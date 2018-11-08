@@ -56,6 +56,7 @@ rotorDiameter = np.zeros(nTurbines)
 axialInduction = np.zeros(nTurbines)
 generatorEfficiency = np.zeros(nTurbines)
 yaw = np.zeros(nTurbines)
+hubHeight = np.zeros(nTurbines)
 
 # initialize input variable arrays
 # rotorDiameter = np.ones(nTurbines)*np.random.random()*150.
@@ -67,6 +68,7 @@ for turbI in range(0, nTurbines):
     axialInduction[turbI] = 1.0/3.0
     generatorEfficiency[turbI] = 0.944
     yaw[turbI] = 0.     # deg.
+    hubHeight[turbI] = 90.     # deg.
 
 # Calculate the x separation distance between turbines.
 rotorRadius = rotorDiameter[0] / 2.0
@@ -105,8 +107,10 @@ w = 2.0
 
 # prob = Problem(root=OptAEP(nTurbines=nTurbines, nDirections=windDirections.size,
 #                            minSpacing=minSpacing, use_rotor_components=True))
-prob = Problem(root=OptAEP(nTurbines=nTurbines, nDirections=wind_direction.size,
-                           minSpacing=minSpacing, use_rotor_components=True))
+# prob = Problem(root=OptAEP(nTurbines=nTurbines, nDirections=wind_direction.size,
+#                            minSpacing=minSpacing, use_rotor_components=True))
+prob = Problem(root=AEPGroup(nTurbines=nTurbines, nDirections=wind_direction.size,
+                           use_rotor_components=True))
 
 # prob.setup()
 
@@ -142,6 +146,7 @@ NREL5MWCPCT = pickle.load(open('./input_files/NREL5MWCPCT_smooth_dict.p'))
 prob['model_params:cos_spread'] = w # added this line of code based on what Jared T. told me on Nov. 7. See his 2017
 # paper for more info.
 prob['yaw0'] = yaw
+prob['hubHeight'] = hubHeight
 prob['rotorDiameter'] = rotorDiameter
 prob['axialInduction'] = axialInduction
 prob['generatorEfficiency'] = generatorEfficiency
