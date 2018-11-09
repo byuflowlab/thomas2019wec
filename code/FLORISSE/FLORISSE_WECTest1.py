@@ -32,7 +32,7 @@ nTurbines = 2
 # TO ONE FOR NOW.
 x_over_ro = np.array([10.0])
 # relaxationFactor = np.arange(3.0, 0.75, -0.5)
-relaxationFactor = np.array([1.0])
+relaxationFactor = np.array([7.0, 1.0])
 
 # Define the start, stop, and step values for a thetaVector. Units in degrees.
 thetaMax = 90
@@ -184,8 +184,7 @@ for i in range(relaxationFactor.size):
         prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
 
         # Set the relaxation factor for this iteration.
-        # FOR FLORISSE, NOT EXACTLY SURE HOW TO ADD THIS IN. WAS ABLE TO DO THIS WITH JENSEN BY ADDING IN ANOTHER
-        # PARAMETER IN THE JensenOpenMDAOconnect.py FILE, BUT NOT SURE WHERE SUCH A FILE IS FOR FLORISSE.
+        prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
 
         # Run OpenMDAO once.
         prob.run_once()
@@ -235,7 +234,7 @@ for i in range(relaxationFactor.size):
 # Add a legend to the plot and display the plot.
 plt.grid(True)
 plt.legend()
-plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-2.0, 0.01), xytext=(-2.0, 0.01), xycoords='data') # change these
+plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-2.0, 0.96), xytext=(-2.0, 0.96), xycoords='data') # change these
 # coordinates once the plot is fixed.
 plt.show()
 
