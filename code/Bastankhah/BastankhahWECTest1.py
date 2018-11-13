@@ -1,11 +1,12 @@
 """
-Filename: FLORISSE_WECTest2.py
+Filename: BastankhahWECTest1.py
 Author: Spencer McOmber
-Created: Oct. 26, 2018
-Description: This file is meant to be a run script for FLORISSE. The purpose is to experiment applying Jared Thomas'
+Created: Nov. 13, 2018
+Description: This file is meant to be a run script for the Bastankhah & Porte-Agel turbine wake model. The purpose is to experiment applying Jared Thomas'
 WEC idea to the FLORISSE wake model. It is hoped that applying WEC will allow us to spread the wake of each turbine,
 which aids in gradient-based optimization of each turbine's position to maximize the wind farm's AEP.
-This file's specific purpose is to plot the velocity ratio v/u or AEP vs. crosswind position for MULTIPLE upwind turbines.
+This run script's specific purpose is to obtain a v/u curve (or AEP curve) vs. crosswind position for a SINGLE turbine.
+THIS RUN SCRIPT WAS COPIED AND PASTED FROM "FLORISSE_WECTest1.py" - NEEDS TO BE ADAPTED TO Bastankhah.
 
 Run script obtained from "test_gradients.py" from the "TotalDerivTestsFlorisAEPOptRotor" class. This file is found
 under "tests" directory under "FLORISSE".
@@ -24,7 +25,7 @@ import cPickle as pickle
 
 from scipy.interpolate import UnivariateSpline
 
-nTurbines = 3
+nTurbines = 2
 # nTurbines = 4
 # self.rtol = 1E-6
 # self.atol = 1E-6
@@ -74,10 +75,7 @@ for turbI in range(0, nTurbines):
 # Calculate the x separation distance between turbines.
 rotorRadius = rotorDiameter[0] / 2.0
 turbineXInitialPosition = 0.0
-turbineYInitialPosition = -50.0
-
-secondTurbineXInitialPosition = 100.0
-secondTurbineYInitialPosition = 50.0
+turbineYInitialPosition = 0.0
 # Calculate the x separation distance between turbines. Calculate the y-turbine positions based on the angle theta.
 for i in range(relaxationFactor.size):
     for j in range(thetaVector.size):
@@ -176,7 +174,7 @@ prob['model_params:adjustInitialWakeDiamToYaw'] = False
 # prob.setup(check=True)
 
 # Create a text file that I can save data into.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesVelocity.txt', 'w+')
+VelocityDataFile = open('../DataFiles/FLORISSE_WECTestVelocity.txt', 'w+')
 
 # Loop through relaxation factors to calculate v/u vs. crosswind position.
 for i in range(relaxationFactor.size):
@@ -184,8 +182,8 @@ for i in range(relaxationFactor.size):
     # For each relaxation factor, calculate the velocity deficit across all values of Y.
     for j in range(thetaVector.size):
 
-        prob['turbineX'] = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, turbineX[i, j]])
-        prob['turbineY'] = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, turbineY[i, j]])
+        prob['turbineX'] = np.array([turbineXInitialPosition, turbineX[i, j]])
+        prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
 
         # Set the relaxation factor for this iteration.
         prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
@@ -195,7 +193,7 @@ for i in range(relaxationFactor.size):
         # prob.run()
 
         # Save the calculated data to a datafile.
-        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][-1] / wind_speed[0]))
+        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][1] / wind_speed[0]))
 
         # print('wind turbine velocity', prob['wtVelocity0'])
 
@@ -203,7 +201,7 @@ for i in range(relaxationFactor.size):
 VelocityDataFile.close()
 
 # Reopen the velocity file so I can read it.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesVelocity.txt', 'r')
+VelocityDataFile = open('../DataFiles/FLORISSE_WECTestVelocity.txt', 'r')
 
 # Initialize a 2D numpy array that I can use to store all the v/u values from the WEC windspeed text file. Should
 # have relaxationFactor.size rows and thetaVector.size columns.
@@ -238,7 +236,7 @@ for i in range(relaxationFactor.size):
 # Add a legend to the plot and display the plot.
 plt.grid(True)
 plt.legend()
-plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-2.0, 0.96), xytext=(-2.0, 0.96), xycoords='data') # change these
+plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-2.0, 0.73), xytext=(-2.0, 0.73), xycoords='data') # change these
 # coordinates once the plot is fixed.
 plt.show()
 
