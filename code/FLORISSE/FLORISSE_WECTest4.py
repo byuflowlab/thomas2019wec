@@ -1,11 +1,11 @@
 """
-Filename: FLORISSE_WECTest2.py
+Filename: FLORISSE_WECTest4.py
 Author: Spencer McOmber
 Created: Oct. 26, 2018
 Description: This file is meant to be a run script for FLORISSE. The purpose is to experiment applying Jared Thomas'
 WEC idea to the FLORISSE wake model. It is hoped that applying WEC will allow us to spread the wake of each turbine,
 which aids in gradient-based optimization of each turbine's position to maximize the wind farm's AEP.
-This file's specific purpose is to plot the velocity ratio v/u or AEP vs. crosswind position for MULTIPLE upwind turbines.
+The purpose for this specific file is to obtain an AEP vs. crosswind position curve for MULTIPLE upwind turbines. The run script is based off of FLORISSE_WECTest2.py.
 
 Run script obtained from "test_gradients.py" from the "TotalDerivTestsFlorisAEPOptRotor" class. This file is found
 under "tests" directory under "FLORISSE".
@@ -176,7 +176,7 @@ prob['model_params:adjustInitialWakeDiamToYaw'] = False
 # prob.setup(check=True)
 
 # Create a text file that I can save data into.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesVelocity.txt', 'w+')
+VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesAEP.txt', 'w+')
 
 # Loop through relaxation factors to calculate v/u vs. crosswind position.
 for i in range(relaxationFactor.size):
@@ -195,7 +195,7 @@ for i in range(relaxationFactor.size):
         # prob.run()
 
         # Save the calculated data to a datafile.
-        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][-1] / wind_speed[0]))
+        VelocityDataFile.write('%f\n' % (prob['AEP'] / 1.0e6))
 
         # print('wind turbine velocity', prob['wtVelocity0'])
 
@@ -203,7 +203,7 @@ for i in range(relaxationFactor.size):
 VelocityDataFile.close()
 
 # Reopen the velocity file so I can read it.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesVelocity.txt', 'r')
+VelocityDataFile = open('../DataFiles/FLORISSE_WECTestMultipleTurbinesAEP.txt', 'r')
 
 # Initialize a 2D numpy array that I can use to store all the v/u values from the WEC windspeed text file. Should
 # have relaxationFactor.size rows and thetaVector.size columns.
@@ -214,7 +214,7 @@ labelList = []
 
 # Start up the figure and give it a title.
 plt.figure(1, figsize=(9, 9))
-plt.title('WEC FLORISSE Model V/U')
+plt.title('WEC FLORISSE Model AEP')
 
 # Create a list of strings to use as labels based on the relaxation factors that are entered.
 for i in range(relaxationFactor.size):
@@ -232,14 +232,13 @@ for i in range(relaxationFactor.size):
 
     # Plot the ith row's results.
     plt.plot(turbineYNormalized[i, :], VelocityData[i, :], label=labelList[i])
-    plt.ylabel('Velocity Ratio (V/U)')
+    plt.ylabel('AEP (MWh)')
     plt.xlabel('Crosswind Position (Y/D)')
 
 # Add a legend to the plot and display the plot.
 plt.grid(True)
-plt.legend()
-annotationPos = (-2.1, 0.625)
-plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=annotationPos, xytext=annotationPos, xycoords='data') # change these
+plt.legend(ncol=2)
+plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-0.5, 40.0), xytext=(-0.5, 40.0), xycoords='data') # change these
 # coordinates once the plot is fixed.
 plt.show()
 
