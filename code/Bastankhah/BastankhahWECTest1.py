@@ -33,8 +33,8 @@ nTurbines = 2
 # Add in necessary variables. NOT SURE HOW TO ADD IN RELAXATION FACTOR FOR FLORISSE YET, SO I'LL JUST MAKE IT EQUAL
 # TO ONE FOR NOW.
 x_over_ro = np.array([10.0])
-relaxationFactor = np.arange(7.0, 0.0, -1.0)
-# relaxationFactor = np.array([2.0, 1.1, 1.0, 0.9, 0.1])
+# relaxationFactor = np.arange(7.0, 0.0, -1.0)
+relaxationFactor = np.array([1.0])
 
 # Define the start, stop, and step values for a thetaVector. Units in degrees.
 thetaMax = 90
@@ -111,42 +111,21 @@ w = 2.0
 #                            minSpacing=minSpacing, use_rotor_components=True))
 # prob = Problem(root=OptAEP(nTurbines=nTurbines, nDirections=wind_direction.size,
 #                            minSpacing=minSpacing, use_rotor_components=True))
-prob = Problem(root=AEPGroup(nTurbines=nTurbines, nDirections=wind_direction.size,
-                           use_rotor_components=True))
-
-# prob.setup()
-
-# set up optimizer
-# prob.driver = pyOptSparseDriver()
-# prob.driver.options['optimizer'] = 'SNOPT'
-# prob.driver = ScipyOptimizer
-# prob.driver.options['optimizer'] = 'SLSQP'
-# prob.driver.add_objective('obj', scaler=1E-8)
-
-# set optimizer options
-# prob.driver.opt_settings['Verify level'] = 3
-# prob.driver.opt_settings['Print file'] = 'SNOPT_print_exampleOptAEP.out'
-# prob.driver.opt_settings['Summary file'] = 'SNOPT_summary_exampleOptAEP.out'
-# prob.driver.opt_settings['Major iterations limit'] = 1
-
-# select design variables
-# prob.driver.add_desvar('turbineX', lower=np.ones(nTurbines)*min(turbineX), upper=np.ones(nTurbines)*max(turbineX), scaler=1E-2)
-# prob.driver.add_desvar('turbineY', lower=np.ones(nTurbines)*min(turbineY), upper=np.ones(nTurbines)*max(turbineY), scaler=1E-2)
-# for direction_id in range(0, windDirections.size):
-#     prob.driver.add_desvar('yaw%i' % direction_id, lower=-30.0, upper=30.0, scaler=1E-1)
-
-# add constraints
-# prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbines-1.)*nTurbines/2.))))
+wake_model_options = {'nSamples': 0}
+prob = Problem(root=AEPGroup(nTurbines=nTurbines, nDirections=nDirections, wake_model=gauss_wrapper,
+                                     wake_model_options=wake_model_options, datasize=0, use_rotor_components=False,
+                                     params_IdepVar_func=add_gauss_params_IndepVarComps, differentiable=True,
+                                     params_IndepVar_args={}))
 
 # initialize problem
 prob.setup(check=True)
 
 # assign values to constant inputs (not design variables)
-NREL5MWCPCT = pickle.load(open('./input_files/NREL5MWCPCT_smooth_dict.p'))
-# prob['turbineX'] = turbineX
-# prob['turbineY'] = turbineY
-prob['model_params:cos_spread'] = w # added this line of code based on what Jared T. told me on Nov. 7. See his 2017
+NREL5MWCPCT = pickle.load(open('../input_files/NREL5MWCPCT_smooth_dict.p'))
+# prob['model_params:cos_spread'] = w # added this line of code based on what Jared T. told me on Nov. 7. See his 2017
 # paper for more info.
+prob['model_params:z_ref'] = 90.    # found this in a unit test within gaussian-wake, so I thought I'd include it.
+
 prob['yaw0'] = yaw
 prob['hubHeight'] = hubHeight
 prob['rotorDiameter'] = rotorDiameter
@@ -156,25 +135,35 @@ prob['windSpeeds'] = wind_speed
 prob['air_density'] = air_density
 prob['windDirections'] = wind_direction
 prob['windFrequencies'] = wind_frequency
-prob['model_params:FLORISoriginal'] = False
+# prob['model_params:FLORISoriginal'] = False
 prob['gen_params:windSpeedToCPCT_CP'] = NREL5MWCPCT['CP']
 prob['gen_params:windSpeedToCPCT_CT'] = NREL5MWCPCT['CT']
 prob['gen_params:windSpeedToCPCT_wind_speed'] = NREL5MWCPCT['wind_speed']
-prob['model_params:ke'] = 0.05
-prob['model_params:kd'] = 0.17
-prob['model_params:aU'] = 12.0
-prob['model_params:bU'] = 1.3
-prob['model_params:initialWakeAngle'] = 1.5
-prob['model_params:useaUbU'] = True
-prob['model_params:useWakeAngle'] = True
-prob['model_params:adjustInitialWakeDiamToYaw'] = False
-# run problem
-# prob.run()
+prob['Ct_in'] = np.ones(nTurbines) * 0.5
+prob['Cp_in'] = np.ones(nTurbines) * 0.4
+
+# assign values to turbine states
+# prob['turbineX'] = turbineX
+# prob['turbineY'] = turbineY
+# prob['hubHeight'] = hubHeight
+# prob['yaw0'] = yaw
+#
+# # assign values to constant inputs (not design variables)
+# prob['rotorDiameter'] = rotorDiameter
+# prob['axialInduction'] = axialInduction
+# prob['generatorEfficiency'] = generatorEfficiency
+# prob['windSpeeds'] = np.array([wind_speed])
+# prob['model_params:z_ref'] = 90.
+# prob['air_density'] = air_density
+# prob['windDirections'] = np.array([wind_direction])
+# prob['windFrequencies'] = np.array([wind_frequency])
+# prob['Ct_in'] = Ct
+# prob['Cp_in'] = Cp
 
 # prob.setup(check=True)
 
 # Create a text file that I can save data into.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestVelocity.txt', 'w+')
+VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'w+')
 
 # Loop through relaxation factors to calculate v/u vs. crosswind position.
 for i in range(relaxationFactor.size):
@@ -185,15 +174,18 @@ for i in range(relaxationFactor.size):
         prob['turbineX'] = np.array([turbineXInitialPosition, turbineX[i, j]])
         prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
 
+        # print(prob['turbineX'], prob['turbineY'])
+        # print(np.array([turbineXInitialPosition, turbineX[i, j]]), np.array([turbineYInitialPosition, turbineY[i, j]]))
+
         # Set the relaxation factor for this iteration.
-        prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
+        # prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
 
         # Run OpenMDAO once.
         prob.run_once()
         # prob.run()
 
         # Save the calculated data to a datafile.
-        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][1] / wind_speed[0]))
+        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][-1] / wind_speed[0]))
 
         # print('wind turbine velocity', prob['wtVelocity0'])
 
@@ -201,7 +193,7 @@ for i in range(relaxationFactor.size):
 VelocityDataFile.close()
 
 # Reopen the velocity file so I can read it.
-VelocityDataFile = open('../DataFiles/FLORISSE_WECTestVelocity.txt', 'r')
+VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'r')
 
 # Initialize a 2D numpy array that I can use to store all the v/u values from the WEC windspeed text file. Should
 # have relaxationFactor.size rows and thetaVector.size columns.
@@ -212,7 +204,7 @@ labelList = []
 
 # Start up the figure and give it a title.
 plt.figure(1, figsize=(9, 9))
-plt.title('WEC FLORISSE Model V/U')
+plt.title('WEC Bastankhah Model V/U')
 
 # Create a list of strings to use as labels based on the relaxation factors that are entered.
 for i in range(relaxationFactor.size):

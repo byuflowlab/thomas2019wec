@@ -140,7 +140,7 @@ prob = Problem(root=AEPGroup(nTurbines=nTurbines, nDirections=wind_direction.siz
 prob.setup(check=True)
 
 # assign values to constant inputs (not design variables)
-NREL5MWCPCT = pickle.load(open('./input_files/NREL5MWCPCT_smooth_dict.p'))
+NREL5MWCPCT = pickle.load(open('../input_files/NREL5MWCPCT_smooth_dict.p'))
 # prob['turbineX'] = turbineX
 # prob['turbineY'] = turbineY
 prob['model_params:cos_spread'] = w # added this line of code based on what Jared T. told me on Nov. 7. See his 2017
