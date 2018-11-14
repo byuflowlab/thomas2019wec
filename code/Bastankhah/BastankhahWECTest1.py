@@ -59,6 +59,8 @@ axialInduction = np.zeros(nTurbines)
 generatorEfficiency = np.zeros(nTurbines)
 yaw = np.zeros(nTurbines)
 hubHeight = np.zeros(nTurbines)
+Ct = np.zeros(nTurbines)
+Cp = np.zeros(nTurbines)
 
 # initialize input variable arrays
 # rotorDiameter = np.ones(nTurbines)*np.random.random()*150.
@@ -71,6 +73,8 @@ for turbI in range(0, nTurbines):
     generatorEfficiency[turbI] = 0.944
     yaw[turbI] = 0.     # deg.
     hubHeight[turbI] = 90.     # deg.
+    Ct[turbI] = 4.0 * axialInduction[turbI] * (1.0 - axialInduction[turbI])
+    Cp[turbI] = 4.0 * 1.0 / 3.0 * np.power((1 - 1.0 / 3.0), 2)
 
 # Calculate the x separation distance between turbines.
 rotorRadius = rotorDiameter[0] / 2.0
@@ -139,8 +143,11 @@ prob['windFrequencies'] = wind_frequency
 prob['gen_params:windSpeedToCPCT_CP'] = NREL5MWCPCT['CP']
 prob['gen_params:windSpeedToCPCT_CT'] = NREL5MWCPCT['CT']
 prob['gen_params:windSpeedToCPCT_wind_speed'] = NREL5MWCPCT['wind_speed']
-prob['Ct_in'] = np.ones(nTurbines) * 0.5
-prob['Cp_in'] = np.ones(nTurbines) * 0.4
+prob['Ct_in'] = Ct
+prob['Cp_in'] = Cp
+
+# prob['Ct_in'] = np.ones(nTurbines) * 0.5
+# prob['Cp_in'] = np.ones(nTurbines) * 0.4
 
 # assign values to turbine states
 # prob['turbineX'] = turbineX
