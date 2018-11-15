@@ -1,12 +1,11 @@
 """
-Filename: BastankhahWECTest1.py
+Filename: BastankhahWECTest2.py
 Author: Spencer McOmber
 Created: Nov. 13, 2018
 Description: This file is meant to be a run script for the Bastankhah & Porte-Agel turbine wake model. The purpose is to experiment applying Jared Thomas'
 WEC idea to the FLORISSE wake model. It is hoped that applying WEC will allow us to spread the wake of each turbine,
 which aids in gradient-based optimization of each turbine's position to maximize the wind farm's AEP.
-This run script's specific purpose is to obtain a v/u curve (or AEP curve) vs. crosswind position for a SINGLE turbine.
-THIS RUN SCRIPT WAS COPIED AND PASTED FROM "FLORISSE_WECTest1.py" - NEEDS TO BE ADAPTED TO Bastankhah.
+This run script's specific purpose is to obtain a v/u curve vs. crosswind position for MULTIPLE upwind turbines.
 
 Run script obtained from "test_gradients.py" from the "TotalDerivTestsFlorisAEPOptRotor" class. This file is found
 under "tests" directory under "FLORISSE".
@@ -25,7 +24,7 @@ import cPickle as pickle
 
 from scipy.interpolate import UnivariateSpline
 
-nTurbines = 2
+nTurbines = 3
 # nTurbines = 4
 # self.rtol = 1E-6
 # self.atol = 1E-6
@@ -79,7 +78,10 @@ for turbI in range(0, nTurbines):
 # Calculate the x separation distance between turbines.
 rotorRadius = rotorDiameter[0] / 2.0
 turbineXInitialPosition = 0.0
-turbineYInitialPosition = 0.0
+turbineYInitialPosition = -300.0
+
+secondTurbineXInitialPosition = 200.0
+secondTurbineYInitialPosition = 250.0
 # Calculate the x separation distance between turbines. Calculate the y-turbine positions based on the angle theta.
 for i in range(relaxationFactor.size):
     for j in range(thetaVector.size):
@@ -90,8 +92,8 @@ for i in range(relaxationFactor.size):
         turbineX[i, j] = x_over_ro[0] * rotorRadius
 
     # Hard-code y-coordinates for turbines.
-    turbineY[i] = np.array([np.linspace(-2.0*rotorDiameter[0], 2.0*rotorDiameter[0], thetaVector.size)])
-    turbineYNormalized[i] = np.array([np.linspace(-2.0, 2.0, thetaVector.size)])
+    turbineY[i] = np.array([np.linspace(-6.0*rotorDiameter[0], 6.0*rotorDiameter[0], thetaVector.size)])
+    turbineYNormalized[i] = np.array([np.linspace(-6.0, 6.0, thetaVector.size)])
 
 # Define flow properties
 # nDirections = 50
@@ -170,7 +172,7 @@ prob['Cp_in'] = Cp
 # prob.setup(check=True)
 
 # Create a text file that I can save data into.
-VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'w+')
+VelocityDataFile = open('../DataFiles/BastankhahWECTestMultipleTurbinesVelocity.txt', 'w+')
 
 # Loop through relaxation factors to calculate v/u vs. crosswind position.
 for i in range(relaxationFactor.size):
@@ -178,8 +180,8 @@ for i in range(relaxationFactor.size):
     # For each relaxation factor, calculate the velocity deficit across all values of Y.
     for j in range(thetaVector.size):
 
-        prob['turbineX'] = np.array([turbineXInitialPosition, turbineX[i, j]])
-        prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
+        prob['turbineX'] = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, turbineX[i, j]])
+        prob['turbineY'] = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, turbineY[i, j]])
 
         # print(prob['turbineX'], prob['turbineY'])
         # print(np.array([turbineXInitialPosition, turbineX[i, j]]), np.array([turbineYInitialPosition, turbineY[i, j]]))
@@ -200,7 +202,7 @@ for i in range(relaxationFactor.size):
 VelocityDataFile.close()
 
 # Reopen the velocity file so I can read it.
-VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'r')
+VelocityDataFile = open('../DataFiles/BastankhahWECTestMultipleTurbinesVelocity.txt', 'r')
 
 # Initialize a 2D numpy array that I can use to store all the v/u values from the WEC windspeed text file. Should
 # have relaxationFactor.size rows and thetaVector.size columns.

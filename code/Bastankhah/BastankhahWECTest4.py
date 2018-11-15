@@ -1,12 +1,11 @@
 """
-Filename: BastankhahWECTest1.py
+Filename: BastankhahWECTest4.py
 Author: Spencer McOmber
 Created: Nov. 13, 2018
 Description: This file is meant to be a run script for the Bastankhah & Porte-Agel turbine wake model. The purpose is to experiment applying Jared Thomas'
 WEC idea to the FLORISSE wake model. It is hoped that applying WEC will allow us to spread the wake of each turbine,
 which aids in gradient-based optimization of each turbine's position to maximize the wind farm's AEP.
-This run script's specific purpose is to obtain a v/u curve (or AEP curve) vs. crosswind position for a SINGLE turbine.
-THIS RUN SCRIPT WAS COPIED AND PASTED FROM "FLORISSE_WECTest1.py" - NEEDS TO BE ADAPTED TO Bastankhah.
+This run script's specific purpose is to obtain an AEP curve vs. crosswind position for MULTIPLE upwind turbines.
 
 Run script obtained from "test_gradients.py" from the "TotalDerivTestsFlorisAEPOptRotor" class. This file is found
 under "tests" directory under "FLORISSE".
@@ -25,7 +24,7 @@ import cPickle as pickle
 
 from scipy.interpolate import UnivariateSpline
 
-nTurbines = 2
+nTurbines = 3
 # nTurbines = 4
 # self.rtol = 1E-6
 # self.atol = 1E-6
@@ -79,7 +78,10 @@ for turbI in range(0, nTurbines):
 # Calculate the x separation distance between turbines.
 rotorRadius = rotorDiameter[0] / 2.0
 turbineXInitialPosition = 0.0
-turbineYInitialPosition = 0.0
+turbineYInitialPosition = -300.0
+
+secondTurbineXInitialPosition = 200.0
+secondTurbineYInitialPosition = 250.0
 # Calculate the x separation distance between turbines. Calculate the y-turbine positions based on the angle theta.
 for i in range(relaxationFactor.size):
     for j in range(thetaVector.size):
@@ -90,8 +92,8 @@ for i in range(relaxationFactor.size):
         turbineX[i, j] = x_over_ro[0] * rotorRadius
 
     # Hard-code y-coordinates for turbines.
-    turbineY[i] = np.array([np.linspace(-2.0*rotorDiameter[0], 2.0*rotorDiameter[0], thetaVector.size)])
-    turbineYNormalized[i] = np.array([np.linspace(-2.0, 2.0, thetaVector.size)])
+    turbineY[i] = np.array([np.linspace(-6.0*rotorDiameter[0], 6.0*rotorDiameter[0], thetaVector.size)])
+    turbineYNormalized[i] = np.array([np.linspace(-6.0, 6.0, thetaVector.size)])
 
 # Define flow properties
 # nDirections = 50
@@ -170,7 +172,7 @@ prob['Cp_in'] = Cp
 # prob.setup(check=True)
 
 # Create a text file that I can save data into.
-VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'w+')
+AEPDataFile = open('../DataFiles/BastankhahWECTestMultipleTurbinesAEP.txt', 'w+')
 
 # Loop through relaxation factors to calculate v/u vs. crosswind position.
 for i in range(relaxationFactor.size):
@@ -178,8 +180,8 @@ for i in range(relaxationFactor.size):
     # For each relaxation factor, calculate the velocity deficit across all values of Y.
     for j in range(thetaVector.size):
 
-        prob['turbineX'] = np.array([turbineXInitialPosition, turbineX[i, j]])
-        prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
+        prob['turbineX'] = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, turbineX[i, j]])
+        prob['turbineY'] = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, turbineY[i, j]])
 
         # print(prob['turbineX'], prob['turbineY'])
         # print(np.array([turbineXInitialPosition, turbineX[i, j]]), np.array([turbineYInitialPosition, turbineY[i, j]]))
@@ -192,26 +194,26 @@ for i in range(relaxationFactor.size):
         # prob.run()
 
         # Save the calculated data to a datafile.
-        VelocityDataFile.write('%f\n' % (prob['wtVelocity0'][-1] / wind_speed[0]))
+        AEPDataFile.write('%f\n' % (prob['AEP'] / 1.0e6))
 
         # print('wind turbine velocity', prob['wtVelocity0'])
 
 # Close the file for writing.
-VelocityDataFile.close()
+AEPDataFile.close()
 
 # Reopen the velocity file so I can read it.
-VelocityDataFile = open('../DataFiles/BastankhahWECTestVelocity.txt', 'r')
+AEPDataFile = open('../DataFiles/BastankhahWECTestMultipleTurbinesAEP.txt', 'r')
 
 # Initialize a 2D numpy array that I can use to store all the v/u values from the WEC windspeed text file. Should
 # have relaxationFactor.size rows and thetaVector.size columns.
-VelocityData = np.zeros((relaxationFactor.size, thetaVector.size))
+AEPData = np.zeros((relaxationFactor.size, thetaVector.size))
 
 # Initialize a Python list that will store all the label strings for the plots I'll make.
 labelList = []
 
 # Start up the figure and give it a title.
 plt.figure(1, figsize=(9, 9))
-plt.title('WEC Bastankhah Model V/U')
+plt.title('WEC Bastankhah Model AEP')
 
 # Create a list of strings to use as labels based on the relaxation factors that are entered.
 for i in range(relaxationFactor.size):
@@ -225,17 +227,17 @@ for i in range(relaxationFactor.size):
     for j in range(thetaVector.size):
 
         # Save the current line in the velocityFile into the v_over_u array.
-        VelocityData[i, j] = float(VelocityDataFile.readline())
+        AEPData[i, j] = float(AEPDataFile.readline())
 
     # Plot the ith row's results.
-    plt.plot(turbineYNormalized[i, :], VelocityData[i, :], label=labelList[i])
-    plt.ylabel('Velocity Ratio (V/U)')
+    plt.plot(turbineYNormalized[i, :], AEPData[i, :], label=labelList[i])
+    plt.ylabel('AEP (MWh)')
     plt.xlabel('Crosswind Position (Y/D)')
 
 # Add a legend to the plot and display the plot.
 plt.grid(True)
 plt.legend(ncol=2)
-annotationLocation = (-0.5, 0.92)   # change these coordinates once the plot is fixed.
+annotationLocation = (-6.0, 34.0)   # change these coordinates once the plot is fixed.
 plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=annotationLocation, xytext=annotationLocation, xycoords='data')
 plt.show()
 
