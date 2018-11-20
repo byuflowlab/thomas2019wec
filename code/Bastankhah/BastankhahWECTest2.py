@@ -237,7 +237,7 @@ for i in range(relaxationFactor.size):
 # Add a legend to the plot and display the plot.
 plt.grid(True)
 plt.legend(ncol=2)
-annotationLocation = (-0.5, 0.92)   # change these coordinates once the plot is fixed.
+annotationLocation = (-6.0, 0.28)   # change these coordinates once the plot is fixed.
 plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=annotationLocation, xytext=annotationLocation, xycoords='data')
 plt.show()
 
