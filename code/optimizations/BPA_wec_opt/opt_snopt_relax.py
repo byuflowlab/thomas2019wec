@@ -4,6 +4,7 @@ from openmdao.api import Problem, pyOptSparseDriver, view_connections, SqliteRec
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy import config
 # from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
@@ -129,6 +130,7 @@ if __name__ == "__main__":
     save_start = False
     save_end = False
 
+    # THESE MUST ALL REMAIN TRUE IN ORDER FOR THE CODE TO WORK.
     save_locations = True
     save_aep = True
     save_time = True
@@ -138,7 +140,11 @@ if __name__ == "__main__":
 
     # select model
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
-    model = 1
+    FLORIS = 0
+    BPA = 1
+    JENSEN = 2
+    LARSEN = 3
+    model = JENSEN
     print(MODELS[model])
 
     # set options for BPA
@@ -402,13 +408,13 @@ if __name__ == "__main__":
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
                                               params_IndepVar_args={}))
-    # elif MODELS[model] == 'JENSEN':
-    #     initialize problem
-    # prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-    #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-    #                                       wake_model=jensen_wrapper,
-    #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IndepVar_args={}))
+    elif MODELS[model] == 'JENSEN':
+        # initialize problem
+        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+                                              minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
+                                              wake_model=jensen_wrapper,
+                                              params_IdepVar_func=add_jensen_params_IndepVarComps,
+                                              params_IndepVar_args={}))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
     # prob.root.deriv_options['type'] = 'fd'
