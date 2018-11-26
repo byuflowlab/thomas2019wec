@@ -405,7 +405,7 @@ if __name__ == "__main__":
         # plt.axis('equal')
         # # plt.show()
 
-    data_directory = "/Users/jaredthomas/Documents/projects/gaussian-yaw/code/Image_gen/image_data/"
+    data_directory = "/Users/jaredthomas/Documents/projects/gaussian-yaw/project-code/Image_gen/image_data/"
     ti_data = np.loadtxt(data_directory+"niayifar-local-turbulence-intensity-les.txt", delimiter=",")
     ti_crespo_hernandez = np.loadtxt(data_directory+"niayifar-local-turbulence-intensity-crespo-hernandez.txt", delimiter=",")
     power_data_les = np.loadtxt(data_directory+"niayifar-normalized-power-les.txt", delimiter=",")

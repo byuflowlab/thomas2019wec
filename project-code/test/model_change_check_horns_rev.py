@@ -4,7 +4,7 @@ from openmdao.api import Problem, pyOptSparseDriver
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points, circumference_points
 import time
 import numpy as np
@@ -25,7 +25,7 @@ def niayifar_power_model(u):
 if __name__ == "__main__":
 
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
-    model = 1
+    model = 2
     wake_model_version = 2016
     print(MODELS[model])
 
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     tic = time.time()
     # print(max_power, normalized_power)
 
-    data_directory = "/Users/jaredthomas/Documents/projects/gaussian-yaw/code/Image_gen/image_data/"
+    data_directory = "../input_files/"
     power_data_les = np.loadtxt(data_directory+"power_by_direction_niayifar_les.txt", delimiter=",")
     power_data_model = np.loadtxt(data_directory+"power_by_direction_niayifar_model.txt", delimiter=",")
 
