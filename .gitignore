@@ -3,3 +3,4 @@
 *.pdf
 *.xml
 *__init__.py
+*Graphs/

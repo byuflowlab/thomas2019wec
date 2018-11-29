@@ -25,7 +25,7 @@ def niayifar_power_model(u):
 if __name__ == "__main__":
 
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
-    model = 2
+    model = 0
     wake_model_version = 2016
     print(MODELS[model])
 
