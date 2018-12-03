@@ -2,8 +2,8 @@
 
 #SBATCH --time=00:05:00   # walltime
 #SBATCH --ntasks=4   # number of processor cores (i.e. tasks)
-#SBATCH --mem-per-cpu=100M   # memory per CPU core
-#SBATCH -J "SpencerTest"   # job name
+#SBATCH --mem-per-cpu=1G   # memory per CPU core
+#SBATCH -J "JensenTest"   # job name
 #SBATCH --qos=test
 #SBATCH --array=0     # job array of size 1
 

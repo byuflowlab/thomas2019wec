@@ -97,7 +97,8 @@ wind_frequency = 1.                             # probability of wind in this di
 
 # set up problem
 
-wake_model_options = {'variant': 'Cosine'}
+# use 'variant': 'Cosine' for normal Jensen-Cosine model, use 'variant': 'CosineFortran' for PJ's FORTRAN Jensen model.
+wake_model_options = {'variant': 'CosineFortran'}
 prob = Problem(root=AEPGroup(nTurbines, nDirections, wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                              params_IdepVar_func=add_jensen_params_IndepVarComps,
                              params_IndepVar_args={'use_angle': False}))
