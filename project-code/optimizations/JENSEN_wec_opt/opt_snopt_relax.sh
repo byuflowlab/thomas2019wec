@@ -2,7 +2,7 @@
 
 #SBATCH --time=15:00:00   # walltime
 #SBATCH --ntasks=6   # number of processor cores (i.e. tasks)
-#SBATCH --mem-per-cpu=500G   # memory per CPU core
+#SBATCH --mem-per-cpu=500M   # memory per CPU core
 #SBATCH -J "38 turbs Jensen snopt relax"   # job name
 #SBATCH --mail-user=spencer.mcomber@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
