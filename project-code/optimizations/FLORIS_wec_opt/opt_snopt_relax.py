@@ -116,8 +116,8 @@ if __name__ == "__main__":
 
     # set up this run
 
-    # input = int(sys.argv[1])
-    input = 0
+    input = int(sys.argv[1])
+    # input = 0
     run_number = input
     layout_number = input
 
