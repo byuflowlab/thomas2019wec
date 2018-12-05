@@ -14,7 +14,11 @@ import numpy as np
 from openmdao.api import Group, Problem
 import matplotlib.pyplot as plt
 
+from time import time
+
 """THIS IS THE RUN SCRIPT FOR JENSEN3D"""
+
+tic = time()
 
 # Create an array of the x/ro ratios used in Jensen's 1983 paper. Note that I'm only testing the ratio of x/ro = 10,
 # because the previous results seemed to indicate that Jensen3D matched pretty well with all models at this ratio. No
@@ -98,7 +102,7 @@ wind_frequency = 1.                             # probability of wind in this di
 # set up problem
 
 # use 'variant': 'Cosine' for normal Jensen-Cosine model, use 'variant': 'CosineFortran' for PJ's FORTRAN Jensen model.
-wake_model_options = {'variant': 'CosineFortran'}
+wake_model_options = {'variant': 'Cosine'}
 prob = Problem(root=AEPGroup(nTurbines, nDirections, wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                              params_IdepVar_func=add_jensen_params_IndepVarComps,
                              params_IndepVar_args={'use_angle': False}))
@@ -156,6 +160,11 @@ for i in range(relaxationFactor.size):
 
 # Close the file for writing.
 AEPDataFile.close()
+
+toc = time()
+duration = toc - tic
+
+print 'Run-time: %f' % duration
 
 # Reopen the velocity file I just closed so I can read it.
 AEPDataFile = open('../DataFiles/JensenWECTestAEP.txt', 'r')
