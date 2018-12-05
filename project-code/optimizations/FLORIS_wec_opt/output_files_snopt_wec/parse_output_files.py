@@ -11,8 +11,9 @@ if __name__ == "__main__":
     nturbs = 38
     windrose = 'nantucket'
     ndirs = 12
+    model = 'FLORIS'
 
-    outfile = '%s_multistart_rundata_%iturbs_%sWindRose_%idirs_BPA_all.txt' % (opt_alg, nturbs, windrose, ndirs)
+    outfile = '%s_multistart_rundata_%iturbs_%sWindRose_%idirs_%s_all.txt' % (opt_alg, nturbs, windrose, ndirs, model)
 
     if relax:
         header = "# run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), " \
@@ -23,8 +24,8 @@ if __name__ == "__main__":
 
     f = open(outfile, 'a')
     for i in np.arange(0, nruns):
-        filename = '%s_multistart_rundata_%iturbs_%sWindRose_%idirs_BPA_run%i.txt' % (
-            opt_alg, nturbs, windrose, ndirs, i)
+        filename = '%s_multistart_rundata_%iturbs_%sWindRose_%idirs_%s_run%i.txt' % (
+            opt_alg, nturbs, windrose, ndirs, model, i)
         try:
             data = np.loadtxt(filename)
         except:
