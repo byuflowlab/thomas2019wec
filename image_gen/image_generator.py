@@ -716,7 +716,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     data_directories = ['output_files_snopt_wec']
 
-    filename = 'snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt'
+    model = ['JENSEN', 'FLORIS', 'BPA']
 
     aep_scale = 1E-6
 
@@ -736,6 +736,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
                     and (data_dir is 'output_files_snopt'):
                 continue
             # load data
+            filename = 'snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_%s_all.txt' % model[plot_num]
             data = np.loadtxt(path_to_directories+opt_dir+'/'+data_dir+'/'+filename)
 
             if plot_num == 0:
@@ -758,7 +759,8 @@ def plot_results_nruns(filename, save_figs, show_figs):
                 else:
                     data = data[ef == 1, :]
 
-                labels[plot_num] = str(labels[plot_num]) + '_wec'
+                labels[plot_num] = model[plot_num]
+                # labels[plot_num] = str(labels[plot_num]) + '_wec'
 
             else:
                 shift = 0
@@ -804,7 +806,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
     fig, ax = plt.subplots(figsize=(10,12))
     ax.boxplot(data_improvement, meanline=True, labels=labels)
     ax.set_ylabel('Improvement (%AEP)')
-    ax.set_ylim([-0.15, 0.1])
+    # ax.set_ylim([-0.15, 0.1])
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
@@ -1447,8 +1449,8 @@ if __name__ == "__main__":
     # filename = "round_farm_38Turbines_5DSpacing_finish.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='finish',turb_nums=True)
 
-    # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
-    # plot_results_nruns(filename, save_figs, show_figs)
+    filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
+    plot_results_nruns(filename, save_figs, show_figs)
 
     # filename = "./images/one_hundred_sampling_points.pdf"
     # plot_100_rotor_points(filename, save_figs, show_figs, npoints=40)
@@ -1471,8 +1473,8 @@ if __name__ == "__main__":
     # filename = "./images/power_by_row_horns_rev_100rpt.pdf"
     # plot_power_row_horns_rev(filename, save_figs, show_figs, nrpt=100)
 
-    filename = "./images/power_by_dir_vs_rpts_"
-    plot_power_direction_error_horns_rev(filename, save_figs, show_figs)
+    # filename = "./images/power_by_dir_vs_rpts_"
+    # plot_power_direction_error_horns_rev(filename, save_figs, show_figs)
 
     # filename = "./images/sowfa_compare_pow_by_turb_dir.pdf"
     # plot_turb_power_error_baseline(filename, save_figs=save_figs, show_figs=show_figs)
