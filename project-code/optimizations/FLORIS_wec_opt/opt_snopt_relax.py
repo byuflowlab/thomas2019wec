@@ -158,7 +158,8 @@ if __name__ == "__main__":
 
     wake_model_version = 2016
 
-    relax = True
+    # relax = True
+    relax = False
 
     if relax:
         output_directory = "./output_files_%s_wec/" % opt_algorithm
