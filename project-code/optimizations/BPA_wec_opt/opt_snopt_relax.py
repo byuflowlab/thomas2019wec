@@ -161,12 +161,16 @@ if __name__ == "__main__":
     relax = True
     # relax = False
     relaxDirectory = False
+    TI_method_is_0 = True
 
     # if relax:
     if relaxDirectory:
         output_directory = "./output_files_%s_wec/" % opt_algorithm
     else:
-        output_directory = "./output_files_%s/" % opt_algorithm
+        if TI_method_is_0:
+            output_directory = "./output_files_%s_TI0/" % opt_algorithm
+        else:
+            output_directory = "./output_files_%s_TI5/" % opt_algorithm
 
     # create output directory if it does not exist yet
     import distutils.dir_util
