@@ -158,10 +158,12 @@ if __name__ == "__main__":
 
     wake_model_version = 2016
 
-    # relax = True
-    relax = False
+    relax = True
+    # relax = False
+    relaxDirectory = False
 
-    if relax:
+    # if relax:
+    if relaxDirectory:
         output_directory = "./output_files_%s_wec/" % opt_algorithm
     else:
         output_directory = "./output_files_%s/" % opt_algorithm
@@ -172,7 +174,8 @@ if __name__ == "__main__":
 
     differentiable = True
 
-    expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+    # expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+    expansion_factors = np.array([1.0])
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
     # expansion_factors = np.array([20., 10., 5., 2.5, 1.25, 1.0])
