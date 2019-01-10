@@ -13,7 +13,6 @@ from plantenergy.OptimizationGroups import AEPGroup
 import numpy as np
 from openmdao.api import Group, Problem
 import matplotlib.pyplot as plt
-
 from time import time
 
 """THIS IS THE RUN SCRIPT FOR JENSEN3D"""
@@ -28,7 +27,7 @@ x_over_ro = np.array([10.0])
 # Instead of looping through different x/ro ratios, this program will cycle through different values for the
 # relaxation factor used in WEC. Note that the stop value is 1.0 - 0.25, or the desired stop value minus the step
 # size. This is to ensure that 1.0 is included in the array.
-relaxationFactor = np.arange(3.0, 0.75, -0.5)
+relaxationFactor = np.arange(7.0, 0.0, -1.0)
 
 # define turbine locations in global reference frame
 # turbineX = np.array([1164.7, 947.2,  1682.4, 1464.9, 1982.6, 2200.1])
@@ -176,15 +175,18 @@ AEPData = np.zeros((relaxationFactor.size, thetaVector.size))
 # Initialize a Python list that will store all the label strings for the plots I'll make.
 labelList = []
 
-# Start up the figure and give it a title.
-plt.figure(1, figsize=(9, 9))
-plt.title('WEC Jensen Model AEP')
+# Start up the figure and give it a title. I could have plotted just a figure, but the only way I could figure out to
+# remove the top and right borders from the plot while keeping the figure and fonts at an appropriate size.
+plt.rcParams.update({'font.size': 26})
+fig = plt.figure(1, figsize=(10, 10))
+ax = fig.add_subplot(111)
+# plt.title('WEC Jensen Model AEP')
 
 # Create a list of strings to use as labels based on the relaxation factors that are entered.
 for i in range(relaxationFactor.size):
 
     # I saved the value as a float with one decimal place here.
-    labelList.append(r'$\xi=%.2f$' % relaxationFactor[i])
+    labelList.append(r'$\xi=%i$' % relaxationFactor[i])
 
 # Loop through the v_over_u array and read in each line as a new value. Outer loop iterates through rows,
 # inner row iterates through columns.
@@ -196,11 +198,15 @@ for i in range(relaxationFactor.size):
 
     # Plot the ith row's results.
     plt.plot(turbineYNormalized[i, :], AEPData[i, :], label=labelList[i])
-    plt.ylabel('AEP (GWh)')
+    plt.ylabel('AEP (MWh)')
     plt.xlabel('Crosswind Position (Y/D)')
 
 # Add a legend to the plot and display the plot.
-plt.grid(True)
-plt.legend()
-plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=(-2.0, 26.0), xytext=(-2.0, 26.0), xycoords='data')
+# plt.grid(True)
+plt.legend(ncol=3, frameon=False).get_frame().set_linewidth(0.0)
+plt.ylim([24, 34])
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+# annotationLocation = (-0.5, 28.5)
+# plt.annotate(r'$x/r_0=%.1f$' % x_over_ro[0], xy=annotationLocation, xytext=annotationLocation, xycoords='data')
 plt.show()
