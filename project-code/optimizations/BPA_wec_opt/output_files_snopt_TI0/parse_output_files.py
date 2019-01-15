@@ -7,6 +7,7 @@ if __name__ == "__main__":
     type = 'multistart'
     # type = 'relax'
     relax = False
+    # relax = True
     nruns = 200
     nturbs = 38
     windrose = 'nantucket'

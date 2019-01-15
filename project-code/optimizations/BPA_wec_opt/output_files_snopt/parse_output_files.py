@@ -6,7 +6,8 @@ if __name__ == "__main__":
     opt_alg = 'snopt'
     type = 'multistart'
     # type = 'relax'
-    relax = True
+    # relax = True
+    relax = False
     nruns = 200
     nturbs = 38
     windrose = 'nantucket'

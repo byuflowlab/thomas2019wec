@@ -1,6 +1,14 @@
+# Ignore these files.
 *.idea*
 *.png
 *.pdf
 *.xml
 *__init__.py
 *Graphs/
+*slurm-*
+*SNOPT_*
+*snopt_multistart_*
+*core*
+
+# But don't ignore the summary files.
+!*_all.txt

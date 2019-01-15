@@ -143,7 +143,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = JENSEN
+    model = FLORIS
     print(MODELS[model])
 
     # set options for BPA
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     relax = True
     # relax = False
-    relaxDirectory = False
+    relaxDirectory = True
 
     # if relax:
     if relaxDirectory:
@@ -174,8 +174,8 @@ if __name__ == "__main__":
 
     differentiable = True
 
-    # expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    expansion_factors = np.array([1.0])
+    expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+    # expansion_factors = np.array([1.0])
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
     # expansion_factors = np.array([20., 10., 5., 2.5, 1.25, 1.0])
