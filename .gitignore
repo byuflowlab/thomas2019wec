@@ -4,3 +4,11 @@
 *.xml
 *__init__.py
 *Graphs/
+*slurm*
+*SNOPT_summary*
+*SNOPT_print*
+*_locations_*
+*.txt
+
+# except don't ignore the summary datafiles.
+!*_all.txt
