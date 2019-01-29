@@ -1,14 +1,40 @@
-# Ignore these files.
 *.idea*
 *.png
 *.pdf
 *.xml
 *__init__.py
 *Graphs/
-*slurm-*
-*SNOPT_*
-*snopt_multistart_*
-*core*
+*slurm*
+*SNOPT_summary*
+*SNOPT_print*
+# *_locations_*
+*_run*.txt
+*core.*
+
+# except don't ignore the summary or layout datafiles.
+!*_all.txt
+!*_layout_*.txt
+!*/input_files/*_locations_*
+!*/input_files/layouts/*_run*.txt
+!/image_gen/image_data/layouts/38_turbs/snopt_multistart_locations_38turbs_nantucketWindRose_12dirs_BPA_run0.txt
+!/image_gen/image_data/layouts/38_turbs/snopt_multistart_locations_38turbs_nantucketWindRose_12dirs_BPA_run0_EF1.000.txt
+# !*/image_gen/image_data/layouts/38_turbs/*_locations_*_run*.txt
+# !*/input_files/*
+# !*/DataFiles/*
+
+
+## ORIGINAL .GITIGNORE. KEEPING JUST IN CASE THE NEW .GITIGNORE DOESN'T WORK AS INTENDED.
+# Ignore these files.
+# *.idea*
+# *.png
+# *.pdf
+# *.xml
+# *__init__.py
+# *Graphs/
+# *slurm-*
+# *SNOPT_*
+# *snopt_multistart_*
+# *core*
 
 # But don't ignore the summary files.
-!*_all.txt
+# !*_all.txt
