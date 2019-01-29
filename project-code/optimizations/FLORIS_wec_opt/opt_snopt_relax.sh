@@ -3,7 +3,7 @@
 #SBATCH --time=15:00:00   # walltime
 #SBATCH --ntasks=6   # number of processor cores (i.e. tasks)
 #SBATCH --mem-per-cpu=500M   # memory per CPU core
-#SBATCH -J "38 turbs FLORIS snopt relax"   # job name
+#SBATCH -J "38 turbs FLORIS snopt non-relax"   # job name
 #SBATCH --mail-user=spencer.mcomber@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END

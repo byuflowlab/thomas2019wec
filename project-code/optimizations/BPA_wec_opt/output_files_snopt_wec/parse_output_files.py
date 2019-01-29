@@ -13,6 +13,8 @@ if __name__ == "__main__":
     ndirs = 12
     model = 'BPA'
 
+    shape1D = (11,)
+
     outfile = '%s_multistart_rundata_%iturbs_%sWindRose_%idirs_%s_all.txt' % (opt_alg, nturbs, windrose, ndirs, model)
 
     if relax:
@@ -28,19 +30,26 @@ if __name__ == "__main__":
             opt_alg, nturbs, windrose, ndirs, model, i)
         try:
             data = np.loadtxt(filename)
+            # print data.shape
         except:
             print "failed to open file: "+filename
             continue
         if i == 0:
             if relax:
-                np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
-                                    data[:, 8],data[:,9],data[:,10]], header=header)
+                if not (data.shape == shape1D):
+                    np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
+                                        data[:, 8],data[:,9],data[:,10]], header=header)
+                else:
+                    np.savetxt(f, np.c_[[data]], header=header)
             else:
                 np.savetxt(f, np.c_[[data]], header=header)
         else:
             if relax:
-                np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
-                                    data[:, 8],data[:,9],data[:,10]], header='')
+                if not (data.shape == shape1D):
+                    np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
+                                        data[:, 8],data[:,9],data[:,10]], header='')
+                else:
+                    np.savetxt(f, np.c_[[data]], header='')
             else:
                 np.savetxt(f, np.c_[[data]], header='')
 
