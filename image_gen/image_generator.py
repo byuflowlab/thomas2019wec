@@ -704,6 +704,11 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     path_to_directories = '../project-code/optimizations/'
 
+    # Spencer M. EDIT: Because of multiple optimization runs ('tries'), I've needed to add more data directories. Thus,
+    # adding in directory string to identify which optimization run to pull the data from. NOTE: The very first try
+    # is saved in a folder that has an empty "try" string.
+    whichOptimizationTry = '_try2'
+
     # optimization_directories = ['no_local_ti_nrel_5mw', 'no_local_ti_vestas_v80', 'yes_local_ti_nrel_5mw',
     #                             'yes_local_ti_vestas_v80', 'yes_local_ti_and_ef10_nrel_5mw',
     #                             'no_then_yes_local_ti_nrel_5mw', 'no_then_yes_local_ti_vestas_v80',
@@ -714,8 +719,9 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     optimization_directories = ['JENSEN_wec_opt', 'FLORIS_wec_opt', 'BPA_wec_opt']
 
-    data_directoriesElse = ['output_files_snopt_wec', 'output_files_snopt']
-    data_directoriesBPA = ['output_files_snopt_wec', 'output_files_snopt_TI0', 'output_files_snopt_TI5']
+    data_directoriesElse = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt'+whichOptimizationTry]
+    data_directoriesBPA = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt_TI0'+whichOptimizationTry,
+                           'output_files_snopt_TI5'+whichOptimizationTry]
 
     model = ['JENSEN', 'JENSEN', 'FLORIS', 'FLORIS', 'BPA', 'BPA', 'BPA']
     labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI5', 'BPA TI5', 'BPA TI0']
@@ -815,6 +821,12 @@ def plot_results_nruns(filename, save_figs, show_figs):
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
+
+    # SPENCER M. EDIT: To get the correct axis label, changing the data_improvement to be 100 times its original
+    # value. This is to get the percent improvement from decimal form to percentage form.
+    for i in range(0, len(data_improvement)):
+        data_improvement[i] *= 100.0
+
 
     fig, ax = plt.subplots(figsize=(10,10))
     ax.boxplot(data_improvement, meanline=True, labels=labels)
