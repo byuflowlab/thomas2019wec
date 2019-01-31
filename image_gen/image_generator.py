@@ -704,6 +704,11 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     path_to_directories = '../project-code/optimizations/'
 
+    # Spencer M. EDIT: Because of multiple optimization runs ('tries'), I've needed to add more data directories. Thus,
+    # adding in directory string to identify which optimization run to pull the data from. NOTE: The very first try
+    # is saved in a folder that has an empty "try" string.
+    whichOptimizationTry = '_try2'
+
     # optimization_directories = ['no_local_ti_nrel_5mw', 'no_local_ti_vestas_v80', 'yes_local_ti_nrel_5mw',
     #                             'yes_local_ti_vestas_v80', 'yes_local_ti_and_ef10_nrel_5mw',
     #                             'no_then_yes_local_ti_nrel_5mw', 'no_then_yes_local_ti_vestas_v80',
@@ -714,14 +719,17 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     optimization_directories = ['JENSEN_wec_opt', 'FLORIS_wec_opt', 'BPA_wec_opt']
 
-    data_directories = ['output_files_snopt_wec']
+    data_directoriesElse = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt'+whichOptimizationTry]
+    data_directoriesBPA = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt_TI0'+whichOptimizationTry,
+                           'output_files_snopt_TI5'+whichOptimizationTry]
 
-    model = ['JENSEN', 'FLORIS', 'BPA']
+    model = ['JENSEN', 'JENSEN', 'FLORIS', 'FLORIS', 'BPA', 'BPA', 'BPA']
+    labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI5', 'BPA TI5', 'BPA TI0']
 
     aep_scale = 1E-6
 
     # initialize list to contain labels
-    labels = list([])
+    # labels = list([])
 
     data_aep = list([])
     data_run_time = list([])
@@ -730,40 +738,47 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     plot_num = 0
     for opt_dir in optimization_directories:
+
+        if opt_dir == 'BPA_wec_opt':
+            data_directories = data_directoriesBPA
+        else:
+            data_directories = data_directoriesElse
+
         for data_dir in data_directories:
-            if (opt_dir is 'no_then_yes_local_ti_nrel_5mw' or opt_dir is 'no_then_yes_local_ti_vestas_v80' \
-                or opt_dir is 'no_then_yes_local_ti_nrel_5mw_compare_LES_0' or opt_dir is 'no_then_yes_local_ti_nrel_5mw_compare_LES_1') \
-                    and (data_dir is 'output_files_snopt'):
-                continue
+
             # load data
             filename = 'snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_%s_all.txt' % model[plot_num]
             data = np.loadtxt(path_to_directories+opt_dir+'/'+data_dir+'/'+filename)
 
-            if plot_num == 0:
-                labels = [opt_dir+'_snopt']
-            else:
-                labels.append(opt_dir+'_snopt')
+            # if plot_num == 0:
+            #     labels = [opt_dir+'_snopt']
+            # else:
+            #     labels.append(opt_dir+'_snopt')
 
             # adjust for wake expansion continuation
-            if 'wec' in data_dir:
-
-                # shift to account for ef location in array
+            if plot_num == 1:
                 shift = 1
-
-                ef = data[:, 1]
-
-                if 'no_then_yes' in opt_dir:
-                    data = data[ef == 1, :]
-                    ti_opt = data[:, 3]
-                    data = data[ti_opt == 5, :]
-                else:
-                    data = data[ef == 1, :]
-
-                labels[plot_num] = model[plot_num]
-                # labels[plot_num] = str(labels[plot_num]) + '_wec'
-
             else:
-                shift = 0
+                shift = 1
+            # if 'wec' in data_dir:
+            #
+            #     # shift to account for ef location in array
+            #     shift = 1
+            #
+            #     ef = data[:, 1]
+            #
+            #     if 'no_then_yes' in opt_dir:
+            #         data = data[ef == 1, :]
+            #         ti_opt = data[:, 3]
+            #         data = data[ti_opt == 5, :]
+            #     else:
+            #         data = data[ef == 1, :]
+            #
+            #     labels[plot_num] = model[plot_num]
+            #     # labels[plot_num] = str(labels[plot_num]) + '_wec'
+            #
+            # else:
+            #     shift = 1
 
             # parse data into desired parts
             # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
@@ -783,7 +798,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
             max_aep = np.max(end_aep)
             max_aep_id = id[np.argmax(end_aep)]
 
-            print labels[-1], "mean imp:", mean_improvement, "std. imp:", std_improvement,
+            print labels[plot_num], "mean imp:", mean_improvement, "std. imp:", std_improvement,
             print "max imp:", max_improvement, 'max AEP:', max_aep, 'max AEP run:', max_aep_id
 
             data_aep.append(end_aep*aep_scale)
@@ -796,31 +811,47 @@ def plot_results_nruns(filename, save_figs, show_figs):
     # set xtick label angle
     angle = 90
 
-    fig, ax = plt.subplots(figsize=(10,12))
+    plt.rcParams.update({'font.size': 26})
+
+    fig, ax = plt.subplots(figsize=(10,10))
     ax.boxplot(data_aep, meanline=True, labels=labels)
     ax.set_ylabel('AEP (GWh)')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(10,12))
+    # SPENCER M. EDIT: To get the correct axis label, changing the data_improvement to be 100 times its original
+    # value. This is to get the percent improvement from decimal form to percentage form.
+    for i in range(0, len(data_improvement)):
+        data_improvement[i] *= 100.0
+
+
+    fig, ax = plt.subplots(figsize=(10,10))
     ax.boxplot(data_improvement, meanline=True, labels=labels)
     ax.set_ylabel('Improvement (%AEP)')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     # ax.set_ylim([-0.15, 0.1])
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(10,12))
+    fig, ax = plt.subplots(figsize=(10,10))
     ax.boxplot(data_run_time, meanline=True, labels=labels)
     ax.set_ylabel('Run Time (min)')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(10,12))
+    fig, ax = plt.subplots(figsize=(10,10))
     ax.boxplot(data_fcalls, meanline=True, labels=labels)
     ax.set_ylabel('Function Calls')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     for tick in ax.get_xticklabels():
         tick.set_rotation(angle)
     plt.tight_layout()
