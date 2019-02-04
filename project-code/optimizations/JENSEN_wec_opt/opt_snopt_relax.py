@@ -636,8 +636,6 @@ if __name__ == "__main__":
     config.obj_func_calls_array[:] = 0.0
     config.sens_func_calls_array[:] = 0.0
 
-    # I THINK THIS IS SUPPOSED TO BE 1.0. OTHERWISE, RELAX FACTOR WILL NEVER BE 0.0, AND final_ti_opt_method WILL
-    # NEVER BE USED. Maybe only applicable to BPA?
     expansion_factor_last = 0.0
 
     tict = time.time()
