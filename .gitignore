@@ -3,6 +3,7 @@
 *.pdf
 *.xml
 *__init__.py
+*.pyc
 *Graphs/
 *slurm*
 *SNOPT_summary*

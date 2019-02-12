@@ -187,7 +187,8 @@ for i in range(relaxationFactor.size):
         # print(np.array([turbineXInitialPosition, turbineX[i, j]]), np.array([turbineYInitialPosition, turbineY[i, j]]))
 
         # Set the relaxation factor for this iteration.
-        prob['model_params:opt_exp_fac'] = relaxationFactor[i]
+        # prob['model_params:opt_exp_fac'] = relaxationFactor[i]
+        prob['model_params:wec_factor'] = relaxationFactor[i]
 
         # Run OpenMDAO once.
         prob.run_once()
@@ -234,7 +235,7 @@ for i in range(relaxationFactor.size):
 
     # Plot the ith row's results.
     plt.plot(turbineYNormalized[i, :], AEPData[i, :], label=labelList[i])
-    plt.ylabel('AEP (MWh)')
+    plt.ylabel('AEP (GWh)')
     plt.xlabel('Crosswind Position (Y/D)')
 
 # Add a legend to the plot and display the plot.
