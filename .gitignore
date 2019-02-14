@@ -11,6 +11,7 @@
 # *_locations_*
 *_run*.txt
 *core.*
+*AEP
 
 # except don't ignore the summary or layout datafiles.
 !*_all.txt

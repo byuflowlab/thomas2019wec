@@ -69,7 +69,7 @@ def make_contour_plot(prob, db=None, res=25):
     if db is not None:
 
         keepGeneratingPoints = True
-        i = 0
+        i = 1
         turbX = np.array([])
         turbY = np.array([])
 
@@ -83,8 +83,8 @@ def make_contour_plot(prob, db=None, res=25):
                 # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
                 # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
                 key = 'rank0:SNOPT|%i' % i
-                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'])
-                turbY = np.append(turbX, db[key]['Unknowns']['turbineY'])
+                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
+                turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
 
                 print('turbX and turbY calculated w/o error')
 
@@ -93,7 +93,9 @@ def make_contour_plot(prob, db=None, res=25):
                 # 'while' loop.
                 i += 1
 
-            except:
+            except Exception as e:
+
+                print('error message:', repr(e))
 
                 print('finished cycling through database db')
 
@@ -103,6 +105,7 @@ def make_contour_plot(prob, db=None, res=25):
         print('turbY:', turbY)
 
         plt.plot(turbX, turbY, 'k-')
+        # plt.scatter(turbX, turbY)
 
     plt.show()
 
@@ -149,7 +152,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = BPA
+    model = JENSEN
     print(MODELS[model])
 
     # Select optimization approach/method.
@@ -286,8 +289,8 @@ if __name__ == "__main__":
     # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
     turbineX = np.array([0.0, 50.0, 100.0])
-    # turbineY = np.array([-150.0, 150.0, 0.0])
-    turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
+    turbineY = np.array([-150.0, 150.0, 0.0])
+    # turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
 
     turbineXInit = np.copy(turbineX)
     turbineYInit = np.copy(turbineY)
@@ -385,7 +388,7 @@ if __name__ == "__main__":
         # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = 0
+        prob.driver.opt_settings['Verify level'] = 3
         prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
@@ -399,12 +402,12 @@ if __name__ == "__main__":
         # prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
         #                            active_tol=2. * rotor_diameter)
 
-    prob.driver.add_objective('obj', scaler=1E-3)
+    prob.driver.add_objective('obj', scaler=1E0)
 
     # select design variables
-    prob.driver.add_desvar('turbineX', scaler=1E1, lower=np.array([turbineX[0], turbineX[1], 0.0]),
+    prob.driver.add_desvar('turbineX', scaler=1E3, lower=np.array([turbineX[0], turbineX[1], 0.0]),
                            upper=np.array([turbineX[0], turbineX[1], 10.0*rotor_diameter]))
-    prob.driver.add_desvar('turbineY', scaler=1E1, lower=np.array([turbineY[0], turbineY[1], -5.0*rotor_diameter]),
+    prob.driver.add_desvar('turbineY', scaler=1E3, lower=np.array([turbineY[0], turbineY[1], -5.0*rotor_diameter]),
                            upper=np.array([turbineY[0], turbineY[1], 5.0*rotor_diameter]))
     # prob.driver.add_desvar('turbineX1', scaler=1E1, lower=turbineXInitialPosition,
     #                        upper=turbineXInitialPosition)

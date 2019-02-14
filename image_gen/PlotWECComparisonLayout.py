@@ -26,15 +26,45 @@ elif turbine_type == 'NREL5MW':
     rotor_diameter = 126.4  # (m)
 
 # load starting locations
-layout_directory = '../project-code/input_files/'
+# layout_directory = '../project-code/input_files/'
+#
+# layout_data = np.loadtxt(layout_directory + "layouts/round_38turbs/nTurbs38_spacing5_layout_%i.txt" % layout_number)
 
-layout_data = np.loadtxt(layout_directory + "layouts/round_38turbs/nTurbs38_spacing5_layout_%i.txt" % layout_number)
+# Desired model to draw layout data from.
+MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
+FLORIS = 0
+BPA = 1
+JENSEN = 2
+LARSEN = 3
+model = JENSEN
+modelString = MODELS[model] + 'wec_opt/'
 
-turbineX = layout_data[:, 0] * rotor_diameter + rotor_diameter/2.
-turbineY = layout_data[:, 1] * rotor_diameter + rotor_diameter/2.
+# Whether or not to use the WEC data or the non-WEC data.
+relax = True
+if relax:
+    wecString = '_wec'
+else:
+    wecString = ''
+
+# Add a string to indicate which optimization attempt (i.e., try) that we want to plot from. The "_try2" folder has
+# the good Jensen optimization results.
+whichOptimizationTry = '_try2/'
+
+# Specify the path to the layout directory.
+layout_directory = '../project-code/optimizations/' + modelString + 'output_files_snopt' + wecString + \
+                   whichOptimizationTry
+
+# Load the data from the appropriate file in this directory.
+layout_data = np.loadtxt(layout_directory + 'snopt_multistart_locations_38turbs_nantucketWindRose_12dirs_JENSEN_run' +
+                                            '%i_EF1.000_TItype0.txt' % layout_number)
+
+turbineXInit = layout_data[:, 0] * rotor_diameter + rotor_diameter / 2.
+turbineYInit = layout_data[:, 1] * rotor_diameter + rotor_diameter / 2.
+turbineXFinal = layout_data[:, 2] * rotor_diameter + rotor_diameter / 2.
+turbineYFinal = layout_data[:, 3] * rotor_diameter + rotor_diameter / 2.
 
 # Save the number of turbines being used.
-nTurbs = turbineX.size
+nTurbs = turbineXInit.size
 
 # Define new rotorDiameter variable to represent the rotor diameter of each turbine.
 rotorDiameter = np.zeros(nTurbs)
@@ -48,10 +78,22 @@ center = np.array([farm_boundary_radius, farm_boundary_radius]) + rotor_diameter
 boundary_center_x = center[0]
 boundary_center_y = center[1]
 
-# Call PJ's function.
-plot_turbine_locations(turbineX, turbineY, rotorDiameter, color='red', alpha=1.0, circle_boundary=True,
-                       farm_radius=farm_boundary_radius,farm_center=(boundary_center_x, boundary_center_y),
+# Call PJ's function to plot the INITIAL coordinates.
+plot_turbine_locations(turbineXInit, turbineYInit, rotorDiameter, color='red', alpha=1.0, circle_boundary=True,
+                       farm_radius=farm_boundary_radius, farm_center=(boundary_center_x, boundary_center_y),
                        boundary_color='blue')
 
 # Plot legend and make the plot display to screen.
+plt.show()
+
+# Wait for user to tell program to continue.
+plt.waitforbuttonpress()
+
+# Now clear the figure and replot using FINAL coordinates.
+plt.clf()
+plot_turbine_locations(turbineXFinal, turbineYFinal, rotorDiameter, color='red', alpha=1.0, circle_boundary=True,
+                       farm_radius=farm_boundary_radius, farm_center=(boundary_center_x, boundary_center_y),
+                       boundary_color='blue')
+
+# Display the plot.
 plt.show()
