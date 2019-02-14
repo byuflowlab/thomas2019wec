@@ -12,6 +12,7 @@
 *_run*.txt
 *core.*
 *AEP
+*.DS_Store
 
 # except don't ignore the summary or layout datafiles.
 !*_all.txt
