@@ -38,6 +38,77 @@ import matplotlib.pyplot as plt
 import sys
 
 
+def make_contour_plot(prob, db=None, res=25):
+
+    x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
+    y = np.linspace(-5.0*prob['rotorDiameter'][0], 5.0*prob['rotorDiameter'][0], res)
+
+    # Create a grid.
+    X, Y = np.meshgrid(x, y)
+    XX = X.flatten()
+    YY = Y.flatten()
+    AEP = np.zeros_like(XX)
+
+    # Sample the AEP across the mesh grid of XX and YY we just made.
+    for i in range(0, XX.size):
+
+        prob['turbineX'][2] = XX[i]
+        prob['turbineY'][2] = YY[i]
+
+        prob.run_once()
+
+        AEP[i] = prob['AEP']
+
+    # Create contour plot.
+    AEP = AEP.reshape(X.shape)
+    plt.contourf(X, Y, AEP)
+    # plt.contour(X, Y, AEP)
+
+    # plt.hold(True)
+
+    if db is not None:
+
+        keepGeneratingPoints = True
+        i = 0
+        turbX = np.array([])
+        turbY = np.array([])
+
+        while keepGeneratingPoints:
+
+            try:
+
+                print('try block started')
+
+                # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
+                # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
+                # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
+                key = 'rank0:SNOPT|%i' % i
+                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'])
+                turbY = np.append(turbX, db[key]['Unknowns']['turbineY'])
+
+                print('turbX and turbY calculated w/o error')
+
+                # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
+                # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
+                # 'while' loop.
+                i += 1
+
+            except:
+
+                print('finished cycling through database db')
+
+                keepGeneratingPoints = False
+
+        print('turbX:', turbX)
+        print('turbY:', turbY)
+
+        plt.plot(turbX, turbY, 'k-')
+
+    plt.show()
+
+    return
+
+
 # If this file is called directly, run the code below.
 if __name__ == "__main__":
 
@@ -78,15 +149,15 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = JENSEN
+    model = BPA
     print(MODELS[model])
 
     # Select optimization approach/method.
     opt_algorithm = 'snopt'  # can be 'ga', 'ps', 'snopt'
 
     # Tell code whether or not WEC is being used with a boolean variable "relax".
-    # relax = True
-    relax = False
+    relax = True
+    # relax = False
 
     # Take specific actions depending on whether or not WEC is being used.
     if relax:
@@ -95,7 +166,9 @@ if __name__ == "__main__":
         output_directory = './output_files_%s_wec/' % opt_algorithm
 
         # Use a vector of expansion factors if WEC is being used.
-        expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
+        # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
+        expansion_factors = np.array([7.0])
+        # expansion_factors = np.array([6.0])
 
     # Take other actions if WEC is not being used.
     else:
@@ -183,22 +256,38 @@ if __name__ == "__main__":
     else:
         raise ValueError("Turbine type is undefined.")
 
+
+    # create boundary specifications
+    # boundary_radius = 0.5 * (rotor_diameter * 4000. / 126.4 - rotor_diameter)  # 1936.8
+    # boundary_radius = 500.0
+    # center = np.array([boundary_radius, boundary_radius]) + rotor_diameter / 2.
+    # start_min_spacing = 5.
+    # nVertices = 1
+    # boundary_center_x = center[0]
+    # boundary_center_y = center[1]
+
+
+
     # Define the x/ro ratio.
     x_over_ro = 10.0
 
     # Define initial turbine coordinates. First and second turbines are the upwind turbines, third turbine is the
     # downwind turbine.
-    turbineXInitialPosition = 0.0
-    turbineYInitialPosition = -200.0
+    # turbineXInitialPosition = 0.0 + boundary_center_x
+    # turbineYInitialPosition = -200.0 + boundary_center_y
+    #
+    # secondTurbineXInitialPosition = 50.0 + boundary_center_x
+    # secondTurbineYInitialPosition = 100.0 + boundary_center_y
+    #
+    # thirdTurbineXInitialPosition = (x_over_ro * (rotor_diameter/2.0)) + boundary_center_x
+    # thirdTurbineYInitialPosition = -200.0 + boundary_center_y
+    #
+    # turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
+    # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
-    secondTurbineXInitialPosition = 50.0
-    secondTurbineYInitialPosition = 100.0
-
-    thirdTurbineXInitialPosition = x_over_ro * (rotor_diameter/2.0)
-    thirdTurbineYInitialPosition = -200.0
-
-    turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
-    turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
+    turbineX = np.array([0.0, 50.0, 100.0])
+    # turbineY = np.array([-150.0, 150.0, 0.0])
+    turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
 
     turbineXInit = np.copy(turbineX)
     turbineYInit = np.copy(turbineY)
@@ -212,18 +301,11 @@ if __name__ == "__main__":
 
     nTurbines = turbineX.size
 
-    # create boundary specifications
-    boundary_radius = 0.5 * (rotor_diameter * 4000. / 126.4 - rotor_diameter)  # 1936.8
-    center = np.array([boundary_radius, boundary_radius]) + rotor_diameter / 2.
-    start_min_spacing = 5.
-    nVertices = 1
-    boundary_center_x = center[0]
-    boundary_center_y = center[1]
     xmax = np.max(turbineX)
     ymax = np.max(turbineY)
     xmin = np.min(turbineX)
     ymin = np.min(turbineY)
-    boundary_radius_plot = boundary_radius + 0.5 * rotor_diameter
+    # boundary_radius_plot = boundary_radius + 0.5 * rotor_diameter
 
     # initialize input variable arrays
     nTurbs = nTurbines
@@ -256,11 +338,40 @@ if __name__ == "__main__":
     size = windDirections.size
     wind_frequency = 1.                             # probability of wind in this direction at this speed
 
-    if MODELS[model] == 'JENSEN':
+    # Set BPA options.
+    nRotorPoints = 1
+    wake_model_options = {'nSamples': 0,
+                          'nRotorPoints': nRotorPoints,
+                          'use_ct_curve': True,
+                          'ct_curve_ct': ct_curve_ct,
+                          'ct_curve_wind_speed': ct_curve_wind_speed,
+                          'interp_type': 1,
+                          'use_rotor_components': False,
+                          'verbose': False}
+
+    if MODELS[model] == 'BPA':
+        # initialize problem
+        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=None,
+                                              minSpacing=minSpacing, differentiable=True,
+                                              use_rotor_components=False,
+                                              wake_model=gauss_wrapper,
+                                              params_IdepVar_func=add_gauss_params_IndepVarComps,
+                                              params_IndepVar_args={'nRotorPoints': nRotorPoints},
+                                              wake_model_options=wake_model_options,
+                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
+    elif MODELS[model] == 'FLORIS':
+        # initialize problem
+        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=None,
+                                              minSpacing=minSpacing, differentiable=True,
+                                              use_rotor_components=False,
+                                              wake_model=floris_wrapper,
+                                              params_IdepVar_func=add_floris_params_IndepVarComps,
+                                              params_IndepVar_args={}))
+    elif MODELS[model] == 'JENSEN':
         # set appropriate wake model options
         wake_model_options = {'variant': 'Cosine'}
         # initialize problem
-        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=None,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
                                               wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                                               params_IdepVar_func=add_jensen_params_IndepVarComps,
@@ -285,16 +396,16 @@ if __name__ == "__main__":
 
         prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2,
                                    active_tol=(2. * rotor_diameter) ** 2)
-        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
-                                   active_tol=2. * rotor_diameter)
+        # prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
+        #                            active_tol=2. * rotor_diameter)
 
     prob.driver.add_objective('obj', scaler=1E-3)
 
     # select design variables
-    prob.driver.add_desvar('turbineX', scaler=1E1, lower=np.zeros(nTurbines),
-                           upper=np.ones(nTurbines) * 3. * boundary_radius)
-    prob.driver.add_desvar('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
-                           upper=np.ones(nTurbines) * 3. * boundary_radius)
+    prob.driver.add_desvar('turbineX', scaler=1E1, lower=np.array([turbineX[0], turbineX[1], 0.0]),
+                           upper=np.array([turbineX[0], turbineX[1], 10.0*rotor_diameter]))
+    prob.driver.add_desvar('turbineY', scaler=1E1, lower=np.array([turbineY[0], turbineY[1], -5.0*rotor_diameter]),
+                           upper=np.array([turbineY[0], turbineY[1], 5.0*rotor_diameter]))
     # prob.driver.add_desvar('turbineX1', scaler=1E1, lower=turbineXInitialPosition,
     #                        upper=turbineXInitialPosition)
     # prob.driver.add_desvar('turbineY1', scaler=1E1, lower=turbineYInitialPosition,
@@ -310,6 +421,14 @@ if __name__ == "__main__":
 
     prob.root.ln_solver.options['single_voi_relevance_reduction'] = True
     prob.root.ln_solver.options['mode'] = 'rev'
+
+    # Import OpenMDAO's recorder to track the downwind turbine's movements during the optimization.
+    # Good to use for small cases like this debugger, but not for large scale problems.
+    from openmdao.api import SqliteRecorder
+    import sqlitedict
+    recorder = SqliteRecorder('AEP')
+    recorder.options['includes'] = ['turbineX', 'turbineY']
+    prob.driver.add_recorder(recorder)
 
     # Begin setting up the problem and running it.
     print("almost time for setup")
@@ -333,7 +452,7 @@ if __name__ == "__main__":
     # prob['turbineY3'] = thirdTurbineYInitialPosition
     prob['yaw0'] = yaw
 
-    # assign values to constant inputs (not design variables)
+    # assign values to constant inputs (not design variables).
     prob['rotorDiameter'] = rotorDiameter
     prob['hubHeight'] = hubHeight
     prob['axialInduction'] = axialInduction
@@ -351,9 +470,44 @@ if __name__ == "__main__":
     ratedPowers = np.ones(nTurbines) * rated_power
     prob['rated_power'] = ratedPowers
 
+    # JUST ADDED THESE IF-ELSE STATEMENTS ON Feb 12, 2019. Can remove if needed.
+    # Account for the different constants needed for different wake models.
+    if MODELS[model] == 'JENSEN':
+
+        print('using Jensen')
+
+    elif MODELS[model] == 'FLORIS':
+
+        # PARAMETERS I'M PRETTY SURE I NEED THAT WEREN'T INCLUDED BEFORE.
+        # added this line of code based on what Jared T. told me on Nov. 7. See his 2017 paper for more info.
+        w = 2.0
+        prob['model_params:cos_spread'] = w
+        prob['model_params:FLORISoriginal'] = False
+
+        # PARAMETERS I DIDN'T HAVE BEFORE THAT I'M NOT SURE I REALLY NEED.
+        # NREL5MWCPCT = pickle.load(open('../input_files/NREL5MWCPCT_smooth_dict.p'))
+        # prob['gen_params:windSpeedToCPCT_CP'] = NREL5MWCPCT['CP']
+        # prob['gen_params:windSpeedToCPCT_CT'] = NREL5MWCPCT['CT']
+        # prob['gen_params:windSpeedToCPCT_wind_speed'] = NREL5MWCPCT['wind_speed']
+        # prob['model_params:ke'] = 0.05
+        # prob['model_params:kd'] = 0.17
+        # prob['model_params:aU'] = 12.0
+        # prob['model_params:bU'] = 1.3
+        # prob['model_params:initialWakeAngle'] = 1.5
+        # prob['model_params:useaUbU'] = True
+        # prob['model_params:useWakeAngle'] = True
+        # prob['model_params:adjustInitialWakeDiamToYaw'] = False
+
+    elif MODELS[model] == 'BPA':
+
+        print('insert bpa code here')
+
+    else:
+        print('Error: wake model not found. You need to choose JENSEN, FLORIS, or BPA as your wake model.')
+
     # assign boundary values
-    prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
-    prob['boundary_radius'] = boundary_radius
+    # prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
+    # prob['boundary_radius'] = boundary_radius
 
     # Get the initial AEP before optimizing. This will be used to see how much the AEP improved using the optimization.
     prob.run_once()
@@ -363,12 +517,34 @@ if __name__ == "__main__":
     for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):
 
         # Pass the current relaxation factor to the problem.
-        prob['model_params:relaxationFactor'] = expansion_factor
+        # TODO: Unify WEC relaxation factor name to: wec_factor
+        # BPA currently has the WEC relaxation factor as: 'model_params:opt_exp_fac'
+        # FLORIS currently has: 'model_params:WECRelaxationFactor'
+        # Jensen currently has: 'model_params:relaxationFactor'
+        # TODO: Check to see if the other wake models are behaving like Jensen (which has acted appropriately so
+        # far). If they don't, figure out why; if they do behave appropriately, then we know that the problem with
+        # the optimization results isn't with the models. Save ALL figures you generate, even if they're bad,
+        # and talk about them in the next lab meeting AND put them in my lab journal.
+        # Check the output files from optimizations (particularly the 0th layout file) to see how WEC and non-WEC
+        # compare. If they're pretty close, and the models aren't the issue then that suggests problem is with run
+        # script. One thing to check with run scripts is to see if the expansion factor is ACTUALLY being changed.
+        # Problem could also be the image_generator.py file. Can create a breakpoint in the image_generator.py file,
+        # check what value it got from the file, go and manually check the file to see what value is actually there,
+        # and see if the code and the file's values match.
+        # These results can go into UCUR presentation - BPA has already been shown to work by Jared, verifying WEC
+        # works with other models, starting with small scale (like what I'm doing in this python file) and moving to
+        # large scale optimizations.
+        # Spend no more than half your time preparing UCUR presentation, make sure you're still troubleshooting. Meet
+        #  with Jared on Wednesday to finish troubleshooting. Practice presenting your presentation on Fri. Feb. 15.
+        prob['model_params:wec_factor'] = expansion_factor
 
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
         prob.run()
+        # prob.run_once()
         mpi_print(prob, 'end %s run' % (MODELS[model]))
+
+        print('expansion factor: ', prob['model_params:wec_factor'])
 
     # Save the most recent AEP result.
     AEP_run_opt = prob['AEP']
@@ -386,10 +562,26 @@ if __name__ == "__main__":
     turbineX = prob['turbineX']
     turbineY = prob['turbineY']
 
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    # Create plot of boundary.
+    # circle = plt.Circle((boundary_center_x, boundary_center_y), boundary_radius, fill='none')
+    rectangle = plt.Rectangle((0.0, -5.0*rotor_diameter), 10.0*rotor_diameter, 10.0*rotor_diameter, fill=None)
+    ax.add_patch(rectangle)
+
     # Plot the resulting turbine locations.
-    plt.figure(1)
-    plt.plot(turbineXInit, turbineYInit, 'r*', label='Initial')
-    plt.plot(turbineX, turbineY, 'b^', label='Final')
+    plt.plot(turbineXInit, turbineYInit, 'r*', label='Initial Position')
+    plt.plot(turbineX, turbineY, 'b^', label='Final Position')
     plt.xlabel('X Coordinates (m)')
     plt.ylabel('Y Coordinates (m)')
+    plt.axis('equal')
+    plt.legend(framealpha=1.0)
     plt.show()
+
+    # Get the recorded info on turbine coordinates.
+    db = sqlitedict.SqliteDict('AEP', 'iterations')
+    print(db.keys())
+    print(db['rank0:SNOPT|3']['Unknowns'].keys())
+
+    # Create the contour plot.
+    make_contour_plot(prob, db=db)
