@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def make_contour_plot(prob, db=None, res=25):
+def make_contour_plot(prob, db=None, res=50):
 
     x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
     y = np.linspace(-5.0*prob['rotorDiameter'][0], 5.0*prob['rotorDiameter'][0], res)
@@ -77,7 +77,7 @@ def make_contour_plot(prob, db=None, res=25):
 
             try:
 
-                print('try block started')
+                # print('try block started')
 
                 # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
                 # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
@@ -86,7 +86,7 @@ def make_contour_plot(prob, db=None, res=25):
                 turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
                 turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
 
-                print('turbX and turbY calculated w/o error')
+                # print('turbX and turbY calculated w/o error')
 
                 # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
                 # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
@@ -95,16 +95,19 @@ def make_contour_plot(prob, db=None, res=25):
 
             except Exception as e:
 
-                print('error message:', repr(e))
+                # print('error message:', repr(e))
 
-                print('finished cycling through database db')
+                # print('finished cycling through database db')
 
                 keepGeneratingPoints = False
 
-        print('turbX:', turbX)
-        print('turbY:', turbY)
+        # print('turbX:', turbX)
+        # print('turbY:', turbY)
 
-        plt.plot(turbX, turbY, 'k-')
+        plt.plot(turbX, turbY, 'k-', label='Turbine Path')
+        plt.legend(framealpha=1.0)
+        plt.xlabel('X Coordinate (m)')
+        plt.ylabel('Y Coordinate (m)')
         # plt.scatter(turbX, turbY)
 
     plt.show()
@@ -152,8 +155,10 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = JENSEN
+    model = FLORIS
     print(MODELS[model])
+
+    # TODO: tapenade for FLORIS. Re-run large-scale optimizations for JENSEN and BPA (since they're both working).
 
     # Select optimization approach/method.
     opt_algorithm = 'snopt'  # can be 'ga', 'ps', 'snopt'
@@ -170,7 +175,7 @@ if __name__ == "__main__":
 
         # Use a vector of expansion factors if WEC is being used.
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([7.0])
+        expansion_factors = np.array([3.0])
         # expansion_factors = np.array([6.0])
 
     # Take other actions if WEC is not being used.
@@ -579,6 +584,12 @@ if __name__ == "__main__":
     plt.ylabel('Y Coordinates (m)')
     plt.axis('equal')
     plt.legend(framealpha=1.0)
+
+    # Hide the right and top axes. Turn off the tick marks on these axes.
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+
     plt.show()
 
     # Get the recorded info on turbine coordinates.
