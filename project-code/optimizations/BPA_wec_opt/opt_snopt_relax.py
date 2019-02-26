@@ -606,7 +606,7 @@ if __name__ == "__main__":
         prob['model_params:wake_combination_method'] = wake_combination_method
         prob['model_params:ti_calculation_method'] = ti_calculation_method
         prob['model_params:wake_model_version'] = wake_model_version
-        prob['model_params:opt_exp_fac'] = 1.0
+        prob['model_params:wec_factor'] = 1.0
         prob['model_params:calc_k_star'] = calc_k_star_calc
         prob['model_params:sort'] = sort_turbs
         prob['model_params:z_ref'] = z_ref
@@ -673,7 +673,7 @@ if __name__ == "__main__":
             if MODELS[model] is 'BPA':
                 prob['model_params:ti_calculation_method'] = ti_opt_method
                 prob['model_params:calc_k_star'] = calc_k_star_opt
-                prob['model_params:opt_exp_fac'] = expansion_factor
+                prob['model_params:wec_factor'] = expansion_factor
 
             # run the problem
             mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -692,7 +692,7 @@ if __name__ == "__main__":
             # mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
             if MODELS[model] is 'BPA':
-                prob['model_params:opt_exp_fac'] = 1.0
+                prob['model_params:wec_factor'] = 1.0
                 prob['model_params:ti_calculation_method'] = ti_calculation_method
                 prob['model_params:calc_k_star'] = calc_k_star_calc
 
@@ -739,7 +739,7 @@ if __name__ == "__main__":
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
         # cProfile.run('prob.run()')
-        prob['model_params:opt_exp_fac'] = 1.
+        prob['model_params:wec_factor'] = 1.
         prob['model_params:ti_calculation_method'] = ti_opt_method
         prob['model_params:calc_k_star'] = calc_k_star_opt
         tic = time.time()
@@ -754,7 +754,7 @@ if __name__ == "__main__":
         mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
         if MODELS[model] is 'BPA':
-            prob['model_params:opt_exp_fac'] = 1.0
+            prob['model_params:wec_factor'] = 1.0
             prob['model_params:ti_calculation_method'] = ti_calculation_method
             prob['model_params:calc_k_star'] = calc_k_star_calc
 
