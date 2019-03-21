@@ -160,8 +160,8 @@ if __name__ == "__main__":
 
     relax = True
     # relax = False
-    relaxDirectory = False
-    TI_method_is_0 = False
+    relaxDirectory = True
+    TI_method_is_0 = True
 
     # if relax:
     if relaxDirectory:
@@ -178,8 +178,8 @@ if __name__ == "__main__":
 
     differentiable = True
 
-    # expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    expansion_factors = np.array([1.0])
+    expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+    # expansion_factors = np.array([1.0])
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
     # expansion_factors = np.array([20., 10., 5., 2.5, 1.25, 1.0])
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     # 4:TI by Niayifar and Porte Agel 2016 using area overlap ratio,
     # 5:TI by Niayifar and Porte Agel 2016 using area overlap ratio and SM function]
 
-    ti_opt_method = 5  # can be [0:No added TI calculations,
+    ti_opt_method = 0  # can be [0:No added TI calculations,
     # 1:TI by Niayifar and Porte Agel altered by Annoni and Thomas,
     # 2:TI by Niayifar and Porte Agel 2016,
     # 3:TI by Niayifar and Porte Agel 2016 with added soft max function,

@@ -143,7 +143,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = BPA
+    model = JENSEN
     print(MODELS[model])
 
     # set options for BPA
@@ -161,16 +161,14 @@ if __name__ == "__main__":
     relax = True
     # relax = False
     relaxDirectory = False
-    TI_method_is_0 = False
 
     # if relax:
     if relaxDirectory:
         output_directory = "./output_files_%s_wec/" % opt_algorithm
+        expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
     else:
-        if TI_method_is_0:
-            output_directory = "./output_files_%s_TI0/" % opt_algorithm
-        else:
-            output_directory = "./output_files_%s_TI5/" % opt_algorithm
+        output_directory = "./output_files_%s/" % opt_algorithm
+        expansion_factors = np.array([1.0])
 
     # create output directory if it does not exist yet
     import distutils.dir_util
@@ -179,7 +177,7 @@ if __name__ == "__main__":
     differentiable = True
 
     # expansion_factors = np.array([3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    expansion_factors = np.array([1.0])
+    # expansion_factors = np.array([1.0])
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
     # expansion_factors = np.array([20., 10., 5., 2.5, 1.25, 1.0])
@@ -196,7 +194,7 @@ if __name__ == "__main__":
     # 4:TI by Niayifar and Porte Agel 2016 using area overlap ratio,
     # 5:TI by Niayifar and Porte Agel 2016 using area overlap ratio and SM function]
 
-    ti_opt_method = 5  # can be [0:No added TI calculations,
+    ti_opt_method = 0  # can be [0:No added TI calculations,
     # 1:TI by Niayifar and Porte Agel altered by Annoni and Thomas,
     # 2:TI by Niayifar and Porte Agel 2016,
     # 3:TI by Niayifar and Porte Agel 2016 with added soft max function,
@@ -416,10 +414,12 @@ if __name__ == "__main__":
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
                                               params_IndepVar_args={}))
     elif MODELS[model] == 'JENSEN':
+        # set appropriate wake model options
+        wake_model_options = {'variant': 'Cosine'}
         # initialize problem
         prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-                                              wake_model=jensen_wrapper,
+                                              wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                                               params_IdepVar_func=add_jensen_params_IndepVarComps,
                                               params_IndepVar_args={}))
     else:
@@ -639,7 +639,11 @@ if __name__ == "__main__":
     expansion_factor_last = 0.0
 
     tict = time.time()
+
+    # If WEC is being used, execute the following
     if relax:
+
+        # Begin loop to optimize AEP for each expansion factor.
         for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):  # best so far
             # print("func calls: ", config.obj_func_calls_array, np.sum(config.obj_func_calls_array))
             # print("grad func calls: ", config.sens_func_calls_array, np.sum(config.sens_func_calls_array))
@@ -670,10 +674,16 @@ if __name__ == "__main__":
             prob['turbineX'] = turbineX
             prob['turbineY'] = turbineY
 
+            # Set the relaxation factor. Should work for Jensen, FLORISSE, and BPA.
+            prob['model_params:wec_factor'] = expansion_factor
+
             if MODELS[model] is 'BPA':
                 prob['model_params:ti_calculation_method'] = ti_opt_method
                 prob['model_params:calc_k_star'] = calc_k_star_opt
-                prob['model_params:wec_factor'] = expansion_factor
+            # elif MODELS[model] is 'JENSEN':
+            #     prob['model_params:wec_factor'] = expansion_factor
+            # elif MODELS[model] is 'FLORIS':
+            #     prob['model_params:wec_factor'] = expansion_factor
 
             # run the problem
             mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -735,6 +745,9 @@ if __name__ == "__main__":
                                header=header)
                     f.close()
             expansion_factor_last = expansion_factor
+
+    # If WEC is not being used, execute the following. Shouldn't ever really be used since we're changing
+    # relaxDirectory from True/False and keeping relax = True for all cases, whether or not WEC is being used.
     else:
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -745,6 +758,7 @@ if __name__ == "__main__":
         tic = time.time()
         # cProfile.run('prob.run()')
         prob.run()
+        # prob.run_once()
         # quit()
         toc = time.time()
 

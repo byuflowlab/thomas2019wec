@@ -161,7 +161,7 @@ if __name__ == "__main__":
     relax = True
     # relax = False
     relaxDirectory = False
-    TI_method_is_0 = False
+    TI_method_is_0 = True
 
     # if relax:
     if relaxDirectory:
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     # 4:TI by Niayifar and Porte Agel 2016 using area overlap ratio,
     # 5:TI by Niayifar and Porte Agel 2016 using area overlap ratio and SM function]
 
-    ti_opt_method = 5  # can be [0:No added TI calculations,
+    ti_opt_method = 0  # can be [0:No added TI calculations,
     # 1:TI by Niayifar and Porte Agel altered by Annoni and Thomas,
     # 2:TI by Niayifar and Porte Agel 2016,
     # 3:TI by Niayifar and Porte Agel 2016 with added soft max function,

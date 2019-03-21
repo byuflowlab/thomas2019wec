@@ -12,4 +12,4 @@
 
 echo ${SLURM_ARRAY_TASK_ID}
 
-mpirun python opt_snopt_relax.py ${SLURM_ARRAY_TASK_ID}
+mpirun python opt_snopt_non_relax_TI5.py ${SLURM_ARRAY_TASK_ID}

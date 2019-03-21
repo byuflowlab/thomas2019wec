@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     relax = True
     # relax = False
-    relaxDirectory = False
+    relaxDirectory = True
 
     # if relax:
     if relaxDirectory:
