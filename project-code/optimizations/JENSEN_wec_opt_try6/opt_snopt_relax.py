@@ -143,7 +143,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = FLORIS
+    model = JENSEN
     print(MODELS[model])
 
     # set options for BPA
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     relax = True
     # relax = False
-    relaxDirectory = True
+    relaxDirectory = False
 
     # if relax:
     if relaxDirectory:
@@ -419,7 +419,7 @@ if __name__ == "__main__":
         # initialize problem
         prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-                                              wake_model=jensen_wrapper,
+                                              wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                                               params_IdepVar_func=add_jensen_params_IndepVarComps,
                                               params_IndepVar_args={}))
     else:
@@ -636,13 +636,11 @@ if __name__ == "__main__":
     config.obj_func_calls_array[:] = 0.0
     config.sens_func_calls_array[:] = 0.0
 
-    # I THINK THIS IS SUPPOSED TO BE 1.0. OTHERWISE, RELAX FACTOR WILL NEVER BE 0.0, AND final_ti_opt_method WILL
-    # NEVER BE USED. Maybe only applicable to BPA?
     expansion_factor_last = 0.0
 
     tict = time.time()
 
-    # If WEC is being used, execute the following.
+    # If WEC is being used, execute the following
     if relax:
 
         # Begin loop to optimize AEP for each expansion factor.
@@ -690,8 +688,8 @@ if __name__ == "__main__":
             # run the problem
             mpi_print(prob, 'start %s run' % (MODELS[model]))
             tic = time.time()
-            # prob.run()
-            prob.run_once()
+            prob.run()
+            # prob.run_once()
             toc = time.time()
             # print(np.sum(config.obj_func_calls_array))
             # print(np.sum(config.sens_func_calls_array))
@@ -760,6 +758,7 @@ if __name__ == "__main__":
         tic = time.time()
         # cProfile.run('prob.run()')
         prob.run()
+        # prob.run_once()
         # quit()
         toc = time.time()
 

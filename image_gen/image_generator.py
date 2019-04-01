@@ -717,14 +717,40 @@ def plot_results_nruns(filename, save_figs, show_figs):
     #
     # data_directories = ['output_files_snopt', 'output_files_snopt_wec']
 
-    optimization_directories = ['JENSEN_wec_opt', 'FLORIS_wec_opt', 'BPA_wec_opt']
+    # Choose which plot to create.
+    plotAllModels = False
+    plotJensen = True
+    plotFLORIS = False
+    plotBPA = False
 
-    data_directoriesElse = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt'+whichOptimizationTry]
-    data_directoriesBPA = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt_TI0'+whichOptimizationTry,
-                           'output_files_snopt_TI5'+whichOptimizationTry]
+    if plotAllModels:
 
-    model = ['JENSEN', 'JENSEN', 'FLORIS', 'FLORIS', 'BPA', 'BPA', 'BPA']
-    labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI5', 'BPA TI5', 'BPA TI0']
+        optimization_directories = ['JENSEN_wec_opt', 'FLORIS_wec_opt', 'BPA_wec_opt']
+
+        data_directoriesElse = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt'+whichOptimizationTry]
+        data_directoriesBPA = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt_TI0'+whichOptimizationTry,
+                               'output_files_snopt_TI5'+whichOptimizationTry]
+
+        model = ['JENSEN', 'JENSEN', 'FLORIS', 'FLORIS', 'BPA', 'BPA', 'BPA']
+        labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI5', 'BPA TI5', 'BPA TI0']
+
+        # Since all the models are being plotted, make the figure size a little bigger.
+        figSize = (10, 10)
+
+    elif plotJensen:
+
+        optimization_directories = ['JENSEN_wec_opt']
+
+        data_directoriesElse = ['output_files_snopt'+whichOptimizationTry,
+                                'output_files_snopt_wec'+whichOptimizationTry]
+        data_directoriesBPA = ['output_files_snopt_wec'+whichOptimizationTry, 'output_files_snopt_TI0'+whichOptimizationTry,
+                               'output_files_snopt_TI5'+whichOptimizationTry]
+
+        model = ['JENSEN', 'JENSEN']
+        labels = ['Jensen', 'Jensen WEC']
+
+        # Since only one model is being plotted, maybe make the figure size a little smaller.
+        figSize = (10, 10)
 
     aep_scale = 1E-6
 
@@ -812,8 +838,9 @@ def plot_results_nruns(filename, save_figs, show_figs):
     angle = 90
 
     plt.rcParams.update({'font.size': 26})
+    fig, ax = plt.subplots(figsize=figSize)
 
-    fig, ax = plt.subplots(figsize=(10,10))
+    # Boxplot
     ax.boxplot(data_aep, meanline=True, labels=labels)
     ax.set_ylabel('AEP (GWh)')
     ax.spines['right'].set_visible(False)
@@ -822,15 +849,26 @@ def plot_results_nruns(filename, save_figs, show_figs):
         tick.set_rotation(angle)
     plt.tight_layout()
 
+    # Histogram.
+    # ax.hist(data_aep, label=labels)
+    # ax.set_xlabel('AEP (GWh)')
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['top'].set_visible(False)
+    # for tick in ax.get_xticklabels():
+    #     tick.set_rotation(angle)
+    # plt.tight_layout()
+
     # SPENCER M. EDIT: To get the correct axis label, changing the data_improvement to be 100 times its original
     # value. This is to get the percent improvement from decimal form to percentage form.
     for i in range(0, len(data_improvement)):
         data_improvement[i] *= 100.0
 
+    # Create new figure and axes.
+    fig, ax = plt.subplots(figsize=figSize)
 
-    fig, ax = plt.subplots(figsize=(10,10))
+    # Boxplot.
     ax.boxplot(data_improvement, meanline=True, labels=labels)
-    ax.set_ylabel('Improvement (%AEP)')
+    ax.set_ylabel('AEP Improvement (%)')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     # ax.set_ylim([-0.15, 0.1])
@@ -838,7 +876,17 @@ def plot_results_nruns(filename, save_figs, show_figs):
         tick.set_rotation(angle)
     plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(10,10))
+    # Histogram.
+    # ax.hist(data_improvement, bins=100, label=labels, alpha=0.75)
+    # ax.set_xlabel('AEP Improvement (%)')
+    # ax.set_ylabel('Count')
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['top'].set_visible(False)
+    # # for tick in ax.get_xticklabels():
+    # #     tick.set_rotation(angle)
+    # plt.tight_layout()
+
+    fig, ax = plt.subplots(figsize=figSize)
     ax.boxplot(data_run_time, meanline=True, labels=labels)
     ax.set_ylabel('Run Time (min)')
     ax.spines['right'].set_visible(False)
@@ -847,7 +895,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
         tick.set_rotation(angle)
     plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(10,10))
+    fig, ax = plt.subplots(figsize=figSize)
     ax.boxplot(data_fcalls, meanline=True, labels=labels)
     ax.set_ylabel('Function Calls')
     ax.spines['right'].set_visible(False)

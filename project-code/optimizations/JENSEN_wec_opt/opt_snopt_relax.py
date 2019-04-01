@@ -116,8 +116,8 @@ if __name__ == "__main__":
 
     # set up this run
 
-    # input = int(sys.argv[1])
-    input = 0
+    input = int(sys.argv[1])
+    # input = 0
     run_number = input
     layout_number = input
 
@@ -606,7 +606,7 @@ if __name__ == "__main__":
         prob['model_params:wake_combination_method'] = wake_combination_method
         prob['model_params:ti_calculation_method'] = ti_calculation_method
         prob['model_params:wake_model_version'] = wake_model_version
-        prob['model_params:opt_exp_fac'] = 1.0
+        prob['model_params:wec_factor'] = 1.0
         prob['model_params:calc_k_star'] = calc_k_star_calc
         prob['model_params:sort'] = sort_turbs
         prob['model_params:z_ref'] = z_ref
@@ -674,14 +674,16 @@ if __name__ == "__main__":
             prob['turbineX'] = turbineX
             prob['turbineY'] = turbineY
 
+            # Set the relaxation factor. Should work for Jensen, FLORISSE, and BPA.
+            prob['model_params:wec_factor'] = expansion_factor
+
             if MODELS[model] is 'BPA':
                 prob['model_params:ti_calculation_method'] = ti_opt_method
                 prob['model_params:calc_k_star'] = calc_k_star_opt
-                prob['model_params:opt_exp_fac'] = expansion_factor
-            elif MODELS[model] is 'JENSEN':
-                prob['model_params:relaxationFactor'] = expansion_factor
-            elif MODELS[model] is 'FLORIS':
-                prob['model_params:WECRelaxationFactor'] = expansion_factor
+            # elif MODELS[model] is 'JENSEN':
+            #     prob['model_params:wec_factor'] = expansion_factor
+            # elif MODELS[model] is 'FLORIS':
+            #     prob['model_params:wec_factor'] = expansion_factor
 
             # run the problem
             mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -700,7 +702,7 @@ if __name__ == "__main__":
             # mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
             if MODELS[model] is 'BPA':
-                prob['model_params:opt_exp_fac'] = 1.0
+                prob['model_params:wec_factor'] = 1.0
                 prob['model_params:ti_calculation_method'] = ti_calculation_method
                 prob['model_params:calc_k_star'] = calc_k_star_calc
 
@@ -750,7 +752,7 @@ if __name__ == "__main__":
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
         # cProfile.run('prob.run()')
-        prob['model_params:opt_exp_fac'] = 1.
+        prob['model_params:wec_factor'] = 1.
         prob['model_params:ti_calculation_method'] = ti_opt_method
         prob['model_params:calc_k_star'] = calc_k_star_opt
         tic = time.time()
@@ -766,7 +768,7 @@ if __name__ == "__main__":
         mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
         if MODELS[model] is 'BPA':
-            prob['model_params:opt_exp_fac'] = 1.0
+            prob['model_params:wec_factor'] = 1.0
             prob['model_params:ti_calculation_method'] = ti_calculation_method
             prob['model_params:calc_k_star'] = calc_k_star_calc
 

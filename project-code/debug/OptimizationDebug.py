@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def make_contour_plot(prob, db=None, res=25):
+def make_contour_plot(prob, db=None, res=50):
 
     x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
     y = np.linspace(-5.0*prob['rotorDiameter'][0], 5.0*prob['rotorDiameter'][0], res)
@@ -96,16 +96,18 @@ def make_contour_plot(prob, db=None, res=25):
                 # 'while' loop.
                 i += 1
 
-            except:
-
-                # print('finished cycling through database db at step %i' % i)
+            except Exception as e:
 
                 keepGeneratingPoints = False
 
-        print('turbX:', turbX)
-        print('turbY:', turbY)
+        # print('turbX:', turbX)
+        # print('turbY:', turbY)
 
-        plt.plot(turbX, turbY, 'ko-')
+        plt.plot(turbX, turbY, 'k-', label='Turbine Path')
+        plt.legend(framealpha=1.0)
+        plt.xlabel('X Coordinate (m)')
+        plt.ylabel('Y Coordinate (m)')
+        # plt.scatter(turbX, turbY)
 
     plt.show()
 
@@ -155,6 +157,8 @@ if __name__ == "__main__":
     model = FLORIS
     print(MODELS[model])
 
+    # TODO: tapenade for FLORIS. Re-run large-scale optimizations for JENSEN and BPA (since they're both working).
+
     # Select optimization approach/method.
     opt_algorithm = 'snopt'  # can be 'ga', 'ps', 'snopt'
 
@@ -174,12 +178,7 @@ if __name__ == "__main__":
 
         # Use a vector of expansion factors if WEC is being used.
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
-        # expansion_factors = np.array([10., 7., 1.])
-
-        expansion_factors = np.linspace(high, low, high-(low-1))
-
-        # print(expansion_factors)
-        # quit()
+        expansion_factors = np.array([3.0])
         # expansion_factors = np.array([6.0])
 
     # Take other actions if WEC is not being used.
@@ -299,9 +298,9 @@ if __name__ == "__main__":
     # turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
     # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
-    turbineX = np.array([0.0, 50.0, 300.0])
-    # turbineY = np.array([-150.0, 150.0, 0.0])
-    turbineY = np.array([-127.0, 127.0, -0.0*rotor_diameter])
+    turbineX = np.array([0.0, 50.0, 100.0])
+    turbineY = np.array([-150.0, 150.0, 0.0])
+    # turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
 
     turbineXInit = np.copy(turbineX)
     turbineYInit = np.copy(turbineY)
@@ -399,7 +398,7 @@ if __name__ == "__main__":
         # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = 0
+        prob.driver.opt_settings['Verify level'] = 3
         prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
@@ -413,12 +412,12 @@ if __name__ == "__main__":
         # prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
         #                            active_tol=2. * rotor_diameter)
 
-    prob.driver.add_objective('obj', scaler=1E-3)
+    prob.driver.add_objective('obj', scaler=1E0)
 
     # select design variables
-    prob.driver.add_desvar('turbineX', scaler=1E1, lower=np.array([turbineX[0], turbineX[1], 0.0]),
+    prob.driver.add_desvar('turbineX', scaler=1E3, lower=np.array([turbineX[0], turbineX[1], 0.0]),
                            upper=np.array([turbineX[0], turbineX[1], 10.0*rotor_diameter]))
-    prob.driver.add_desvar('turbineY', scaler=1E1, lower=np.array([turbineY[0], turbineY[1], -5.0*rotor_diameter]),
+    prob.driver.add_desvar('turbineY', scaler=1E3, lower=np.array([turbineY[0], turbineY[1], -5.0*rotor_diameter]),
                            upper=np.array([turbineY[0], turbineY[1], 5.0*rotor_diameter]))
     # prob.driver.add_desvar('turbineX1', scaler=1E1, lower=turbineXInitialPosition,
     #                        upper=turbineXInitialPosition)
@@ -609,6 +608,12 @@ if __name__ == "__main__":
     plt.ylabel('Y Coordinates (m)')
     plt.axis('equal')
     plt.legend(framealpha=1.0)
+
+    # Hide the right and top axes. Turn off the tick marks on these axes.
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+
     plt.show()
 
     # Get the recorded info on turbine coordinates.
