@@ -54,22 +54,25 @@ def make_contour_plot(prob, db=None, res=25):
 
         prob['turbineX'][2] = XX[i]
         prob['turbineY'][2] = YY[i]
+        prob['model_params:wec_factor'] = 1.0
 
         prob.run_once()
 
         AEP[i] = prob['AEP']
+        # print(AEP[i])
 
     # Create contour plot.
     AEP = AEP.reshape(X.shape)
+    # print(AEP.shape)
     plt.contourf(X, Y, AEP)
     # plt.contour(X, Y, AEP)
 
     # plt.hold(True)
-
+    # print(db.keys())
     if db is not None:
 
         keepGeneratingPoints = True
-        i = 0
+        i = 1
         turbX = np.array([])
         turbY = np.array([])
 
@@ -77,16 +80,16 @@ def make_contour_plot(prob, db=None, res=25):
 
             try:
 
-                print('try block started')
+                # print('try block started')
 
                 # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
                 # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
                 # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
                 key = 'rank0:SNOPT|%i' % i
-                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'])
-                turbY = np.append(turbX, db[key]['Unknowns']['turbineY'])
+                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
+                turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
 
-                print('turbX and turbY calculated w/o error')
+                # print('turbX and turbY calculated w/o error')
 
                 # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
                 # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
@@ -95,14 +98,14 @@ def make_contour_plot(prob, db=None, res=25):
 
             except:
 
-                print('finished cycling through database db')
+                # print('finished cycling through database db at step %i' % i)
 
                 keepGeneratingPoints = False
 
         print('turbX:', turbX)
         print('turbY:', turbY)
 
-        plt.plot(turbX, turbY, 'k-')
+        plt.plot(turbX, turbY, 'ko-')
 
     plt.show()
 
@@ -149,7 +152,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = BPA
+    model = FLORIS
     print(MODELS[model])
 
     # Select optimization approach/method.
@@ -159,6 +162,10 @@ if __name__ == "__main__":
     relax = True
     # relax = False
 
+    # exp. fac. range
+    high = 3.
+    low = 1.
+
     # Take specific actions depending on whether or not WEC is being used.
     if relax:
 
@@ -167,7 +174,12 @@ if __name__ == "__main__":
 
         # Use a vector of expansion factors if WEC is being used.
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([7.0])
+        # expansion_factors = np.array([10., 7., 1.])
+
+        expansion_factors = np.linspace(high, low, high-(low-1))
+
+        # print(expansion_factors)
+        # quit()
         # expansion_factors = np.array([6.0])
 
     # Take other actions if WEC is not being used.
@@ -231,6 +243,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 3.  # m/s
+        cut_out_speed = 25. # m/s
+        rated_speed = 11.4  # m/s
         rated_power = 5000.  # kW
         generator_efficiency = 0.944
 
@@ -285,9 +299,9 @@ if __name__ == "__main__":
     # turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
     # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
-    turbineX = np.array([0.0, 50.0, 100.0])
+    turbineX = np.array([0.0, 50.0, 300.0])
     # turbineY = np.array([-150.0, 150.0, 0.0])
-    turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
+    turbineY = np.array([-127.0, 127.0, -0.0*rotor_diameter])
 
     turbineXInit = np.copy(turbineX)
     turbineYInit = np.copy(turbineY)
@@ -467,8 +481,12 @@ if __name__ == "__main__":
     prob['cp_curve_wind_speed'] = cp_curve_wind_speed
     cutInSpeeds = np.ones(nTurbines) * cut_in_speed
     prob['cut_in_speed'] = cutInSpeeds
+    cutOutSpeeds = np.ones(nTurbines) * cut_out_speed
+    prob['cut_out_speed'] = cutOutSpeeds
     ratedPowers = np.ones(nTurbines) * rated_power
+    prob['rated_wind_speed'] = np.ones(nTurbines)*rated_speed
     prob['rated_power'] = ratedPowers
+    prob['use_power_curve_definition'] = True
 
     # JUST ADDED THESE IF-ELSE STATEMENTS ON Feb 12, 2019. Can remove if needed.
     # Account for the different constants needed for different wake models.
@@ -511,7 +529,7 @@ if __name__ == "__main__":
 
     # Get the initial AEP before optimizing. This will be used to see how much the AEP improved using the optimization.
     prob.run_once()
-    AEP_init_opt = prob['AEP']
+    AEP_init_opt = np.copy(prob['AEP'])
 
     # Begin loop to optimize AEP for each expansion factor.
     for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):
@@ -536,7 +554,10 @@ if __name__ == "__main__":
         # large scale optimizations.
         # Spend no more than half your time preparing UCUR presentation, make sure you're still troubleshooting. Meet
         #  with Jared on Wednesday to finish troubleshooting. Practice presenting your presentation on Fri. Feb. 15.
-        prob['model_params:wec_factor'] = expansion_factor
+        if MODELS[model] is 'BPA':
+            prob['model_params:opt_exp_fac'] = expansion_factor
+        else:
+            prob['model_params:wec_factor'] = expansion_factor
 
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -544,9 +565,19 @@ if __name__ == "__main__":
         # prob.run_once()
         mpi_print(prob, 'end %s run' % (MODELS[model]))
 
-        print('expansion factor: ', prob['model_params:wec_factor'])
+        if MODELS[model]:
+            print('expansion factor: ', prob['model_params:opt_exp_fac'])
+        else:
+            print('expansion factor: ', prob['model_params:wec_factor'])
+
+        db = sqlitedict.SqliteDict('AEP', 'iterations')
+        print(db.keys())
 
     # Save the most recent AEP result.
+    if MODELS[model]:
+        prob['model_params:opt_exp_fac'] = 1.
+    else:
+        prob['model_params:wec_factor'] = 1.
     AEP_run_opt = prob['AEP']
 
     # If ... some sort of condition is met ... then print all the results.
@@ -558,10 +589,12 @@ if __name__ == "__main__":
         mpi_print(prob, 'Initial AEP (kWh): %s' % AEP_init_opt)
         mpi_print(prob, 'Final AEP (kWh): %s' % AEP_run_opt)
         mpi_print(prob, 'AEP improvement: %s' % (AEP_run_opt / AEP_init_opt))
+        mpi_print(prob, 'wtpowers', prob['wtPower0'])
+        mpi_print(prob, 'wtvelocity', prob['wtVelocity0'])
 
     turbineX = prob['turbineX']
     turbineY = prob['turbineY']
-
+    # quit()
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     # Create plot of boundary.
