@@ -31,9 +31,9 @@ nTurbines = 3
 
 # Add in necessary variables. NOT SURE HOW TO ADD IN RELAXATION FACTOR FOR FLORISSE YET, SO I'LL JUST MAKE IT EQUAL
 # TO ONE FOR NOW.
-x_over_ro = np.array([10.0])
-relaxationFactor = np.arange(7.0, 0.0, -1.0)
-# relaxationFactor = np.array([2.0, 1.1, 1.0, 0.9, 0.1])
+x_over_ro = np.array([10.0])    # originally 10.0
+# relaxationFactor = np.arange(7.0, 0.0, -1.0)
+relaxationFactor = np.array([2.0, 1.1, 1.0, 0.9, 0.1])
 
 # Define the start, stop, and step values for a thetaVector. Units in degrees.
 thetaMax = 90

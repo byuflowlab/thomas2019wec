@@ -38,7 +38,23 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def make_contour_plot(prob, db=None, res=50):
+def get_turbine_position_data(prob):
+
+    # Create vectors to store turbine x and y coordinates.
+    turbX = np.array([])
+    turbY = np.array([])
+
+    # Loop through relaxation factors. TODO: this doesn't work. wec_factor is only a float. maybe cycle through db
+    # database?
+    for i in range(0, len(prob['model_params:wec_factor'])):
+
+        turbX = np.append(turbX, prob['turbineX'])
+        turbY = np.append(turbY, prob['turbineY'])
+
+    return turbX, turbY
+
+
+def make_contour_plot(prob, db=None, res=25, figSize=(10, 10)):
 
     x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
     y = np.linspace(-5.0*prob['rotorDiameter'][0], 5.0*prob['rotorDiameter'][0], res)
@@ -48,6 +64,10 @@ def make_contour_plot(prob, db=None, res=50):
     XX = X.flatten()
     YY = Y.flatten()
     AEP = np.zeros_like(XX)
+
+    # Create vectors to store turbinex and y coordinates.
+    # turbX = np.array([])
+    # turbY = np.array([])
 
     # Sample the AEP across the mesh grid of XX and YY we just made.
     for i in range(0, XX.size):
@@ -63,48 +83,55 @@ def make_contour_plot(prob, db=None, res=50):
 
     # Create contour plot.
     AEP = AEP.reshape(X.shape)
-    # print(AEP.shape)
-    plt.contourf(X, Y, AEP)
+    fig = plt.figure(figsize=figSize)
+    plt.contourf(X, Y, AEP, cmap='Blues_r')
     # plt.contour(X, Y, AEP)
 
     # plt.hold(True)
     # print(db.keys())
     if db is not None:
+        # keepGeneratingPoints = True
+        # i = 1
+        # turbX = np.array([])
+        # turbY = np.array([])
 
-        keepGeneratingPoints = True
-        i = 1
-        turbX = np.array([])
-        turbY = np.array([])
+        # while keepGeneratingPoints:
+        #
+        #     try:
+        #
+        #         # print('try block started')
+        #
+        #         # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
+        #         # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
+        #         # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
+        #         # key = 'rank0:SNOPT|%i' % i
+        #         # turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
+        #         # turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
+        #
+        #         # print('turbX and turbY calculated w/o error')
+        #
+        #         # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
+        #         # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
+        #         # 'while' loop.
+        #         # i += 1
+        #
+        #     except Exception as e:
+        #
+        #         # print('error message:', repr(e))
+        #
+        #         # print('finished cycling through database db')
+        #
+        #         keepGeneratingPoints = False
 
-        while keepGeneratingPoints:
-
-            try:
-
-                # print('try block started')
-
-                # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
-                # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
-                # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
-                key = 'rank0:SNOPT|%i' % i
-                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
-                turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
-
-                # print('turbX and turbY calculated w/o error')
-
-                # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
-                # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
-                # 'while' loop.
-                i += 1
-
-            except Exception as e:
-
-                keepGeneratingPoints = False
-
+        # Get turbX and turbY from the function I defined above.
+        turbX, turbY = get_turbine_position_data(prob)
         # print('turbX:', turbX)
         # print('turbY:', turbY)
 
         plt.plot(turbX, turbY, 'k-', label='Turbine Path')
-        plt.legend(framealpha=1.0)
+        plt.plot(turbX[0], turbY[0], 'r*', label='Initial Position')
+        plt.plot(turbX[-1], turbY[-1], 'b^', label='Final Position')
+        # plt.legend(framealpha=0.0, frameon=False)
         plt.xlabel('X Coordinate (m)')
         plt.ylabel('Y Coordinate (m)')
         # plt.scatter(turbX, turbY)
@@ -112,6 +139,9 @@ def make_contour_plot(prob, db=None, res=50):
     plt.show()
 
     return
+
+
+# Separate above function. Create function that gets data, create/edit function that plots data.
 
 
 # If this file is called directly, run the code below.
@@ -154,7 +184,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = FLORIS
+    model = BPA
     print(MODELS[model])
 
     # TODO: tapenade for FLORIS. Re-run large-scale optimizations for JENSEN and BPA (since they're both working).
@@ -178,8 +208,10 @@ if __name__ == "__main__":
 
         # Use a vector of expansion factors if WEC is being used.
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([3.0])
-        # expansion_factors = np.array([6.0])
+        expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
+                                      1.50, 1.25, 1.0, 1.0])
+        # expansion_factors = np.array([3.0])
+        # expansion_factors = np.array([5.0])
 
     # Take other actions if WEC is not being used.
     else:
@@ -298,19 +330,16 @@ if __name__ == "__main__":
     # turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
     # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
-    turbineX = np.array([0.0, 50.0, 100.0])
-    turbineY = np.array([-150.0, 150.0, 0.0])
+    # X-coordinate for downwind turbine. Originally 150.0.
+    downwindTurbineX = 150.0
+    downwindTurbineY = 10.0
+
+    turbineX = np.array([0.0, 50.0, downwindTurbineX])
+    turbineY = np.array([-150.0, 150.0, downwindTurbineY])
     # turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
 
     turbineXInit = np.copy(turbineX)
     turbineYInit = np.copy(turbineY)
-
-    # TODO: Define turbineX vector such that we have the same layout that was used to obtain the AEP vs. crosswind
-    # position curves. Put upper and lower bounds on the upwind turbines such that they don't move (their coordinates
-    # are fixed). Only things that should change are the coordinates of the downwind turbine. This way, we can test
-    # if WEC is working by seeing where the downwind turbine ends up -- if wec doesn't work, then the turbine will
-    # end up at the local min position; otherwise, the turbine will end up on the left or the right of the two upwind
-    # turbines.
 
     nTurbines = turbineX.size
 
@@ -551,12 +580,7 @@ if __name__ == "__main__":
         # These results can go into UCUR presentation - BPA has already been shown to work by Jared, verifying WEC
         # works with other models, starting with small scale (like what I'm doing in this python file) and moving to
         # large scale optimizations.
-        # Spend no more than half your time preparing UCUR presentation, make sure you're still troubleshooting. Meet
-        #  with Jared on Wednesday to finish troubleshooting. Practice presenting your presentation on Fri. Feb. 15.
-        if MODELS[model] is 'BPA':
-            prob['model_params:opt_exp_fac'] = expansion_factor
-        else:
-            prob['model_params:wec_factor'] = expansion_factor
+        prob['model_params:wec_factor'] = expansion_factor
 
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -564,19 +588,13 @@ if __name__ == "__main__":
         # prob.run_once()
         mpi_print(prob, 'end %s run' % (MODELS[model]))
 
-        if MODELS[model]:
-            print('expansion factor: ', prob['model_params:opt_exp_fac'])
-        else:
-            print('expansion factor: ', prob['model_params:wec_factor'])
+        print('expansion factor: ', prob['model_params:wec_factor'])
 
         db = sqlitedict.SqliteDict('AEP', 'iterations')
         print(db.keys())
 
     # Save the most recent AEP result.
-    if MODELS[model]:
-        prob['model_params:opt_exp_fac'] = 1.
-    else:
-        prob['model_params:wec_factor'] = 1.
+    prob['model_params:wec_factor'] = 1.
     AEP_run_opt = prob['AEP']
 
     # If ... some sort of condition is met ... then print all the results.
@@ -593,8 +611,11 @@ if __name__ == "__main__":
 
     turbineX = prob['turbineX']
     turbineY = prob['turbineY']
-    # quit()
-    fig = plt.figure()
+
+    # Define the size of the figures.
+    figSize = (10, 10)
+
+    fig = plt.figure(figsize=figSize)
     ax = fig.add_subplot(1, 1, 1)
     # Create plot of boundary.
     # circle = plt.Circle((boundary_center_x, boundary_center_y), boundary_radius, fill='none')
@@ -619,7 +640,7 @@ if __name__ == "__main__":
     # Get the recorded info on turbine coordinates.
     db = sqlitedict.SqliteDict('AEP', 'iterations')
     print(db.keys())
-    print(db['rank0:SNOPT|3']['Unknowns'].keys())
+    # print(db['rank0:SNOPT|3']['Unknowns'].keys())
 
     # Create the contour plot.
-    make_contour_plot(prob, db=db)
+    make_contour_plot(prob, db=db, res=10, figSize=figSize)

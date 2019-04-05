@@ -707,7 +707,12 @@ def plot_results_nruns(filename, save_figs, show_figs):
     # Spencer M. EDIT: Because of multiple optimization runs ('tries'), I've needed to add more data directories. Thus,
     # adding in directory string to identify which optimization run to pull the data from. NOTE: The very first try
     # is saved in a folder that has an empty "try" string.
-    whichOptimizationTry = '_try2'
+    # FURTHER EDIT: From "try6" onwards, I've appended the OPTIMIZATION directories with the try number and left the
+    # data directories alone.
+    # TODO: Adjust logic in code so that I don't have to refactor code with "whichOptimizationTry" in order to switch
+    # between optimization data sets. Maybe change names of the directories to match this new source tree
+    # organization method?
+    whichOptimizationTry = '_try6'
 
     # optimization_directories = ['no_local_ti_nrel_5mw', 'no_local_ti_vestas_v80', 'yes_local_ti_nrel_5mw',
     #                             'yes_local_ti_vestas_v80', 'yes_local_ti_and_ef10_nrel_5mw',
@@ -719,7 +724,8 @@ def plot_results_nruns(filename, save_figs, show_figs):
 
     # Choose which plot to create.
     plotAllModels = False
-    plotJensen = True
+    plotJensenAndBPA = True
+    plotJensen = False
     plotFLORIS = False
     plotBPA = False
 
@@ -732,7 +738,25 @@ def plot_results_nruns(filename, save_figs, show_figs):
                                'output_files_snopt_TI5'+whichOptimizationTry]
 
         model = ['JENSEN', 'JENSEN', 'FLORIS', 'FLORIS', 'BPA', 'BPA', 'BPA']
-        labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI5', 'BPA TI5', 'BPA TI0']
+        labels = ['Jensen WEC', 'Jensen', 'FLORIS WEC', 'FLORIS', 'BPA WEC TI0', 'BPA TI5', 'BPA TI0']
+
+        # Since all the models are being plotted, make the figure size a little bigger.
+        figSize = (10, 10)
+
+    # TODO: pull the right data from the supercomputer. Test FLORISSE with 3-turbine case. Semester report due at end
+    # of next week, have my results ready to go and written up so Jared can include it in our report. Treat this
+    # results section as another case study (similar to the case study in Jared's WEC paper). Include the 3-turbine
+    # case and the 38-turbine case for JENSEN and FLORISSE.
+    elif plotJensenAndBPA:
+
+        optimization_directories = ['JENSEN_wec_opt'+whichOptimizationTry, 'BPA_wec_opt'+whichOptimizationTry]
+
+        data_directoriesElse = ['output_files_snopt_wec', 'output_files_snopt']
+        data_directoriesBPA = ['output_files_snopt_wec', 'output_files_snopt_TI0',
+                               'output_files_snopt_TI5']
+
+        model = ['JENSEN', 'JENSEN', 'BPA', 'BPA', 'BPA']
+        labels = ['Jensen WEC', 'Jensen', 'BPA WEC TI0', 'BPA TI5', 'BPA TI0']
 
         # Since all the models are being plotted, make the figure size a little bigger.
         figSize = (10, 10)
@@ -765,7 +789,7 @@ def plot_results_nruns(filename, save_figs, show_figs):
     plot_num = 0
     for opt_dir in optimization_directories:
 
-        if opt_dir == 'BPA_wec_opt':
+        if ((opt_dir == 'BPA_wec_opt') or (opt_dir == 'BPA_wec_opt'+whichOptimizationTry)):
             data_directories = data_directoriesBPA
         else:
             data_directories = data_directoriesElse

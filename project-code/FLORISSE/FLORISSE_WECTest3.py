@@ -185,7 +185,8 @@ for i in range(relaxationFactor.size):
         prob['turbineY'] = np.array([turbineYInitialPosition, turbineY[i, j]])
 
         # Set the relaxation factor for this iteration.
-        prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
+        # prob['model_params:WECRelaxationFactor'] = relaxationFactor[i]
+        prob['model_params:wec_factor'] = relaxationFactor[i]
 
         # Run OpenMDAO once.
         prob.run_once()
