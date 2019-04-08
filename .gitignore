@@ -13,6 +13,9 @@
 *core.*
 *AEP
 *.DS_Store
+journal.log
+journal.aux
+journal.synctex.gz
 
 # except don't ignore the summary or layout datafiles.
 !*_all.txt

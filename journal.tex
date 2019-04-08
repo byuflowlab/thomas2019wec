@@ -3,7 +3,7 @@
 % graphics packages
 \usepackage{graphicx}
 \usepackage{stackengine}
-%\usepackage{subfigure}
+\usepackage{subfigure}
 
 % algorithm packages
 %\usepackage{algpseudocode}
@@ -72,9 +72,19 @@ Because of the general nature of the proposed method, it could theoretically be 
 
 \section{Wake and Wind Farm Models}
 \subsection{The Jensen Cosine Wake Model}
-\todo{Spencer}
+The Jensen-Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance of the air passing through a wind turbine. The equation for the Jensen-Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
+
+% Equation for the Jensen Cosine velocity deficit.
+\begin{equation}
+    \frac{V}{U} = 1 - 2af_\theta \bigg(\frac{r_0}{r_0 + \alpha x} \bigg)^2
+    \label{eq:JensenVelocityDeficit}
+\end{equation}
+
+In \cref{eq:JensenVelocityDeficit}, $V$ represents the wind velocity at any distance $x$ downstream of the waking turbine, $U$ represents the free-stream wind velocity, $f_\theta$ represents the cosine factor (see \cref{eq:JensenCosineAdjustment}), $r_0$ represents the radius of the wind turbine, and $a$ represents the axial induction (ideal value of $a = 1/3$).
+
 \subsection{The FLORIS Wake Model}
-\todo{Spencer}
+The FLORIS wake model was developed by Gebraad et al. based on the Jensen-Cosine wake model \cite{Gebraad2014}. It is similar to the Jensen-Cosine model in that the velocity deficit is constant within certain regions of the wake; however, whereas the Jensen-Cosine model describes turbines as having a single velocity for the whole cross-section of the wake, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit (see \cref{fig:FLORISDiagram}) \cite{Gebraad2014}. The FLORIS wake model contains many parameters that are tuned based on datasets produced by Large-Eddy Simulations (LES) run on the Simulator for Off/Onshore Wind Farm Applications (SOWFA) \cite{Fleming2015}. For this comparison study, we used the FLORIS model after it had been tuned to the National Renewable Energy Laboratories (NREL) 5-MW wind turbine.
+
 \subsection{The Bastankhah and Port\'e-Agel Wake Model}
 In the Bastankhah and Port\'e-Agel wake model, the two primary characteristics of the wakes, wake deficit and wake spread, are particularly easy to differentiate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah and Port\'e-Agel wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with part of the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}. 
 %
@@ -142,6 +152,96 @@ where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i
 \section{Applying WEC to the Jensen Cosine Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Jensen Cosine wake model.  
 
+%Just as the Bastankah and Port\'e-Agel model could be adjusted with a relaxation factor ($\xi$) \cite{Thomas2018}, so may the Jensen-Cosine model. In the BPA wake model, the relaxation factor was applied to the terms describing the turbine's wake width, thereby expanding the wake's width without affecting the rate of wake spread. In a similar manner, the relaxation factor was applied to the radius of the wake width in the Jensen-Cosine model (\cref{eq:JensenWECWakeWidth}).
+
+WEC may be applied to the Jensen Cosine wake model by applying a relaxation factor to the radius of the wake, as seen in \cref{eq:JensenWECWakeWidth}. This relaxation factor allows the wake's spread to be increased or decreased without affecting the velocity deficit at the center of the wake.
+
+% Enter the equation where the relaxation factor is being inserted into the Jensen Cosine model.
+\begin{equation}
+    R = \xi r_0
+    \label{eq:JensenWECWakeWidth}
+\end{equation}
+
+In \cref{eq:JensenWECWakeWidth}, $r$ represents the rotor radius of wind turbine and $R$ represents the radius of the wake at the wind turbine scaled by the value of $\xi$, the relaxation factor.
+
+Using \cref{eq:JensenWECWakeWidth} as the definition of the wake width, the distance $z$ between the wake-generating turbine and the theoretical starting point of the wake (i.e., the wake's fulcrum) may be determined as a function of $\xi$. This distance, shown in \cref{eq:FulcrumDistance}, may be obtained through simple trigonometry.
+
+\begin{equation}
+    z = \frac{R}{tan(\beta)}
+    \label{eq:FulcrumDistance}
+\end{equation}
+
+Substituting in the definition for $R$ from \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain \cref{eq:WECFulcrumDistance}.
+
+\begin{equation}
+    z = \frac{\xi r_0}{tan(\beta)}
+    \label{eq:WECFulcrumDistance}
+\end{equation}
+
+Now that an expression for $z$ has been derived, the angle $\theta$ may be obtained. As seen from \cref{fig:JensenDiagrams}, $\theta$ represents the angle between the wake's center line and the position of the waked turbine.
+
+\begin{figure}[h]
+    \centering
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram1}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram2}
+    }
+    \caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
+    \label{fig:JensenDiagrams}
+\end{figure}
+
+This angle $\theta$ can be determined using \cref{eq:Theta}, again obtained from \cref{fig:JensenDiagrams} through trigonometry.
+
+% Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
+\begin{equation}
+    \theta = \tan^{-1}\Big( \frac{\Delta y}{\Delta x + z} \Big)
+    \label{eq:Theta}
+\end{equation}
+
+The variable $\theta$ obtained from \cref{eq:Theta} is used in the cosine factor, as seen in \cref{eq:JensenCosineAdjustment} below.
+
+% Enter the Cosine Adjustment Equation to Jensen's Wake Model.
+\begin{equation}
+    f(\theta) = \frac{1 + cos(n\theta)}{2}
+    \label{eq:JensenCosineAdjustment}
+\end{equation}
+
+In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor based upon the boundary angle of the wake spread, $\beta$, as shown in \cref{fig:JensenDiagrams}. This boundary angle has a default value of $\beta = 20 \degree$. The value for $n$ can be calculated below in \cref{eq:nFactor}, where $\beta$ is in units of radians.
+
+% Equation to determine the factor n in the Jensen Cosine factor.
+\begin{equation}
+    n = \pi / \beta
+    \label{eq:nFactor}
+\end{equation}
+
+Substituting \cref{eq:WECFulcrumDistance} into \cref{eq:Theta}, we obtain \cref{eq:ThetaWithFulcrumDist}.
+
+% Insert equation: sub z equation into theta equation.
+\begin{equation}
+    \theta = \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg)
+    \label{eq:ThetaWithFulcrumDist}
+\end{equation}
+
+Combining Eqs. \cref{eq:nFactor} and \cref{eq:ThetaWithFulcrumDist} into \cref{eq:JensenCosineAdjustment} yields \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}.
+
+% Insert equation: sub n and theta into cosine factor.
+\begin{equation}
+    f(\theta) = \frac{1}{2} \Bigg( 1 + cos \Bigg[ \frac{\pi}{\beta} \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
+    \label{eq:JensenCosineAdjustmentWithThetaAndNFactor}
+\end{equation}
+
+Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} into \cref{eq:JensenVelocityDeficit}, we obtain the final equation for calculating the velocity deficit with the Jensen-Cosine model (\cref{eq:JensenVelocityDeficitCombined}).
+
+% Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
+\begin{equation}
+    \frac{V}{U} = 1 - a \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg)^2
+    \label{eq:JensenVelocityDeficitCombined}
+\end{equation}
+
+Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake width without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center.
+
 \subsection{Jensen Cosine WEC Step (1)}
 \todo{Spencer}
 \subsection{Jensen Cosine WEC Step (2)}
@@ -151,6 +251,50 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 
 \section{Applying WEC to the FLORIS Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
+
+%\todo{need to get better figure. remember to update caption once new figure inserted.}
+%\begin{figure}[h]
+%    \centering
+%    \includegraphics[width=0.3\linewidth]{FLORISDiagram1}
+%    \caption{Diagram displaying the three wake zones in the FLORIS turbine wake model. A higher quality diagram would have been constructed if there had been sufficient time. The black outer lines represent the outermost wake zone (mixing zone) which expands from the wind turbine as the air travels downstream. The blue lines represent the middle wake zone (far zone) which retains nearly the same width with distance from the turbine. Finally, the green lines represent the innermost wake zone (near wake) which converges to a point some distance from the turbine. The velocity deficit associated with each wake zone increases from the outermost wake zone to the innermost wake zone.}
+%    \label{fig:FLORISDiagram}
+%\end{figure}
+
+We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen-Cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{Gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
+
+\begin{equation}
+    D_{w,i,q} = D_i + 2k_em_{e,q}(x - X_i)
+    \label{eq:FLORISWakeWidth}
+\end{equation}
+
+In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width. If we applied the relaxation factor to $k_e$ or $m_{e,q}$, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ to obtain \cref{eq:FLORISWECWakeWidth}.
+
+\begin{equation}
+    D_{w,i,q}' = D_i' + 2k_em_{e,q}(x - X_i)
+    \label{eq:FLORISWECWakeWidth}
+\end{equation}
+
+Where $D_{w,i,q}'$ represents the adjusted wake width from applying WEC and $D_i'$ represents the adjusted initial wake diameter from applying WEC. An equation for the adjusted initial wake diameter is seen below in \cref{eq:FLORISWECWakeDiameter}.
+
+\begin{equation}
+    D_i' = \xi D_i
+    \label{eq:FLORISWECWakeDiameter}
+\end{equation}
+
+% Initial results from applying the above equations prompted us to adjust our methods. First, we decided to implement a cosine factor to smooth the results, as done by Thomas and Ning in \cite{Thomas2017}. Second, we noticed that the preliminary results from FLORIS indicated that the velocity deficit in the wake's center was not constant for all values of $\xi$. We determined that the cause of this error was the increase in wake width of the innermost wake-zone. By increasing this wake diameter, we were allowing the innermost wake-zone to propagate much farther downwind than it would without a relaxation factor. Thus, turbines near the center of the wake would experience the effects of the innermost wake-zone for high values of $\xi$ but not for lower values of $\xi$. This caused the velocity deficit in the center of the wake to differ with $\xi$.
+
+% Originally, we resolved this issue by only applying the WEC relaxation factor to the middle and outermost wake zones. By doing so, we kept the innermost zone from propagating too far downstream and thereby ensured that the velocity deficit at the wake-center would be the same for all $\xi$. After more testing, however, we determined that failing to apply the relaxation factor to the innermost wake zone actually promoted the creation of a local optimum between two upwind turbines, which defeats WEC's purpose in smoothing out local optima. While the velocity deficit in the center of the wake is not preserved as well when applying WEC to the innermost wake zone, FLORIS performs better with WEC as a result of this change.
+
+We applied \cref{eq:FLORISWECWakeWidth} to all wake zones within the FLORIS wake model. The resulting equations controlling the wake diameters for various wake zones in the FLORIS model are displayed below in \cref{eq:FLORISWECWakeDiameterPiecewise}. In this equation, $q$ represents the wake zone being used (i.e., $q = 1$ for the innermost wake zone, $q = 2$ for the middle wake zone, and $q = 3$ for the outermost wake zone).
+
+\begin{equation}
+    D_{w, i, q}' = \begin{cases}
+        \xi D_i + 2k_em_{e, q} (x - X_i), & q = 1 \\
+        \xi D_i + 2k_em_{e, q} (x - X_i), & q = 2 \\
+        \xi D_i + 2k_em_{e, q} (x - X_i), & q = 3
+    \end{cases}
+    \label{eq:FLORISWECWakeDiameterPiecewise}
+\end{equation}
 
 \subsection{FLORIS WEC Step (1)}
 \todo{Spencer}
@@ -212,6 +356,7 @@ For each test case, the population size for NSGA-II was set to be ten times the 
 
 \subsection{Case 0: Single Dimension}
 \todo{Spencer}
+The preliminary goals of this study were to determine whether WEC (1) spread out the wake for each wake model and (2) maintained the velocity deficit at the wake's center for each wake model. The Case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
 
 \subsection{Case 1: Small Grid}
 Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters (see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
