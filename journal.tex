@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{stackengine}
 \usepackage{subfigure}
+\usepackage{float}
 
 % algorithm packages
 %\usepackage{algpseudocode}
@@ -358,6 +359,10 @@ For each test case, the population size for NSGA-II was set to be ten times the 
 \todo{Spencer}
 The preliminary goals of this study were to determine whether WEC (1) spread out the wake for each wake model and (2) maintained the velocity deficit at the wake's center for each wake model. The Case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
 
+\subsection{Case 0.5: Small-Scale Optimization}
+\todo{Jared: what do you think of this section? It's for the small-scale optimization tests we ran}
+Once the preliminary tests had been completed, case 0.5 was ran to predict whether the intended effects of WEC---that turbines would be optimized to better optima rather than local optima between wakes---would be realized in our large-scale optimizations. Similar to case 0, two turbines were given constant coordinates upwind of a variable downwind turbine. The coordinates of the variable downwind turbine were optimized to maximize AEP.
+
 \subsection{Case 1: Small Grid}
 Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters (see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
 \begin{figure}[h!]
@@ -429,7 +434,65 @@ where $(x_c,y_c)$ is the location of the center of the wind farm, and $R_b$ is t
 We compared optimized AEP, as well as the number of function calls required, for each of the cases discussed previously. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). Results for each test case will be presented and discussed in the following sections.
 
 \subsection{Case 0 Results}
-\todo{Spencer}
+Results for case 0 can be seen in \cref{fig:WECAEPFigures}. As the relaxation factor increases in the left-hand plots, the wake's effects are felt farther from the wake center (i.e., the wake expands). An important feature displayed by the right-hand column is that the local maxima are being smoothed out. This key result allows gradient-based optimizations to avoid converging on most local maxima.
+
+\todo{Spencer: may need to update some of these figures}
+% Enter subfigures of AEP vs. crosswind position displaying widening effects of WEC.
+% \begin{figure}[htbp!]
+\begin{figure}[H]
+    \centering
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECSingleTurbineAEP.eps}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECMultipleTurbinesAEP.eps}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECSingleTurbineAEP.eps}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECMultipleTurbinesAEP.eps}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECSingleTurbineAEP.eps}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECMultipleTurbinesAEP.eps}
+    }
+    \caption{Plots displaying the effects the WEC approach has on wake width. Plots (a) and (b) display the Jensen-Cosine model, plots (c) and (d) display the FLORIS model, and (e) and (f) display the BPA model.}
+    \label{fig:WECAEPFigures}
+\end{figure}
+
+\subsection{Case 0.5 Results}
+\todo{Jared: I wanted to include the small-scale optimization results as well. This case study is similar to case 0, but now instead of simply obtaining the AEP vs crosswind position, we're optimizing the downwind turbine's coordinates while holding the upwind turbines' coordinates constant.}
+\todo{Spencer: finish this section}
+
+Results for case 0.5 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
+
+\todo{refer to notes from Jared in updating these figures.}
+\begin{figure}[H]
+    \centering
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleJensenNonWECGraphContour}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleJensenWECGraphContour}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSENonWECGraphContour}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSEWECGraphContour2}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleBPANonWECGraphContour}
+    }
+    \subfigure[]{
+        \includegraphics[width=0.35\textwidth]{SmallScaleBPAWECGraphContour}
+    }
+    \caption{Small-scale optimization contour plots with eastward flowing wind, two stationary upwind turbines, and one variable downwind turbine. Optimizations are shown without WEC (left) and with WEC (right). Each row represents a different turbine wake model: Jensen Cosine, FLORIS, and BPA, respectively.}
+    \label{fig:SmallScaleOptimizations}
+\end{figure}
 
 \subsection{Case 1 Results}
 Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).
@@ -522,6 +585,7 @@ It may be noted that the function calls required for each method to solve case 2
 \end{table}
 
 \section{Discussion}
+\todo{Jared: should I discuss case 0 and 0.5 results here too?}
 In the WFLO problem, we are looking for high AEP values, a tight distribution, and relatively few function calls. The benefit of high AEP means that the resulting wind farm will be more efficient, likely leading to a reduced cost of energy. A tight distribution means that the method is consistent, that the optimized solution is independent of the starting layout. The tighter the distribution the fewer optimizations need to be run before we are confident that we have one of the best wind farm designs we can get. A low number of function calls means that wind farm design can be done more cheaply and that more variables could potentially be tested, which could again lead to a lower cost of energy. Each of the methods tested demonstrated at least one of these characteristics.
 
 The relatively high AEP results from NSGA-II on the smaller case, compared to the relatively low AEP results of NSGA-II on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}. As shown by the high number of function calls for NSGA-II, gradient-free algorithms also tend to take a relatively long time to run. These weakness are the main drivers for increasing interest in gradient-based algorithms.
@@ -531,7 +595,13 @@ The relatively wide spread and moderate results from SNOPT on both cases demonst
 The high values of AEP and lower standard deviation of AEP compared to SNOPT with WEC, indicates that SNOPT with WEC is more accurate and reliable. So much so that, ignoring outliers, the probability distributions for SNOPT with and without WEC from case 2 just overlap only slightly (see \cref{fig:aep2}). This reliability does come at the cost of more function calls than SNOPT without WEC. The increase in function calls when using WEC is expected because the relaxation optimization method ran nine optimizations to convergence (one for each value of $\xi$) for every one optimization by SNOPT alone. The number of function calls needed for WEC was still only a fraction of what was need for NSGA-II, so the added cost in function calls seems reasonable from that perspective. However, because WEC has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
 
 \section{Conclusion}
-The WEC proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested WEC on two WFLO problems, one with 16 turbines and one with 38 turbines. Results using WEC show a $4\%$ mean optimized AEP improvement compared to gradient-based optimization without WEC for both test cases. A gradient-free algorithm had a mean optimized AEP that was $1\%$ higher than WEC for the 16-turbine case, but WEC resulted in a $10\%$ higher mean optimized AEP compared to a gradient-free optimization method for the 38-turbine problem. Future work should investigate potential improvements and best practices for WEC, apply WEC to other wake models, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES). 
+The WEC proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested WEC on two WFLO problems, one with 16 turbines and one with 38 turbines. Results using WEC show a $4\%$ mean optimized AEP improvement compared to gradient-based optimization without WEC for both test cases. A gradient-free algorithm had a mean optimized AEP that was $1\%$ higher than WEC for the 16-turbine case, but WEC resulted in a $10\%$ higher mean optimized AEP compared to a gradient-free optimization method for the 38-turbine problem.
+
+Applying WEC to other turbine wake models produced mixed results. Preliminary tests and small-scale optimization tests resulted in promising results that seemed to predict desirable performance in large-scale optimizations. However, the large-scale optimizations did not return similarly promising results, and seemed to indicate even undesirable results. Further work will be necessary to determine the root cause of these unexpected issues.
+
+%Future work should investigate potential improvements and best practices for WEC, apply WEC to other wake models, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
+
+Future work should investigate potential improvements and best practices for WEC, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
 
 \ack 
 This work was supported by the National Science Foundation under Grant No. 1539384. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
