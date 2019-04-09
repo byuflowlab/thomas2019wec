@@ -494,6 +494,9 @@ Results for case 0.5 are displayed below. Note that optimizations without WEC fa
     \label{fig:SmallScaleOptimizations}
 \end{figure}
 
+\subsection{Case 0.75 Results}
+Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
+
 \subsection{Case 1 Results}
 Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).
 
@@ -585,8 +588,9 @@ It may be noted that the function calls required for each method to solve case 2
 \end{table}
 
 \section{Discussion}
-\todo{Jared: should I discuss case 0 and 0.5 results here too?}
 In the WFLO problem, we are looking for high AEP values, a tight distribution, and relatively few function calls. The benefit of high AEP means that the resulting wind farm will be more efficient, likely leading to a reduced cost of energy. A tight distribution means that the method is consistent, that the optimized solution is independent of the starting layout. The tighter the distribution the fewer optimizations need to be run before we are confident that we have one of the best wind farm designs we can get. A low number of function calls means that wind farm design can be done more cheaply and that more variables could potentially be tested, which could again lead to a lower cost of energy. Each of the methods tested demonstrated at least one of these characteristics.
+
+The plots from Case 0 indicate that WEC should be achieving its purpose in smoothing out local optima. These results are confirmed in the Case 0.5 test results, where WEC was shown to allow the optimization to escape the local optimum and achieve a better optimum. These combined results suggest that large-scale optimization test results should display similar improvements in optimization performance.
 
 The relatively high AEP results from NSGA-II on the smaller case, compared to the relatively low AEP results of NSGA-II on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}. As shown by the high number of function calls for NSGA-II, gradient-free algorithms also tend to take a relatively long time to run. These weakness are the main drivers for increasing interest in gradient-based algorithms.
 
