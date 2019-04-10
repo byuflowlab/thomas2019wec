@@ -155,41 +155,15 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 
 %Just as the Bastankah and Port\'e-Agel model could be adjusted with a relaxation factor ($\xi$) \cite{Thomas2018}, so may the Jensen-Cosine model. In the BPA wake model, the relaxation factor was applied to the terms describing the turbine's wake width, thereby expanding the wake's width without affecting the rate of wake spread. In a similar manner, the relaxation factor was applied to the radius of the wake width in the Jensen-Cosine model (\cref{eq:JensenWECWakeWidth}).
 
-WEC may be applied to the Jensen Cosine wake model by applying a relaxation factor to the radius of the wake, as seen in \cref{eq:JensenWECWakeWidth}. This relaxation factor allows the wake's spread to be increased or decreased without affecting the velocity deficit at the center of the wake.
-
-
-
-In \cref{eq:JensenWECWakeWidth}, $r$ represents the rotor radius of wind turbine and $R$ represents the radius of the wake at the wind turbine scaled by the value of $\xi$, the relaxation factor.
-
-Using \cref{eq:JensenWECWakeWidth} as the definition of the wake width, the distance $z$ between the wake-generating turbine and the theoretical starting point of the wake (i.e., the wake's fulcrum) may be determined as a function of $\xi$.
-
-Substituting in the definition for $R$ from \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain \cref{eq:WECFulcrumDistance}.
-
-
-
-Now that an expression for $z$ has been derived, the angle $\theta$ may be obtained. As seen from \cref{fig:JensenDiagrams}, $\theta$ represents the angle between the wake's center line and the position of the waked turbine.
-
-The variable $\theta$ obtained from \cref{eq:Theta} is used in the cosine factor, as seen in \cref{eq:JensenCosineAdjustment} below.
-
-Substituting \cref{eq:WECFulcrumDistance} into \cref{eq:Theta}, we obtain \cref{eq:ThetaWithFulcrumDist}.
-
-
-
-Combining Eqs. \cref{eq:nFactor} and \cref{eq:ThetaWithFulcrumDist} into \cref{eq:JensenCosineAdjustment} yields \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}.
-
-
-
-
-
 \subsection{Jensen Cosine WEC Step (1)}
 \todo{Spencer}
-Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
+%Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without affecting the velocity deficit in the center of the wake.
 
 \subsection{Jensen Cosine WEC Step (2)}
 \todo{Spencer}
-Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
+%Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
 
 This section will break down how the cosine factor, $f_\theta$, is determined, and how a relaxation factor may be applied to spread the wake without impacting the velocity deficit of the wake's center. A figure displaying the relevant parameters is displayed below in \cref{fig:JensenDiagrams}.
 
@@ -274,14 +248,32 @@ Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} int
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
-    \frac{V}{U} = 1 - a \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg)^2
+    \frac{V}{U} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
     \label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
-Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake width without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center.
+Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. Figure \cref{fig:JensenLocalOptSmoothed} below confirms this prediction and confirms that local optima can be smoothed out through WEC for the Jensen Cosine model.
+
+% Figure describing setup for aep vs crosswind position tests for Jensen
+\begin{figure}[ht]
+	\centering
+	\begin{minipage}[t]{0.43\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
+		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_visualization}).}
+		\label{fig:smoothing_locations}
+	\end{minipage}\hspace{1pc}
+% Figure displaying results from aep vs crosswind position tests for Jensen
+	\begin{minipage}[t]{0.52\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{JensenWECMultipleTurbinesAEP}
+		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
+		\label{fig:JensenLocalOptSmoothed}
+	\end{minipage}
+\end{figure}
 
 \subsection{Jensen Cosine WEC Step (3)}
-\todo{Spencer}
+\todo{Spencer: still working on it}
 Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
 
 \section{Applying WEC to the FLORIS Wake Model}
@@ -377,6 +369,7 @@ The addition of $\xi$ allows manipulation of the shape of the design space. By i
 \end{minipage} 
 \end{figure}
 %
+\todo{Should the x-axis on \cref{fig:smoothing_visualization} be Y/Dr rather than X/Dr?}
 
 Local optima scattered throughout the design space are reduced as the spaces between wakes are filled with mixed wakes. Larger values of $\xi$ allow the smaller local optima to disappear completely. Smaller values of $\xi$ allow for more accurate wake widths but with an increase in the number and magnitude of local optima. When $\xi$ is set to 1, \cref{eq:bpa_relax} reduces to \cref{eq:bpa}.
 
