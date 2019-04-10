@@ -5,6 +5,7 @@
 \usepackage{stackengine}
 \usepackage{subfigure}
 \usepackage{float}
+\usepackage{placeins}
 
 % algorithm packages
 %\usepackage{algpseudocode}
@@ -184,10 +185,13 @@ Now that an expression for $z$ has been derived, the angle $\theta$ may be obtai
 \begin{figure}[h]
     \centering
     \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram1}
+%        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram1}
+		\missingfigure[figwidth=6cm]{Jensen diagram 1}
+%        \includegraphics[demo, width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{dummy}
     }
     \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram2}
+%        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram2}
+			\missingfigure[figwidth=6cm]{Jensen diagram 1}
     }
     \caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
     \label{fig:JensenDiagrams}
