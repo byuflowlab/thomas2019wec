@@ -77,7 +77,7 @@ The Jensen-Cosine wake model is used to calculate the velocity deficit of the wi
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
-    \frac{V}{U} = 1 - 2af_\theta \bigg(\frac{r_0}{r_0 + \alpha x} \bigg)^2
+    \frac{V}{U} = 1 - 2a \bigg(\frac{f_\theta r_0}{r_0 + \alpha x} \bigg)^2
     \label{eq:JensenVelocityDeficit}
 \end{equation}
 
@@ -157,30 +157,43 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 
 WEC may be applied to the Jensen Cosine wake model by applying a relaxation factor to the radius of the wake, as seen in \cref{eq:JensenWECWakeWidth}. This relaxation factor allows the wake's spread to be increased or decreased without affecting the velocity deficit at the center of the wake.
 
-% Enter the equation where the relaxation factor is being inserted into the Jensen Cosine model.
-\begin{equation}
-    R = \xi r_0
-    \label{eq:JensenWECWakeWidth}
-\end{equation}
+
 
 In \cref{eq:JensenWECWakeWidth}, $r$ represents the rotor radius of wind turbine and $R$ represents the radius of the wake at the wind turbine scaled by the value of $\xi$, the relaxation factor.
 
-Using \cref{eq:JensenWECWakeWidth} as the definition of the wake width, the distance $z$ between the wake-generating turbine and the theoretical starting point of the wake (i.e., the wake's fulcrum) may be determined as a function of $\xi$. This distance, shown in \cref{eq:FulcrumDistance}, may be obtained through simple trigonometry.
-
-\begin{equation}
-    z = \frac{R}{tan(\beta)}
-    \label{eq:FulcrumDistance}
-\end{equation}
+Using \cref{eq:JensenWECWakeWidth} as the definition of the wake width, the distance $z$ between the wake-generating turbine and the theoretical starting point of the wake (i.e., the wake's fulcrum) may be determined as a function of $\xi$.
 
 Substituting in the definition for $R$ from \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain \cref{eq:WECFulcrumDistance}.
 
-\begin{equation}
-    z = \frac{\xi r_0}{tan(\beta)}
-    \label{eq:WECFulcrumDistance}
-\end{equation}
+
 
 Now that an expression for $z$ has been derived, the angle $\theta$ may be obtained. As seen from \cref{fig:JensenDiagrams}, $\theta$ represents the angle between the wake's center line and the position of the waked turbine.
 
+The variable $\theta$ obtained from \cref{eq:Theta} is used in the cosine factor, as seen in \cref{eq:JensenCosineAdjustment} below.
+
+Substituting \cref{eq:WECFulcrumDistance} into \cref{eq:Theta}, we obtain \cref{eq:ThetaWithFulcrumDist}.
+
+
+
+Combining Eqs. \cref{eq:nFactor} and \cref{eq:ThetaWithFulcrumDist} into \cref{eq:JensenCosineAdjustment} yields \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}.
+
+
+
+
+
+\subsection{Jensen Cosine WEC Step (1)}
+\todo{Spencer}
+Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
+
+The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without affecting the velocity deficit in the center of the wake.
+
+\subsection{Jensen Cosine WEC Step (2)}
+\todo{Spencer}
+Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
+
+This section will break down how the cosine factor, $f_\theta$, is determined, and how a relaxation factor may be applied to spread the wake without impacting the velocity deficit of the wake's center. A figure displaying the relevant parameters is displayed below in \cref{fig:JensenDiagrams}.
+
+% Diagrams showing wake described by Jensen Cosine model.
 \begin{figure}[h]
     \centering
     \subfigure[]{
@@ -193,19 +206,11 @@ Now that an expression for $z$ has been derived, the angle $\theta$ may be obtai
     \label{fig:JensenDiagrams}
 \end{figure}
 
-This angle $\theta$ can be determined using \cref{eq:Theta}, again obtained from \cref{fig:JensenDiagrams} through trigonometry.
-
-% Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
-\begin{equation}
-    \theta = \tan^{-1}\Big( \frac{\Delta y}{\Delta x + z} \Big)
-    \label{eq:Theta}
-\end{equation}
-
-The variable $\theta$ obtained from \cref{eq:Theta} is used in the cosine factor, as seen in \cref{eq:JensenCosineAdjustment} below.
+An equation describing the cosine factor may be seen below in \cref{eq:JensenCosineAdjustment}.
 
 % Enter the Cosine Adjustment Equation to Jensen's Wake Model.
 \begin{equation}
-    f(\theta) = \frac{1 + cos(n\theta)}{2}
+    f_\theta = \frac{1 + cos(n\theta)}{2}
     \label{eq:JensenCosineAdjustment}
 \end{equation}
 
@@ -217,7 +222,39 @@ In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor based u
     \label{eq:nFactor}
 \end{equation}
 
-Substituting \cref{eq:WECFulcrumDistance} into \cref{eq:Theta}, we obtain \cref{eq:ThetaWithFulcrumDist}.
+As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
+
+% Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
+\begin{equation}
+    \theta = \tan^{-1}\Big( \frac{\Delta y}{\Delta x + z} \Big)
+    \label{eq:Theta}
+\end{equation}
+
+In \cref{eq:Theta}, $\Delta x$ and $\Delta y$ represent the spacing between the upwind turbine and the downwind turbine with respect to the $x$ and $y$ coordinate frames, respectively. The variable $z$ represents the distance between the wake's fulcrum and the upwind turbine (see \cref{fig:JensenDiagrams} for a visual representation of these spacing variables). By adjusting the value of $z$, we are able to increase or decrease the wake's spread. An expression for $z$ can be found below in \cref{eq:FulcrumDistance}, which was determined from \cref{fig:JensenDiagrams} using trigonometry.
+
+\begin{equation}
+    z = \frac{r}{tan(\beta)}
+    \label{eq:FulcrumDistance}
+\end{equation}
+
+In \cref{eq:FulcrumDistance}, $r$ represents the radius of the wake at any point $x$ downwind of the upwind turbine. This is where the wake spread may be directly adjusted by applying a relaxation factor, as seen below in \cref{eq:JensenWECWakeWidth}.
+
+% Enter the equation where the relaxation factor is being inserted into the Jensen Cosine model.
+\begin{equation}
+    r = \xi r_0
+    \label{eq:JensenWECWakeWidth}
+\end{equation}
+
+In \cref{eq:JensenWECWakeWidth}, $\xi$ represents the relaxation factor from WEC, and $r_0$ represents the rotor radius, and $r$ represents the radius of the wake at the wind turbine. As seen in the above equation, the radius of the wake may be directly scaled by the relaxation factor from WEC.
+
+The relaxation factor, $\xi$, may be propagated back into the original Jensen Cosine equation, \cref{eq:JensenVelocityDeficit}. By substituting \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain \cref{eq:WECFulcrumDistance}, a representation of the new fulcrum distance as adjusted by the relaxation factor, $\xi$.
+
+\begin{equation}
+    z = \frac{\xi r_0}{tan(\beta)}
+    \label{eq:WECFulcrumDistance}
+\end{equation}
+
+This new fulcrum distance, \cref{eq:WECFulcrumDistance}, may be substituted into \cref{eq:Theta} to obtain \cref{eq:ThetaWithFulcrumDist} below.
 
 % Insert equation: sub z equation into theta equation.
 \begin{equation}
@@ -225,15 +262,15 @@ Substituting \cref{eq:WECFulcrumDistance} into \cref{eq:Theta}, we obtain \cref{
     \label{eq:ThetaWithFulcrumDist}
 \end{equation}
 
-Combining Eqs. \cref{eq:nFactor} and \cref{eq:ThetaWithFulcrumDist} into \cref{eq:JensenCosineAdjustment} yields \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}.
+This new equation for $\theta$, \cref{eq:ThetaWithFulcrumDist}, may be substituted into \cref{eq:JensenCosineAdjustment} to obtain \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}, the cosine factor adjusted by WEC.
 
 % Insert equation: sub n and theta into cosine factor.
 \begin{equation}
-    f(\theta) = \frac{1}{2} \Bigg( 1 + cos \Bigg[ \frac{\pi}{\beta} \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
+    f_\theta = \frac{1}{2} \Bigg( 1 + cos \Bigg[ \frac{\pi}{\beta} \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
     \label{eq:JensenCosineAdjustmentWithThetaAndNFactor}
 \end{equation}
 
-Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} into \cref{eq:JensenVelocityDeficit}, we obtain the final equation for calculating the velocity deficit with the Jensen-Cosine model (\cref{eq:JensenVelocityDeficitCombined}).
+Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} into \cref{eq:JensenVelocityDeficit}, we obtain the final equation for calculating the velocity deficit with the Jensen Cosine model (\cref{eq:JensenVelocityDeficitCombined}).
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
@@ -242,14 +279,6 @@ Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} int
 \end{equation}
 
 Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake width without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center.
-
-\subsection{Jensen Cosine WEC Step (1)}
-\todo{Spencer}
-Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
-
-\subsection{Jensen Cosine WEC Step (2)}
-\todo{Spencer}
-Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
 
 \subsection{Jensen Cosine WEC Step (3)}
 \todo{Spencer}
@@ -304,10 +333,15 @@ We applied \cref{eq:FLORISWECWakeWidth} to all wake zones within the FLORIS wake
 
 \subsection{FLORIS WEC Step (1)}
 \todo{Spencer}
+Identify where the magnitude and spread of the wake are within the FLORISSE equation.
+
 \subsection{FLORIS WEC Step (2)}
 \todo{Spencer}
+Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
+
 \subsection{FLORIS WEC Step (3)}
 \todo{Spencer}
+Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
 
 \section{Applying WEC to the Bastankhah and Port\'e-Agel Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Bastankhah and Port\'e-Agel wake model.  
