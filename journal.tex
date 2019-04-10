@@ -73,11 +73,11 @@ Because of the general nature of the proposed method, it could theoretically be 
 
 \section{Wake and Wind Farm Models}
 \subsection{The Jensen Cosine Wake Model}
-The Jensen-Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance of the air passing through a wind turbine. The equation for the Jensen-Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
+The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
-    \frac{V}{U} = 1 - 2a \bigg(\frac{f_\theta r_0}{r_0 + \alpha x} \bigg)^2
+    \frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \bigg(\frac{f_\theta r_0}{r_0 + \alpha x} \bigg)^2
     \label{eq:JensenVelocityDeficit}
 \end{equation}
 
@@ -165,7 +165,7 @@ The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the w
 \todo{Spencer}
 %Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
 
-This section will break down how the cosine factor, $f_\theta$, is determined, and how a relaxation factor may be applied to spread the wake without impacting the velocity deficit of the wake's center. A figure displaying the relevant parameters is displayed below in \cref{fig:JensenDiagrams}.
+This section will break down how the cosine factor, $f_\theta$, is determined, and how a relaxation factor may be applied to spread the wake without impacting the velocity deficit of the wake's center. A figure displaying the relevant parameters is displayed below in \cref{fig:JensenDiagrams}, and an equation describing the cosine factor may be seen below in \cref{eq:JensenCosineAdjustment}.
 
 % Diagrams showing wake described by Jensen Cosine model.
 \begin{figure}[h]
@@ -179,8 +179,6 @@ This section will break down how the cosine factor, $f_\theta$, is determined, a
     \caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
     \label{fig:JensenDiagrams}
 \end{figure}
-
-An equation describing the cosine factor may be seen below in \cref{eq:JensenCosineAdjustment}.
 
 % Enter the Cosine Adjustment Equation to Jensen's Wake Model.
 \begin{equation}
@@ -196,7 +194,7 @@ In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor based u
     \label{eq:nFactor}
 \end{equation}
 
-As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
+As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line, the wake's fulcrum, and the downwind turbine's location. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
 
 % Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
 \begin{equation}
@@ -248,11 +246,11 @@ Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} int
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
-    \frac{V}{U} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
+    \frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
     \label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
-Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. Figure \cref{fig:JensenLocalOptSmoothed} below confirms this prediction and confirms that local optima can be smoothed out through WEC for the Jensen Cosine model.
+Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. Figure (\cref{fig:smoothing_locations_Jensen,fig:JensenLocalOptSmoothed}) below confirms this prediction and confirms that local optima can be smoothed out through WEC for the Jensen Cosine model.
 
 % Figure describing setup for aep vs crosswind position tests for Jensen
 \begin{figure}[ht]
@@ -261,20 +259,22 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 		\centering
 		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
 		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_visualization}).}
-		\label{fig:smoothing_locations}
+		\label{fig:smoothing_locations_Jensen}
 	\end{minipage}\hspace{1pc}
 % Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{JensenWECMultipleTurbinesAEP}
-		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
+		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations_Jensen}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
 		\label{fig:JensenLocalOptSmoothed}
 	\end{minipage}
 \end{figure}
 
 \subsection{Jensen Cosine WEC Step (3)}
-\todo{Spencer: still working on it}
-Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
+\todo{Spencer}
+%Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
+
+The optimization for the Jensen Cosine model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original Jensen Cosine model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the Jensen Cosine model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1, 1]$. The selection of relaxation factors should be the topic of future research.
 
 \section{Applying WEC to the FLORIS Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
@@ -326,6 +326,8 @@ We applied \cref{eq:FLORISWECWakeWidth} to all wake zones within the FLORIS wake
 \subsection{FLORIS WEC Step (1)}
 \todo{Spencer}
 Identify where the magnitude and spread of the wake are within the FLORISSE equation.
+
+After searching through 
 
 \subsection{FLORIS WEC Step (2)}
 \todo{Spencer}
@@ -468,41 +470,40 @@ where $(x_c,y_c)$ is the location of the center of the wind farm, and $R_b$ is t
 \todo{Jared: figure out how to best present these results now that we have 3 models}
 We compared optimized AEP, as well as the number of function calls required, for each of the cases discussed previously. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). Results for each test case will be presented and discussed in the following sections.
 
-\subsection{Case 0 Results}
-Results for case 0 can be seen in \cref{fig:WECAEPFigures}. As the relaxation factor increases in the left-hand plots, the wake's effects are felt farther from the wake center (i.e., the wake expands). An important feature displayed by the right-hand column is that the local maxima are being smoothed out. This key result allows gradient-based optimizations to avoid converging on most local maxima.
+%\subsection{Case 0 Results}
+%Results for case 0 can be seen in \cref{fig:WECAEPFigures}. As the relaxation factor increases in the left-hand plots, the wake's effects are felt farther from the wake center (i.e., the wake expands). An important feature displayed by the right-hand column is that the local maxima are being smoothed out. This key result allows gradient-based optimizations to avoid converging on most local maxima.
 
-\todo{Spencer: may need to update some of these figures}
+%\todo{Spencer: may need to update some of these figures}
 % Enter subfigures of AEP vs. crosswind position displaying widening effects of WEC.
 % \begin{figure}[htbp!]
-\begin{figure}[H]
-    \centering
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECSingleTurbineAEP.eps}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECMultipleTurbinesAEP.eps}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECSingleTurbineAEP.eps}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECMultipleTurbinesAEP.eps}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECSingleTurbineAEP.eps}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECMultipleTurbinesAEP.eps}
-    }
-    \caption{Plots displaying the effects the WEC approach has on wake width. Plots (a) and (b) display the Jensen-Cosine model, plots (c) and (d) display the FLORIS model, and (e) and (f) display the BPA model.}
-    \label{fig:WECAEPFigures}
-\end{figure}
+%\begin{figure}[H]
+%    \centering
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECSingleTurbineAEP.eps}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{JensenWECMultipleTurbinesAEP.eps}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECSingleTurbineAEP.eps}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{FLORISWECMultipleTurbinesAEP.eps}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECSingleTurbineAEP.eps}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.4\textwidth, trim={0cm 1cm 0cm 1cm}]{BastankhahWECMultipleTurbinesAEP.eps}
+%    }
+%    \caption{Plots displaying the effects the WEC approach has on wake width. Plots (a) and (b) display the Jensen-Cosine model, plots (c) and (d) display the FLORIS model, and (e) and (f) display the BPA model.}
+%    \label{fig:WECAEPFigures}
+%\end{figure}
 
-\subsection{Case 0.5 Results}
-\todo{Jared: I wanted to include the small-scale optimization results as well. This case study is similar to case 0, but now instead of simply obtaining the AEP vs crosswind position, we're optimizing the downwind turbine's coordinates while holding the upwind turbines' coordinates constant.}
+\subsection{Case 0 Results}
 \todo{Spencer: finish this section}
 
-Results for case 0.5 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
+Results for case 0 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
 
 \todo{refer to notes from Jared in updating these figures.}
 \begin{figure}[H]
@@ -529,8 +530,8 @@ Results for case 0.5 are displayed below. Note that optimizations without WEC fa
     \label{fig:SmallScaleOptimizations}
 \end{figure}
 
-\subsection{Case 0.75 Results}
-Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
+%\subsection{Case 0.75 Results}
+%Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
 
 \subsection{Case 1 Results}
 Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).
@@ -625,7 +626,7 @@ It may be noted that the function calls required for each method to solve case 2
 \section{Discussion}
 In the WFLO problem, we are looking for high AEP values, a tight distribution, and relatively few function calls. The benefit of high AEP means that the resulting wind farm will be more efficient, likely leading to a reduced cost of energy. A tight distribution means that the method is consistent, that the optimized solution is independent of the starting layout. The tighter the distribution the fewer optimizations need to be run before we are confident that we have one of the best wind farm designs we can get. A low number of function calls means that wind farm design can be done more cheaply and that more variables could potentially be tested, which could again lead to a lower cost of energy. Each of the methods tested demonstrated at least one of these characteristics.
 
-The plots from Case 0 indicate that WEC should be achieving its purpose in smoothing out local optima. These results are confirmed in the Case 0.5 test results, where WEC was shown to allow the optimization to escape the local optimum and achieve a better optimum. These combined results suggest that large-scale optimization test results should display similar improvements in optimization performance.
+The results from case 0 appear promising (\cref{fig:SmallScaleOptimizations}). Whereas optimizations without WEC are unable to escape the local optimum between wakes, optimizations with WEC are able to escape the local optimum and achieve better optima. These  results suggest that large-scale optimization test results should display similar improvements in optimization performance.
 
 The relatively high AEP results from NSGA-II on the smaller case, compared to the relatively low AEP results of NSGA-II on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}. As shown by the high number of function calls for NSGA-II, gradient-free algorithms also tend to take a relatively long time to run. These weakness are the main drivers for increasing interest in gradient-based algorithms.
 
@@ -636,7 +637,8 @@ The high values of AEP and lower standard deviation of AEP compared to SNOPT wit
 \section{Conclusion}
 The WEC proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested WEC on two WFLO problems, one with 16 turbines and one with 38 turbines. Results using WEC show a $4\%$ mean optimized AEP improvement compared to gradient-based optimization without WEC for both test cases. A gradient-free algorithm had a mean optimized AEP that was $1\%$ higher than WEC for the 16-turbine case, but WEC resulted in a $10\%$ higher mean optimized AEP compared to a gradient-free optimization method for the 38-turbine problem.
 
-Applying WEC to other turbine wake models produced mixed results. Preliminary tests and small-scale optimization tests resulted in promising results that seemed to predict desirable performance in large-scale optimizations. However, the large-scale optimizations did not return similarly promising results, and seemed to indicate even undesirable results. Further work will be necessary to determine the root cause of these unexpected issues.
+\todo{Jared: what do you think of this paragraph?}
+Applying WEC to other turbine wake models (e.g., Jensen Cosine and FLORIS) produced mixed results. Small-scale optimization tests resulted in promising results that seemed to predict desirable performance in large-scale optimizations. However, the large-scale optimizations did not return similarly promising results, and seemed to indicate even undesirable results. Further work will be necessary to determine the root cause of these unexpected issues.
 
 %Future work should investigate potential improvements and best practices for WEC, apply WEC to other wake models, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
 
