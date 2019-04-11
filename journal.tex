@@ -73,16 +73,51 @@ By spreading the wakes, we can effectively fill in the gaps between wakes so tha
 Because of the general nature of the proposed method, it could theoretically be applied to a range of wake models. In this study we have applied WEC to the cosine version of the Jensen model \cite{jensen1983}, the FLORIS model \cite{gebraad2014,thomas2017-Improving-FLORIS}, and the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}.
 
 \section{Wake and Wind Farm Models}
+We have applied and tested WEC using three wake models: Jensen Cosine, FLORIS, and the Bastankhah and Port\'e-Agel wake model. We also used various other models necessary for combining wakes and calculating wind farm AEP.
+
 \subsection{The Jensen Cosine Wake Model}
-The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
+The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance \todo{I think it was actually derived from mass balance, but let's check} of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
     \frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \bigg(\frac{f_\theta r_0}{r_0 + \alpha x} \bigg)^2
     \label{eq:JensenVelocityDeficit}
 \end{equation}
+%
+In \cref{eq:JensenVelocityDeficit}, $V$ represents the wind velocity at any distance $x$ downstream of the waking turbine, $U$ represents the free-stream wind velocity, $r_0$ represents the radius of the wind turbine, $a$ represents the axial induction (ideal value of $a = 1/3$), and $f_\theta$ is the cosine factor defined in \cref{eq:JensenCosineAdjustment}.
+%
+% Enter the Cosine Adjustment Equation to Jensen's Wake Model.
+\begin{equation}
+f_\theta = \frac{1 + cos(n\theta)}{2}
+\label{eq:JensenCosineAdjustment}
+\end{equation}
+%
+In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor derived from the wake spreading angle, $\beta$, as shown in \cref{fig:JensenDiagrams}. The value for $n$ can be calculated as in \cref{eq:nFactor}, where $\beta$ is in units of radians.
+%
+% Equation to determine the factor n in the Jensen Cosine factor.
+\begin{equation}
+n = \pi / \beta
+\label{eq:nFactor}
+\end{equation}
+%
+The wake spreading angle used by N.~O.~Jensen was $\beta = 20 \degree$  \cite{jensen1983}. 
 
-In \cref{eq:JensenVelocityDeficit}, $V$ represents the wind velocity at any distance $x$ downstream of the waking turbine, $U$ represents the free-stream wind velocity, $f_\theta$ represents the cosine factor (see \cref{eq:JensenCosineAdjustment}), $r_0$ represents the radius of the wind turbine, and $a$ represents the axial induction (ideal value of $a = 1/3$).
+% Diagrams showing wake described by Jensen Cosine model.
+\todo{I think the below figure could be made into a single figure and be more easily read. Remove turbine dots. Put in correctly scalled top view of a turbine at the upstream turbine location. Replace downstream turbine with small "point of interest" dot. Combine everything.}
+\begin{figure}[h]
+	\centering
+	\subfigure[]{
+		        \includegraphics[width=0.4\textwidth, trim={2.5cm 0cm -1cm 0cm}]{JensenDiagram1}
+%		\missingfigure[figwidth=6cm]{Jensen diagram 1}
+%		        \includegraphics[demo, width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{dummy}
+	}
+	\subfigure[]{
+		        \includegraphics[width=0.4\textwidth, trim={-1cm 0cm 2.5cm 0cm}]{JensenDiagram2}
+%		\missingfigure[figwidth=6cm]{Jensen diagram 1}
+	}
+	\caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
+	\label{fig:JensenDiagrams}
+\end{figure}
 
 \subsection{The FLORIS Wake Model}
 The FLORIS wake model was developed by Gebraad et al. based on the Jensen Cosine wake model \cite{Gebraad2014}. It is similar to the Jensen Cosine model in that the velocity deficit is constant within certain regions of the wake; however, whereas the Jensen Cosine model describes turbines as having a single velocity for the whole cross-section of the wake, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit (see \cref{fig:FLORISDiagram}) \cite{Gebraad2014}. The FLORIS wake model contains many parameters that are tuned based on datasets produced by Large-Eddy Simulations (LES) run on the Simulator for Off/Onshore Wind Farm Applications (SOWFA) \cite{Fleming2015}. For this comparison study, we used the FLORIS model after it had been tuned to the National Renewable Energy Laboratories (NREL) 5-MW wind turbine.
@@ -162,58 +197,28 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without affecting the velocity deficit in the center of the wake.
 
-\subsection{Jensen Cosine WEC Step (2)}
 \todo{Spencer}
 %Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
-
-This section will break down how the cosine factor, $f_\theta$, is determined, and how a relaxation factor may be applied to spread the wake without impacting the velocity deficit of the wake's center. A figure displaying the relevant parameters is displayed below in \cref{fig:JensenDiagrams}, and an equation describing the cosine factor may be seen below in \cref{eq:JensenCosineAdjustment}.
-
-% Diagrams showing wake described by Jensen Cosine model.
-\begin{figure}[h]
-    \centering
-    \subfigure[]{
-%        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram1}
-		\missingfigure[figwidth=6cm]{Jensen diagram 1}
-%        \includegraphics[demo, width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{dummy}
-    }
-    \subfigure[]{
-%        \includegraphics[width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{JensenDiagram2}
-			\missingfigure[figwidth=6cm]{Jensen diagram 1}
-    }
-    \caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
-    \label{fig:JensenDiagrams}
-\end{figure}
-
-% Enter the Cosine Adjustment Equation to Jensen's Wake Model.
-\begin{equation}
-    f_\theta = \frac{1 + cos(n\theta)}{2}
-    \label{eq:JensenCosineAdjustment}
-\end{equation}
-
-In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor based upon the boundary angle of the wake spread, $\beta$, as shown in \cref{fig:JensenDiagrams}. This boundary angle has a default value of $\beta = 20 \degree$. The value for $n$ can be calculated below in \cref{eq:nFactor}, where $\beta$ is in units of radians.
-
-% Equation to determine the factor n in the Jensen Cosine factor.
-\begin{equation}
-    n = \pi / \beta
-    \label{eq:nFactor}
-\end{equation}
 
 As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line, the wake's fulcrum, and the downwind turbine's location. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
 
 % Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
 \begin{equation}
-    \theta = \tan^{-1}\Big( \frac{\Delta y}{\Delta x + z} \Big)
-    \label{eq:Theta}
+\theta = \tan^{-1}\Big( \frac{\Delta y}{\Delta x + z} \Big)
+\label{eq:Theta}
 \end{equation}
 
 In \cref{eq:Theta}, $\Delta x$ and $\Delta y$ represent the spacing between the upwind turbine and the downwind turbine with respect to the $x$ and $y$ coordinate frames, respectively. The variable $z$ represents the distance between the wake's fulcrum and the upwind turbine (see \cref{fig:JensenDiagrams} for a visual representation of these spacing variables). By adjusting the value of $z$, we are able to increase or decrease the wake's spread. An expression for $z$ can be found below in \cref{eq:FulcrumDistance}, which was determined from \cref{fig:JensenDiagrams} using trigonometry.
 
 \begin{equation}
-    z = \frac{r}{tan(\beta)}
-    \label{eq:FulcrumDistance}
+z = \frac{r}{tan(\beta)}
+\label{eq:FulcrumDistance}
 \end{equation}
 
-In \cref{eq:FulcrumDistance}, $r$ represents the radius of the wake at any point $x$ downwind of the upwind turbine. This is where the wake spread may be directly adjusted by applying a relaxation factor, as seen below in \cref{eq:JensenWECWakeWidth}.
+In \cref{eq:FulcrumDistance}, $r$ represents the radius of the wake at any point $x$ downwind of the upwind turbine. 
+
+\subsection{Jensen Cosine WEC Step (2)}
+We can directly adjust the wake spread, without impacting the magnitude of the deficit in the center of the wake, by applying a relaxation factor to the $r$ in \cref{eq:FulcrumDistance}, as seen below in \cref{eq:JensenWECWakeWidth}.
 
 % Enter the equation where the relaxation factor is being inserted into the Jensen Cosine model.
 \begin{equation}
@@ -221,7 +226,7 @@ In \cref{eq:FulcrumDistance}, $r$ represents the radius of the wake at any point
     \label{eq:JensenWECWakeWidth}
 \end{equation}
 
-In \cref{eq:JensenWECWakeWidth}, $\xi$ represents the relaxation factor from WEC, and $r_0$ represents the rotor radius, and $r$ represents the radius of the wake at the wind turbine. As seen in the above equation, the radius of the wake may be directly scaled by the relaxation factor from WEC.
+In \cref{eq:JensenWECWakeWidth}, $\xi$ represents the relaxation factor for WEC, and $r_0$ represents the rotor radius.
 
 The relaxation factor, $\xi$, may be propagated back into the original Jensen Cosine equation, \cref{eq:JensenVelocityDeficit}. By substituting \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain \cref{eq:WECFulcrumDistance}, a representation of the new fulcrum distance as adjusted by the relaxation factor, $\xi$.
 
