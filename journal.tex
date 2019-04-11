@@ -76,7 +76,7 @@ Because of the general nature of the proposed method, it could theoretically be 
 We have applied and tested WEC using three wake models: Jensen Cosine, FLORIS, and the Bastankhah and Port\'e-Agel wake model. We also used various other models necessary for combining wakes and calculating wind farm AEP.
 
 \subsection{The Jensen Cosine Wake Model}
-The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from a momentum balance \todo{I think it was actually derived from mass balance, but let's check} of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
+The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from mass conservation of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
@@ -103,20 +103,30 @@ n = \pi / \beta
 The wake spreading angle used by N.~O.~Jensen was $\beta = 20 \degree$  \cite{jensen1983}. 
 
 % Diagrams showing wake described by Jensen Cosine model.
-\todo{I think the below figure could be made into a single figure and be more easily read. Remove turbine dots. Put in correctly scalled top view of a turbine at the upstream turbine location. Replace downstream turbine with small "point of interest" dot. Combine everything. Also, let's make the upwind portion of the wake (from fulcrum to turbine) dashed lines)}
-\begin{figure}[h]
-	\centering
-	\subfigure[]{
-		        \includegraphics[width=0.4\textwidth, trim={2.5cm 0cm -1cm 0cm}]{JensenDiagram1}
+\todo{I think the below figure could be made into a single figure and be more easily read. Remove turbine dots. Put in correctly scaled top view of a turbine at the upstream turbine location. Replace downstream turbine with small "point of interest" dot. Combine everything. Also, let's make the upwind portion of the wake (from fulcrum to turbine) dashed lines)}
+
+% The two old Diagrams with the big red circles.
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[]{
+%		        \includegraphics[width=0.4\textwidth, trim={2.5cm 0cm -1cm 0cm}]{JensenDiagram1}
 %		\missingfigure[figwidth=6cm]{Jensen diagram 1}
 %		        \includegraphics[demo, width=0.4\textwidth, trim={0cm 0cm 0cm 0cm}]{dummy}
-	}
-	\subfigure[]{
-		        \includegraphics[width=0.4\textwidth, trim={-1cm 0cm 2.5cm 0cm}]{JensenDiagram2}
+%	}
+%	\subfigure[]{
+%		        \includegraphics[width=0.4\textwidth, trim={-1cm 0cm 2.5cm 0cm}]{JensenDiagram2}
 %		\missingfigure[figwidth=6cm]{Jensen diagram 1}
-	}
-	\caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
+%	}
+%	\caption{Diagrams describing the overhead geometry of the Jensen Cosine turbine wake model. Two sub-figures are required to more clearly display all the relevant wind farm parameters. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within each subfigure. The dashed line down the middle represents the center line of the wake.}
+%	\label{fig:JensenDiagrams}
+%\end{figure}
+
+% New diagram that combines two subfigures into a single figure.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.6\textwidth]{JensenDiagramNew}
 	\label{fig:JensenDiagrams}
+	\caption{Diagram describing the overhead geometry of the Jensen Cosine turbine wake model. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within the figure. The dashed line down the middle represents the center line of the wake.}
 \end{figure}
 
 \subsection{The FLORIS Wake Model}
@@ -194,12 +204,10 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 %Just as the Bastankah and Port\'e-Agel model could be adjusted with a relaxation factor ($\xi$) \cite{Thomas2018}, so may the Jensen Cosine model. In the BPA wake model, the relaxation factor was applied to the terms describing the turbine's wake width, thereby expanding the wake's width without affecting the rate of wake spread. In a similar manner, the relaxation factor was applied to the radius of the wake width in the Jensen Cosine model (\cref{eq:JensenWECWakeWidth}).
 
 \subsection{Jensen Cosine WEC Step (1)}
-\todo{Spencer}
 %Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without affecting the velocity deficit in the center of the wake.
 
-\todo{Spencer}
 %Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
 
 As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line, the wake's fulcrum, and the downwind turbine's location. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
@@ -280,10 +288,9 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 \end{figure}
 
 \subsection{Jensen Cosine WEC Step (3)}
-\todo{Spencer}
 %Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
 
-The optimization for the Jensen Cosine model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original Jensen Cosine model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the Jensen Cosine model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1, 1]$. \todo{Jensen should only neet to be run a single time for WEC=1} The selection of relaxation factors should be the topic of future research.
+The optimization for the Jensen Cosine model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original Jensen Cosine model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the Jensen Cosine model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
 \section{Applying WEC to the FLORIS Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
@@ -297,7 +304,6 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 %\end{figure}
 
 \subsection{FLORIS WEC Step (1)}
-\todo{Spencer}
 %\textbf{Identify where the magnitude and spread of the wake are within the FLORISSE equation.}
 
 We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen Cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{Gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
@@ -310,7 +316,6 @@ We began by determining where in the FLORIS wake model to apply the relaxation f
 In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width.
 
 \subsection{FLORIS WEC Step (2)}
-\todo{Spencer}
 %\textbf{Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.}
 
 If we applied the relaxation factor to $k_e$ or $m_{e,q}$ in \cref{eq:FLORISWakeWidth}, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ in \cref{eq:FLORISWakeWidth} to obtain \cref{eq:FLORISWECWakeWidth}.
@@ -363,10 +368,9 @@ When we applied \cref{eq:FLORISWECWakeDiameterPiecewise} to the FLORIS wake mode
 \end{figure}
 
 \subsection{FLORIS WEC Step (3)}
-\todo{Spencer}
 %\textbf{Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.}
 
-The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1, 1]$. \todo{wec should only equal 1 once}The selection of relaxation factors should be the topic of future research.
+The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
 \section{Applying WEC to the Bastankhah and Port\'e-Agel Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Bastankhah and Port\'e-Agel wake model.  
@@ -532,8 +536,6 @@ We compared optimized AEP, as well as the number of function calls required, for
 %\end{figure}
 
 \subsection{Case 0 Results}
-\todo{Spencer: finish this section}
-
 Results for case 0 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
 
 \todo{refer to notes from Jared in updating these figures.}
