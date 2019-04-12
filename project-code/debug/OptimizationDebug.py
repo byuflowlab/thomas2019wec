@@ -54,7 +54,7 @@ def get_turbine_position_data(prob):
     return turbX, turbY
 
 
-def make_contour_plot(prob, db=None, res=25, figSize=(10, 10)):
+def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25, figSize=(10, 10)):
 
     x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
     y = np.linspace(-5.0*prob['rotorDiameter'][0], 5.0*prob['rotorDiameter'][0], res)
@@ -74,7 +74,7 @@ def make_contour_plot(prob, db=None, res=25, figSize=(10, 10)):
 
         prob['turbineX'][2] = XX[i]
         prob['turbineY'][2] = YY[i]
-        prob['model_params:wec_factor'] = 1.0
+        # prob['model_params:wec_factor'] = 1.0
 
         prob.run_once()
 
@@ -90,47 +90,49 @@ def make_contour_plot(prob, db=None, res=25, figSize=(10, 10)):
     # plt.hold(True)
     # print(db.keys())
     if db is not None:
-        # keepGeneratingPoints = True
-        # i = 1
-        # turbX = np.array([])
-        # turbY = np.array([])
+        keepGeneratingPoints = True
+        i = 1
+        turbX = np.array([])
+        turbY = np.array([])
 
-        # while keepGeneratingPoints:
-        #
-        #     try:
-        #
-        #         # print('try block started')
-        #
-        #         # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
-        #         # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
-        #         # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
-        #         # key = 'rank0:SNOPT|%i' % i
-        #         # turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
-        #         # turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
-        #
-        #         # print('turbX and turbY calculated w/o error')
-        #
-        #         # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
-        #         # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
-        #         # 'while' loop.
-        #         # i += 1
-        #
-        #     except Exception as e:
-        #
-        #         # print('error message:', repr(e))
-        #
-        #         # print('finished cycling through database db')
-        #
-        #         keepGeneratingPoints = False
+        while keepGeneratingPoints:
+
+            try:
+
+                print('try block started')
+
+                # Add the next turbineX and turbineY values from the database (db) to turbX and turbY.
+                # turbX = turbX.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineX'] % i)
+                # turbY = turbY.extend(db['rank0:SNOPT|%i']['Unknowns']['turbineY'] % i)
+                key = 'rank0:SNOPT|%i' % i
+                turbX = np.append(turbX, db[key]['Unknowns']['turbineX'][2])
+                turbY = np.append(turbY, db[key]['Unknowns']['turbineY'][2])
+
+                print('turbX and turbY calculated w/o error')
+
+                # Increment the counter variable. Because this is in a 'try-except' block of code, I don't need to
+                # write a checker. Once we've gone past the last index for the database, it'll automatically exit the
+                # 'while' loop.
+                i += 1
+
+            except Exception as e:
+
+                # print('error message:', repr(e))
+
+                # print('finished cycling through database db')
+
+                keepGeneratingPoints = False
 
         # Get turbX and turbY from the function I defined above.
-        turbX, turbY = get_turbine_position_data(prob)
-        # print('turbX:', turbX)
-        # print('turbY:', turbY)
+        # turbX, turbY = get_turbine_position_data(prob)
+        print('turbX:', turbX)
+        print('turbY:', turbY)
 
         plt.plot(turbX, turbY, 'k-', label='Turbine Path')
-        plt.plot(turbX[0], turbY[0], 'r*', label='Initial Position')
-        plt.plot(turbX[-1], turbY[-1], 'b^', label='Final Position')
+        # plt.plot(turbX[0], turbY[0], 'r*', label='Initial Position')
+        plt.plot(turbinePosPreOpt[0], turbinePosPreOpt[1], 'r*', label='Initial Position')
+        # plt.plot(turbX[-1], turbY[-1], 'b^', label='Final Position')
+        plt.plot(turbinePosPostOpt[0], turbinePosPostOpt[1], 'b^', label='Final Position')
         # plt.legend(framealpha=0.0, frameon=False)
         plt.xlabel('X Coordinate (m)')
         plt.ylabel('Y Coordinate (m)')
@@ -208,8 +210,9 @@ if __name__ == "__main__":
 
         # Use a vector of expansion factors if WEC is being used.
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
-                                      1.50, 1.25, 1.0, 1.0])
+        # expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
+        #                               1.50, 1.25, 1.0, 1.0])
+        expansion_factors = np.array([3.0, 2.0, 1.0])
         # expansion_factors = np.array([3.0])
         # expansion_factors = np.array([5.0])
 
@@ -563,10 +566,12 @@ if __name__ == "__main__":
     for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):
 
         # Pass the current relaxation factor to the problem.
-        # TODO: Unify WEC relaxation factor name to: wec_factor
+
+        # DONE: Unify WEC relaxation factor name to: wec_factor
         # BPA currently has the WEC relaxation factor as: 'model_params:opt_exp_fac'
         # FLORIS currently has: 'model_params:WECRelaxationFactor'
         # Jensen currently has: 'model_params:relaxationFactor'
+
         # TODO: Check to see if the other wake models are behaving like Jensen (which has acted appropriately so
         # far). If they don't, figure out why; if they do behave appropriately, then we know that the problem with
         # the optimization results isn't with the models. Save ALL figures you generate, even if they're bad,
@@ -582,16 +587,30 @@ if __name__ == "__main__":
         # large scale optimizations.
         prob['model_params:wec_factor'] = expansion_factor
 
+        # Save the pre-optimization turbine coordinates OF THE DOWNWIND TURBINE.
+        turbineXPreOpt = prob['turbineX'][2]
+        turbineYPreOpt = prob['turbineY'][2]
+        turbinePosPreOpt = np.array([turbineXPreOpt, turbineYPreOpt])
+
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
         prob.run()
         # prob.run_once()
         mpi_print(prob, 'end %s run' % (MODELS[model]))
 
+        # Save post-optimization turbine coordinates
+        turbineXPostOpt = prob['turbineX'][2]
+        turbineYPostOpt = prob['turbineY'][2]
+        turbinePosPostOpt = np.array([turbineXPostOpt, turbineYPostOpt])
+
         print('expansion factor: ', prob['model_params:wec_factor'])
 
         db = sqlitedict.SqliteDict('AEP', 'iterations')
-        print(db.keys())
+        # print(db.keys())
+
+        # Try plotting the contour plot for each relaxation factor
+        figSize = (10, 10)
+        make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=db, res=25, figSize=figSize)
 
     # Save the most recent AEP result.
     prob['model_params:wec_factor'] = 1.
@@ -643,4 +662,4 @@ if __name__ == "__main__":
     # print(db['rank0:SNOPT|3']['Unknowns'].keys())
 
     # Create the contour plot.
-    make_contour_plot(prob, db=db, res=10, figSize=figSize)
+    # make_contour_plot(prob, db=db, res=10, figSize=figSize)
