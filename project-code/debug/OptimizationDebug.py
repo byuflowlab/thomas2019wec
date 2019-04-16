@@ -84,8 +84,13 @@ def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25
     # Create contour plot.
     AEP = AEP.reshape(X.shape)
     fig = plt.figure(figsize=figSize)
-    plt.contourf(X, Y, AEP, cmap='Blues_r')
+    ax = fig.add_subplot(1, 1, 1)
+    contours = ax.contourf(X, Y, AEP, cmap='Blues_r')
+    # contours = ax.pcolormesh(X, Y, AEP, cmap='Blues_r')
     # plt.contour(X, Y, AEP)
+
+    # Add colorbar to contour plot
+    colorBar = fig.colorbar(contours)
 
     # plt.hold(True)
     # print(db.keys())
@@ -138,6 +143,11 @@ def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25
         plt.ylabel('Y Coordinate (m)')
         # plt.scatter(turbX, turbY)
 
+    # Hide the right and top axes. Turn off the tick marks on these axes.
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+
     plt.show()
 
     return
@@ -186,7 +196,7 @@ if __name__ == "__main__":
     BPA = 1
     JENSEN = 2
     LARSEN = 3
-    model = BPA
+    model = JENSEN
     print(MODELS[model])
 
     # TODO: tapenade for FLORIS. Re-run large-scale optimizations for JENSEN and BPA (since they're both working).
@@ -212,7 +222,9 @@ if __name__ == "__main__":
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
         # expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
         #                               1.50, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([3.0, 2.0, 1.0])
+        expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
+                                      1.50, 1.25, 1.0])
+        # expansion_factors = np.array([3.0, 2.0, 1.0])
         # expansion_factors = np.array([3.0])
         # expansion_factors = np.array([5.0])
 
@@ -591,6 +603,7 @@ if __name__ == "__main__":
         turbineXPreOpt = prob['turbineX'][2]
         turbineYPreOpt = prob['turbineY'][2]
         turbinePosPreOpt = np.array([turbineXPreOpt, turbineYPreOpt])
+        print(turbinePosPreOpt)
 
         # run the problem
         mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -602,15 +615,20 @@ if __name__ == "__main__":
         turbineXPostOpt = prob['turbineX'][2]
         turbineYPostOpt = prob['turbineY'][2]
         turbinePosPostOpt = np.array([turbineXPostOpt, turbineYPostOpt])
+        print(turbinePosPostOpt)
 
         print('expansion factor: ', prob['model_params:wec_factor'])
 
         db = sqlitedict.SqliteDict('AEP', 'iterations')
         # print(db.keys())
 
-        # Try plotting the contour plot for each relaxation factor
-        figSize = (10, 10)
-        make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=db, res=25, figSize=figSize)
+        # Only create contour plot for specified relaxation factors.
+        relaxationFactorsToPlot = np.array([3.0, 2.0, 1.0])
+        if prob['model_params:wec_factor'] in relaxationFactorsToPlot:
+
+            # Try plotting the contour plot for each relaxation factor
+            figSize = (10, 10)
+            make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=db, res=10, figSize=figSize)
 
     # Save the most recent AEP result.
     prob['model_params:wec_factor'] = 1.

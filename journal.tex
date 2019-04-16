@@ -84,7 +84,7 @@ The Jensen Cosine wake model is used to calculate the velocity deficit of the wi
     \label{eq:JensenVelocityDeficit}
 \end{equation}
 %
-In \cref{eq:JensenVelocityDeficit}, $V$ represents the wind velocity at any distance $x$ downstream of the waking turbine, $U$ represents the free-stream wind velocity, $r_0$ represents the radius of the wind turbine, $a$ represents the axial induction (ideal value of $a = 1/3$), and $f_\theta$ is the cosine factor defined in \cref{eq:JensenCosineAdjustment}.
+In \cref{eq:JensenVelocityDeficit}, $\Delta \bar{u}$ represents the wind velocity at any distance $x$ downstream of the waking turbine, $\bar{u}_\infty$ represents the free-stream wind velocity, $r_0$ represents the radius of the wind turbine, $\alpha$ represents the wake entrainment constant \cite{jensen1983}, $a$ represents the axial induction (for which we assumed an ideal value of $a = 1/3$), and $f_\theta$ is the cosine factor defined in \cref{eq:JensenCosineAdjustment}.
 %
 % Enter the Cosine Adjustment Equation to Jensen's Wake Model.
 \begin{equation}
@@ -92,7 +92,7 @@ f_\theta = \frac{1 + cos(n\theta)}{2}
 \label{eq:JensenCosineAdjustment}
 \end{equation}
 %
-In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor derived from the wake spreading angle, $\beta$, as shown in \cref{fig:JensenDiagrams}. The value for $n$ can be calculated as in \cref{eq:nFactor}, where $\beta$ is in units of radians.
+In \cref{eq:JensenCosineAdjustment}, $n$ represents an adjustment factor derived from the wake spreading angle, $\beta$, as shown in \cref{fig:JensenDiagrams}. The value for $n$ can be calculated as in \cref{eq:nFactor}, where $\beta$ is in radians.
 %
 % Equation to determine the factor n in the Jensen Cosine factor.
 \begin{equation}
@@ -103,7 +103,7 @@ n = \pi / \beta
 The wake spreading angle used by N.~O.~Jensen was $\beta = 20 \degree$  \cite{jensen1983}. 
 
 % Diagrams showing wake described by Jensen Cosine model.
-\todo{I think the below figure could be made into a single figure and be more easily read. Remove turbine dots. Put in correctly scaled top view of a turbine at the upstream turbine location. Replace downstream turbine with small "point of interest" dot. Combine everything. Also, let's make the upwind portion of the wake (from fulcrum to turbine) dashed lines)}
+%\todo{I think the below figure could be made into a single figure and be more easily read. Remove turbine dots. Put in correctly scaled top view of a turbine at the upstream turbine location. Replace downstream turbine with small "point of interest" dot. Combine everything. Also, let's make the upwind portion of the wake (from fulcrum to turbine) dashed lines)}
 
 % The two old Diagrams with the big red circles.
 %\begin{figure}[h]
@@ -123,19 +123,20 @@ The wake spreading angle used by N.~O.~Jensen was $\beta = 20 \degree$  \cite{je
 
 % New diagram that combines two subfigures into a single figure.
 \begin{figure}[h]
+	\label{fig:JensenDiagrams}
 	\centering
 	\includegraphics[width=0.6\textwidth]{JensenDiagramNew}
-	\label{fig:JensenDiagrams}
 	\caption{Diagram describing the overhead geometry of the Jensen Cosine turbine wake model. It is assumed the wind is blowing to the right in these figures. The wake's "fulcrum" is represented as the left-most vertex of the wake within the figure. The dashed line down the middle represents the center line of the wake.}
 \end{figure}
 
 \subsection{The FLORIS Wake Model}
-The FLORIS wake model was developed by Gebraad et al. based on the Jensen Cosine wake model \cite{gebraad2014}. It is similar to the Jensen Cosine model in that the velocity deficit is constant within certain regions of the wake; however, whereas the Jensen Cosine model describes turbines as having a single velocity for the whole cross-section of the wake, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit (see \cref{fig:FLORISDiagram}) \cite{gebraad2014}. 
+The FLORIS wake model was developed by Gebraad et al. based on the Jensen Cosine wake model \cite{gebraad2014}. It is similar to the Jensen Tophat model in that the velocity deficit is constant within certain regions of the wake; however, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit (see \cref{fig:FLORISDiagram}) \cite{gebraad2014}.
 
+\todo{not sure best way to clarify this paragraph}
 The FLORIS wake model contains many parameters that are tuned based on datasets produced by Large-Eddy Simulations (LES) run on the Simulator for Off/Onshore Wind Farm Applications (SOWFA) \cite{fleming2015}. For this comparison study, we used the FLORIS model as presented in \cite{thomas2016-improving-floris} after it had been tuned to the NREL 5-MW wind turbine \cite{jonkman2009}.
 
 \subsection{The Bastankhah and Port\'e-Agel Wake Model}
-In the Bastankhah and Port\'e-Agel wake model, the two primary characteristics of the wakes, wake deficit and wake spread, are particularly easy to differentiate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah and Port\'e-Agel wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with part of the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}. 
+In the Bastankhah and Port\'e-Agel wake model, the two primary characteristics of the wakes, wake deficit and wake spread, are particularly easy to differentiate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah and Port\'e-Agel wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with part of the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}.
 %
 \begin{equation}
 	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg(1-\sqrt{1-\frac{C_T \cos{\gamma}}{8 \sigma_y \sigma_z/d^2}}~\Bigg) \exp{\bigg(-0.5\Big(\frac{y-\delta}{\sigma_y}\Big)^2\bigg)}\exp{\bigg(-0.5\Big(\frac{z-z_h}{\sigma_z}\Big)^2\bigg)}
@@ -210,7 +211,8 @@ The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the w
 
 %Apply relaxation factor to the Jensen Cosine equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.
 
-As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line, the wake's fulcrum, and the downwind turbine's location. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
+\todo{trying to cite figure 1 of Jensen overhead diagram, but it's saying "section 3.1" instead. Why?}
+As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line, the wake's fulcrum (see \cref{fig:JensenDiagrams}), and the downwind turbine's location. This angle $\theta$ can be determined using \cref{eq:Theta}, which was obtained from \cref{fig:JensenDiagrams} through trigonometry.
 
 % Equation for calculating theta, the angle between the wake's fulcrum and the wake-receiving turbine.
 \begin{equation}
@@ -433,7 +435,7 @@ For each test case, the population size for NSGA-II was set to be ten times the 
 \subsection{Case 0: Small-Scale Optimization}
 Once the preliminary tests had been completed, case 0 was ran to predict whether the intended effects of WEC would be realized in our large-scale optimizations. In these tests, two turbines were given constant coordinates upwind of a variable downwind turbine, which was placed between the wakes of the two upwind turbines. The coordinates of the variable downwind turbine were optimized to maximize AEP.
 
-This test helped us to determine whether WEC was functioning as we expected. Without WEC, the optimization would leave the downwind turbine in the local optimum between the wakes of the two upwind turbines. However, if WEC was used in the optimization, we would expect the downwind turbine to be relocated outside of the local optimum to a better optimum.
+This test helped us to determine whether WEC was functioning as we expected. Without WEC, the optimization left the downwind turbine in the local optimum between the wakes of the two upwind turbines. However, if WEC was used in the optimization, we would expect the downwind turbine to be relocated outside of the local optimum to a better optimum.
 
 \subsection{Case 1: Small Grid}
 Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters (see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
