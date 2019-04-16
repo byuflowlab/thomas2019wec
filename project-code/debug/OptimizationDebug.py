@@ -37,7 +37,10 @@ import matplotlib.pyplot as plt
 # import cProfile
 import sys
 
-
+"""
+Function to obtain position data from either the prob dictionary or db database (sqlite). Not sure best way of doing
+this, currently (April 16, 2019) not using.
+"""
 def get_turbine_position_data(prob):
 
     # Create vectors to store turbine x and y coordinates.
@@ -54,6 +57,13 @@ def get_turbine_position_data(prob):
     return turbX, turbY
 
 
+"""
+Function to create a contour plot of two upwind turbines and their wakes. Would like to see path of turbine across wake.
+Need some sort of input that contains all of the turbine coordinates (for each turbine for an optimization for one
+relaxation factor), which could be the prob dictionary, vectors that I saved the coordinates into, or the db database
+from sqlite.
+Other important inputs include resolution and figure size.
+"""
 def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25, figSize=(10, 10)):
 
     x = np.linspace(0.0, 10.0*prob['rotorDiameter'][0], res)
@@ -86,8 +96,10 @@ def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25
     fig = plt.figure(figsize=figSize)
     ax = fig.add_subplot(1, 1, 1)
     contours = ax.contourf(X, Y, AEP, cmap='Blues_r')
-    # contours = ax.pcolormesh(X, Y, AEP, cmap='Blues_r')
     # plt.contour(X, Y, AEP)
+
+    # TODO: PJ recommended using pcolormesh instead of contourf. Try it out?
+    # contours = ax.pcolormesh(X, Y, AEP, cmap='Blues_r')
 
     # Add colorbar to contour plot
     colorBar = fig.colorbar(contours)
@@ -133,6 +145,11 @@ def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25
         print('turbX:', turbX)
         print('turbY:', turbY)
 
+        # TODO: This doesn't seem to increase font size. Why?
+        # Make the font size in all figures the following size.
+        plt.rcParams.update({'font.size': 26})
+
+        # Create plots.
         plt.plot(turbX, turbY, 'k-', label='Turbine Path')
         # plt.plot(turbX[0], turbY[0], 'r*', label='Initial Position')
         plt.plot(turbinePosPreOpt[0], turbinePosPreOpt[1], 'r*', label='Initial Position')
@@ -345,10 +362,14 @@ if __name__ == "__main__":
     # turbineX = np.array([turbineXInitialPosition, secondTurbineXInitialPosition, thirdTurbineXInitialPosition])
     # turbineY = np.array([turbineYInitialPosition, secondTurbineYInitialPosition, thirdTurbineYInitialPosition])
 
-    # X-coordinate for downwind turbine. Originally 150.0.
-    downwindTurbineX = 150.0
+    # Initial coordinates for variable downwind turbine.
+    # X-coordinate chosen to be just barely feasible with respect to spacing constraints.
+    # Y-coordinate chosen with the expectation that the optimizer would then move the downwind turbine in a more
+    # positive direction rather than a more negative direction (but either way would be fine).
+    downwindTurbineX = 2.1 * rotor_diameter
     downwindTurbineY = 10.0
 
+    # Package up all turbine coordinates, including the turbine coordinates for the two stationary, upwind turbines.
     turbineX = np.array([0.0, 50.0, downwindTurbineX])
     turbineY = np.array([-150.0, 150.0, downwindTurbineY])
     # turbineY = np.array([-150.0, 150.0, -4.0*rotor_diameter])
@@ -577,14 +598,13 @@ if __name__ == "__main__":
     # Begin loop to optimize AEP for each expansion factor.
     for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):
 
-        # Pass the current relaxation factor to the problem.
-
         # DONE: Unify WEC relaxation factor name to: wec_factor
-        # BPA currently has the WEC relaxation factor as: 'model_params:opt_exp_fac'
-        # FLORIS currently has: 'model_params:WECRelaxationFactor'
-        # Jensen currently has: 'model_params:relaxationFactor'
+        # BPA previously had the WEC relaxation factor as: 'model_params:opt_exp_fac'
+        # FLORIS previously had: 'model_params:WECRelaxationFactor'
+        # Jensen previously had: 'model_params:relaxationFactor'
 
-        # TODO: Check to see if the other wake models are behaving like Jensen (which has acted appropriately so
+        # TODO: Large-scale optimizations are NOT working as expected. Below are some thoughts of how to fix problem.
+        # Check to see if the other wake models are behaving like Jensen (which has acted appropriately so
         # far). If they don't, figure out why; if they do behave appropriately, then we know that the problem with
         # the optimization results isn't with the models. Save ALL figures you generate, even if they're bad,
         # and talk about them in the next lab meeting AND put them in my lab journal.
@@ -597,6 +617,8 @@ if __name__ == "__main__":
         # These results can go into UCUR presentation - BPA has already been shown to work by Jared, verifying WEC
         # works with other models, starting with small scale (like what I'm doing in this python file) and moving to
         # large scale optimizations.
+
+        # Pass the current relaxation factor to the prob dictionary.
         prob['model_params:wec_factor'] = expansion_factor
 
         # Save the pre-optimization turbine coordinates OF THE DOWNWIND TURBINE.
@@ -619,6 +641,7 @@ if __name__ == "__main__":
 
         print('expansion factor: ', prob['model_params:wec_factor'])
 
+        # Store prob info in a "database".
         db = sqlitedict.SqliteDict('AEP', 'iterations')
         # print(db.keys())
 
@@ -626,7 +649,7 @@ if __name__ == "__main__":
         relaxationFactorsToPlot = np.array([3.0, 2.0, 1.0])
         if prob['model_params:wec_factor'] in relaxationFactorsToPlot:
 
-            # Try plotting the contour plot for each relaxation factor
+            # Plot the contour plot for each relaxation factor.
             figSize = (10, 10)
             make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=db, res=10, figSize=figSize)
 
@@ -652,13 +675,17 @@ if __name__ == "__main__":
     # Define the size of the figures.
     figSize = (10, 10)
 
+    # Make the font size in all figures the following size.
+    plt.rcParams.update({'font.size': 26})
+
+    # Create figure
     fig = plt.figure(figsize=figSize)
     ax = fig.add_subplot(1, 1, 1)
     # Create plot of boundary.
-    # circle = plt.Circle((boundary_center_x, boundary_center_y), boundary_radius, fill='none')
     rectangle = plt.Rectangle((0.0, -5.0*rotor_diameter), 10.0*rotor_diameter, 10.0*rotor_diameter, fill=None)
     ax.add_patch(rectangle)
 
+    # TODO: Normalize x and y coordinates by rotor diameter.
     # Plot the resulting turbine locations.
     plt.plot(turbineXInit, turbineYInit, 'r*', label='Initial Position')
     plt.plot(turbineX, turbineY, 'b^', label='Final Position')
@@ -675,8 +702,8 @@ if __name__ == "__main__":
     plt.show()
 
     # Get the recorded info on turbine coordinates.
-    db = sqlitedict.SqliteDict('AEP', 'iterations')
-    print(db.keys())
+    # db = sqlitedict.SqliteDict('AEP', 'iterations')
+    # print(db.keys())
     # print(db['rank0:SNOPT|3']['Unknowns'].keys())
 
     # Create the contour plot.
