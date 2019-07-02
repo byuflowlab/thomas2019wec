@@ -1,3 +1,9 @@
+*.blg
+*.gz
+*.bbl
+*.bbg
+*.aux
+*.log
 *.idea*
 *.png
 *.pdf
