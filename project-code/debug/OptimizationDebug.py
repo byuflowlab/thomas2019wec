@@ -150,11 +150,11 @@ def make_contour_plot(prob, turbinePosPreOpt, turbinePosPostOpt, db=None, res=25
         plt.rcParams.update({'font.size': 26})
 
         # Create plots.
-        plt.plot(turbX, turbY, 'k-', label='Turbine Path')
+        plt.plot(turbX, turbY, 'k-s', label='Turbine Path')
         # plt.plot(turbX[0], turbY[0], 'r*', label='Initial Position')
-        plt.plot(turbinePosPreOpt[0], turbinePosPreOpt[1], 'r*', label='Initial Position')
+        plt.plot(turbinePosPreOpt[0], turbinePosPreOpt[1], 'r*', label='Initial Position', MarkerSize=50)
         # plt.plot(turbX[-1], turbY[-1], 'b^', label='Final Position')
-        plt.plot(turbinePosPostOpt[0], turbinePosPostOpt[1], 'b^', label='Final Position')
+        plt.plot(turbinePosPostOpt[0], turbinePosPostOpt[1], 'b^', label='Final Position', MarkerSize=50)
         # plt.legend(framealpha=0.0, frameon=False)
         plt.xlabel('X Coordinate (m)')
         plt.ylabel('Y Coordinate (m)')
@@ -622,8 +622,8 @@ if __name__ == "__main__":
         prob['model_params:wec_factor'] = expansion_factor
 
         # Save the pre-optimization turbine coordinates OF THE DOWNWIND TURBINE.
-        turbineXPreOpt = prob['turbineX'][2]
-        turbineYPreOpt = prob['turbineY'][2]
+        turbineXPreOpt = np.copy(prob['turbineX'][2])
+        turbineYPreOpt = np.copy(prob['turbineY'][2])
         turbinePosPreOpt = np.array([turbineXPreOpt, turbineYPreOpt])
         print(turbinePosPreOpt)
 
@@ -634,8 +634,8 @@ if __name__ == "__main__":
         mpi_print(prob, 'end %s run' % (MODELS[model]))
 
         # Save post-optimization turbine coordinates
-        turbineXPostOpt = prob['turbineX'][2]
-        turbineYPostOpt = prob['turbineY'][2]
+        turbineXPostOpt = np.copy(prob['turbineX'][2])
+        turbineYPostOpt = np.copy(prob['turbineY'][2])
         turbinePosPostOpt = np.array([turbineXPostOpt, turbineYPostOpt])
         print(turbinePosPostOpt)
 
@@ -646,7 +646,7 @@ if __name__ == "__main__":
         # print(db.keys())
 
         # Only create contour plot for specified relaxation factors.
-        relaxationFactorsToPlot = np.array([3.0, 2.0, 1.0])
+        relaxationFactorsToPlot = np.array([5.0, 3.0, 2.0, 1.0])
         if prob['model_params:wec_factor'] in relaxationFactorsToPlot:
 
             # Plot the contour plot for each relaxation factor.
