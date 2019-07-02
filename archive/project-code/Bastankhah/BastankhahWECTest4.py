@@ -189,6 +189,7 @@ for i in range(relaxationFactor.size):
         # Set the relaxation factor for this iteration.
         # prob['model_params:opt_exp_fac'] = relaxationFactor[i]
         prob['model_params:wec_factor'] = relaxationFactor[i]
+        # prob['model_params:exp_rate_multiplier'] = relaxationFactor[i]*10
 
         # Run OpenMDAO once.
         prob.run_once()
