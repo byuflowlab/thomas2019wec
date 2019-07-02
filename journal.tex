@@ -62,7 +62,10 @@ Current methods seek to avoid local optima by searching the existing design spac
 \section{Wake Expansion Continuation}\label{sec:dsrop}
 The two primary characteristics that simple wake models seek to capture are wake spread and velocity deficit. These characteristics in turn largely determine the shape of the wind farm layout design space. The fluctuations of wind speed as turbines move in and out of the wakes during optimization are primarily responsible for the multi-modal nature of the WFLO problem. 
 
-During optimization, the spaces between wakes translate to locally optimal locations for turbines. However, it is often the case that there are more optimal turbine locations that are not found by the optimizer because the turbines are effectively stuck on the peaks between wakes. The proposed WEC seeks to overcome this problem by temporarily reducing the multi-modality of the design space. The WEC is comprised of three basic steps:
+\subsection{How WEC works}
+During optimization, the spaces between wakes translate to locally optimal locations for turbines. However, it is often the case that there are more optimal turbine locations that are not found by the optimizer because the turbines are effectively stuck in locally optimal locations. The proposed WEC method seeks to overcome the problem of local optima by temporarily reducing the multi-modality of the design space. 
+
+The WEC method is comprised of three basic steps:
 \begin{enumerate}[label=\arabic*)]
 	\item Determine how the wake spread and wake deficit are controlled for the selected model(s).
     \item If necessary, add a factor to the model such that the wake spread can be directly controlled without significantly altering the wake deficit in the center of the wake. (While we assume that it is important to avoid altering the velocity in the wake significantly, this assumption should be the subject of future study.)
@@ -70,10 +73,8 @@ During optimization, the spaces between wakes translate to locally optimal locat
 \end{enumerate}
 By spreading the wakes, we can effectively fill in the gaps between wakes so that a gradient-based optimization algorithm can bypass local optima and proceed to a better solution. Another way of think about this is that by spreading the wakes, more turbines see the influence of each wake, which provides more information to the gradient-based optimization algorithm about the design space through the Jacobian.
 
-Because of the general nature of the proposed method, it could theoretically be applied to a range of wake models. In this study we have applied WEC to the cosine version of the Jensen model \cite{jensen1983}, the FLORIS model \cite{gebraad2014,thomas2017-Improving-FLORIS}, and the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}.
-
 \section{Wake and Wind Farm Models}
-We have applied and tested WEC using three wake models: Jensen Cosine, FLORIS, and the Bastankhah and Port\'e-Agel wake model. We also used various other models necessary for combining wakes and calculating wind farm AEP.
+Because of the general nature of the proposed method, it could theoretically be applied to a range of wake models. In this study we have applied WEC to the cosine version of the Jensen model \cite{jensen1983}, the FLORIS model \cite{gebraad2014,thomas2017-Improving-FLORIS}, and the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}. We also used various other models necessary for combining wakes and calculating wind farm AEP.
 
 \subsection{The Jensen Cosine Wake Model}
 The Jensen Cosine wake model is used to calculate the velocity deficit of the wind at any distance downwind from the waking turbine. The author, N. O. Jensen, derived the equation from mass conservation of the air passing through a wind turbine. The equation for the Jensen Cosine wake model is displayed below in \cref{eq:JensenVelocityDeficit}.
@@ -200,12 +201,53 @@ P_i = \frac{1}{2}\rho A_{r,i}C_P U_i^3
 %
 where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i$, and $C_P$ is the power coefficient. The values of $C_P$ and $C_T$ were determined based on the calculated inflow velocity of each turbine and the power curve and thrust coefficient curve presented in \cite{niayifar2016}.
 
-\section{Applying WEC to the Jensen Cosine Wake Model}
+
+\section{Applying WEC to the  Wake Models}
+
+\subsection{Spreading by Wake Diameter or by Wake Expansion Rate}
+There are two basic ways by which the width of the wind turbine wake can be spread. The simplest is by multiplying the wake diameter at the point of interest by some scaler. This approach maintains the same spreading angle of the wake, but increases the diameter of the wake at every point, including at the turbine rotor. The other way to increase the width of the wake is to increase the spreading angle. Increasing the spreading angle is a little more involved than increasing the dameter because some models have different spreading angles at different points in the wake, or start the spreading of the wake downstream of the turbine, so that increasing the spreading angle of the wake would not increase the wake diameter near the rotor. To test the wake spreading  approaches we implemented both of them in the Bastankhah and Port\'{e}-Agel wakee model.
+
+\subsubsection{Wake Spreading Angle Method}
+
+The BPA model, presented in \cite{bastankhah2016}, is given by \cref{eq:bpa,eq:sigmay,eq:sigmaz}. In order to control the wake spreading angle without impacting the velocity deficit, we need to define two new spreading terms, $\sigma_{y*}$, $\sigma_{z*}$, which we will adjust using the WEC angle multiplier $\xi_k$ as shown in \cref{eq:sigmay*,eq:sigmaz*}.
+\begin{equation}\label{eq:sigmay*}
+\sigma_{y*} = \xi_k k^* (x - x_0) + \frac{D_r \cos{\gamma}}{\sqrt{8}}
+\end{equation}
+%
+\begin{equation}\label{eq:sigmaz*}
+\sigma_{z*} = \xi_k k^* (x - x_0) + \frac{D_r}{\sqrt{8}}
+\end{equation}
+%
+We use these new terms, $\sigma_{y*}$, $\sigma_{z*}$, in the exponential terms of \cref{eq:bpa}, to obtain \cref{eq:bpa_angle}
+\begin{equation}
+\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg(1-\sqrt{1-\frac{C_T \cos{\gamma}}{8 \sigma_y \sigma_z/d^2}}~\Bigg) \exp{\bigg(-0.5\Big(\frac{y-\delta}{\sigma_{y*}}\Big)^2\bigg)}\exp{\bigg(-0.5\Big(\frac{z-z_h}{\sigma_{z*}}\Big)^2\bigg)}
+\label{eq:bpa_angle}
+\end{equation}
+
+Results using this method are forthcoming, but a preliminary investigation of the design space yields the cross-section shown in \cref{fig:wec_angle_cross_section}. In \cref{fig:wec_angle_cross_section} the impact of $\xi_k$ is much more pronounced for the turbine that is further upstream. 
+
+\begin{figure}[ht]
+	\centering
+	\begin{minipage}[t]{0.43\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
+		\caption{Simple design space used to demonstrate the effects of the wake spreading angle relaxation factor, $\xi_k$, on the wind farm layout design space (see \cref{fig:wec_angle_cross_section}).}
+		\label{fig:smoothing_locations_angle}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{0.52\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{angle}
+		\caption{The impact of the wake spread angle relaxation factor, $\xi_k$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_angle}). }
+		\label{fig:wec_angle_cross_section}
+	\end{minipage} 
+\end{figure}
+
+\subsection{Applying WEC to the Jensen Cosine Wake Model}
 In this section we apply WEC, step by step as presented in \cref{sec:dsrop}, to the Jensen Cosine wake model.  
 
 %Just as the Bastankah and Port\'e-Agel model could be adjusted with a relaxation factor ($\xi$) \cite{Thomas2018}, so may the Jensen Cosine model. In the BPA wake model, the relaxation factor was applied to the terms describing the turbine's wake width, thereby expanding the wake's width without affecting the rate of wake spread. In a similar manner, the relaxation factor was applied to the radius of the wake width in the Jensen Cosine model (\cref{eq:JensenWECWakeWidth}).
 
-\subsection{Jensen Cosine WEC Step (1)}
+\subsubsection{Jensen Cosine WEC Step (1)}
 %Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without impacting the velocity deficit in the center of the wake.
@@ -228,13 +270,13 @@ z = \frac{r}{tan(\beta)}
 \label{eq:FulcrumDistance}
 \end{equation} 
 
-\subsection{Jensen Cosine WEC Step (2)}
+\subsubsection{Jensen Cosine WEC Step (2)}
 We can directly adjust the wake spread, without impacting the magnitude of the deficit in the center of the wake, by applying a relaxation factor to the $r$ in \cref{eq:FulcrumDistance}, as seen below in \cref{eq:JensenWECWakeWidth}.
 %
 % Enter the equation where the relaxation factor is being inserted into the Jensen Cosine model.
 \begin{equation}
-    r = \xi r_0
-    \label{eq:JensenWECWakeWidth}
+r = \xi r_0
+\label{eq:JensenWECWakeWidth}
 \end{equation}
 %
 In \cref{eq:JensenWECWakeWidth}, $\xi$ represents the relaxation factor for WEC, and $r_0$ represents the rotor radius.
@@ -242,32 +284,32 @@ In \cref{eq:JensenWECWakeWidth}, $\xi$ represents the relaxation factor for WEC,
 The relaxation factor, $\xi$, may be propagated back into the original Jensen Cosine equation, \cref{eq:JensenVelocityDeficit}. By substituting \cref{eq:JensenWECWakeWidth} into \cref{eq:FulcrumDistance}, we obtain a representation of the new fulcrum distance as adjusted by the relaxation factor, $\xi$, shown in \cref{eq:WECFulcrumDistance}.
 
 \begin{equation}
-    z = \frac{\xi r_0}{tan(\beta)}
-    \label{eq:WECFulcrumDistance}
+z = \frac{\xi r_0}{tan(\beta)}
+\label{eq:WECFulcrumDistance}
 \end{equation}
 
 This new fulcrum distance, \cref{eq:WECFulcrumDistance}, may be substituted into \cref{eq:Theta} to obtain the new angle to the point of  interest as defined in \cref{eq:ThetaWithFulcrumDist}.
 
 % Insert equation: sub z equation into theta equation.
 \begin{equation}
-    \theta = \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg)
-    \label{eq:ThetaWithFulcrumDist}
+\theta = \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg)
+\label{eq:ThetaWithFulcrumDist}
 \end{equation}
 
 This new equation for $\theta$, \cref{eq:ThetaWithFulcrumDist}, may be substituted into \cref{eq:JensenCosineAdjustment} to obtain the cosine factor adjusted by WEC (\cref{eq:JensenCosineAdjustmentWithThetaAndNFactor}).
 
 % Insert equation: sub n and theta into cosine factor.
 \begin{equation}
-    f_\theta = \frac{1}{2} \Bigg( 1 + cos \Bigg[ \frac{\pi}{\beta} \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
-    \label{eq:JensenCosineAdjustmentWithThetaAndNFactor}
+f_\theta = \frac{1}{2} \Bigg( 1 + cos \Bigg[ \frac{\pi}{\beta} \tan^{-1}\Bigg( \frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
+\label{eq:JensenCosineAdjustmentWithThetaAndNFactor}
 \end{equation}
 
 Finally, by substituting \cref{eq:JensenCosineAdjustmentWithThetaAndNFactor} into \cref{eq:JensenVelocityDeficit}, we obtain the final equation for calculating the velocity deficit with the Jensen Cosine model (\cref{eq:JensenVelocityDeficitCombined}).
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
-    \frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
-    \label{eq:JensenVelocityDeficitCombined}
+\frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
+\label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
 Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. Figures \ref{fig:smoothing_locations_Jensen} and \ref{fig:JensenLocalOptSmoothed} demonstrate this behavior and confirm that local optima can be smoothed out through WEC for the Jensen Cosine model.
@@ -281,7 +323,7 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:JensenLocalOptSmoothed}).}
 		\label{fig:smoothing_locations_Jensen}
 	\end{minipage}\hspace{1pc}
-% Figure displaying results from aep vs crosswind position tests for Jensen
+	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{JensenWECMultipleTurbinesAEP}
@@ -290,12 +332,13 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 	\end{minipage}
 \end{figure}
 
-\subsection{Jensen Cosine WEC Step (3)}
+\subsubsection{Jensen Cosine WEC Step (3)}
 %Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.
 
 The optimization for the Jensen Cosine model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original Jensen Cosine model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the Jensen Cosine model becomes more accurate as the relaxation factor is decreased closer to one. For many wind farm optimizations, we have found the following relaxation factors yield good results: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
-\section{Applying WEC to the FLORIS Wake Model}
+
+\subsection{Applying WEC to the FLORIS Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
 
 %\todo{need to get better figure. remember to update caption once new figure inserted.}
@@ -306,7 +349,7 @@ In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to 
 %    \label{fig:FLORISDiagram}
 %\end{figure}
 
-\subsection{FLORIS WEC Step (1)}
+\subsubsection{FLORIS WEC Step (1)}
 %\textbf{Identify where the magnitude and spread of the wake are within the FLORISSE equation.}
 
 We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen Cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
@@ -318,7 +361,7 @@ We began by determining where in the FLORIS wake model to apply the relaxation f
 
 In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width.
 
-\subsection{FLORIS WEC Step (2)}
+\subsubsection{FLORIS WEC Step (2)}
 %\textbf{Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.}
 
 If we applied the relaxation factor to $k_e$ or $m_{e,q}$ in \cref{eq:FLORISWakeWidth}, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ in \cref{eq:FLORISWakeWidth} to obtain \cref{eq:FLORISWECWakeWidth}.
@@ -370,18 +413,18 @@ When we applied \cref{eq:FLORISWECWakeDiameterPiecewise} to the FLORIS wake mode
 	\end{minipage}
 \end{figure}
 
-\subsection{FLORIS WEC Step (3)}
+\subsubsection{FLORIS WEC Step (3)}
 %\textbf{Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.}
 
 The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
-\section{Applying WEC to the Bastankhah and Port\'e-Agel Wake Model}
+\subsection{Applying WEC to the Bastankhah and Port\'e-Agel Wake Model}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Bastankhah and Port\'e-Agel wake model.  
 
-\subsection{Bastankhah and Port\'e-Agel WEC Step (1)}
+\subsubsection{Bastankhah and Port\'e-Agel WEC Step (1)}
 The first parenthetical term of \cref{eq:bpa} defines the magnitude of the velocity deficit. The exponential terms determine the wake spread. The wake spread and velocity deficit are coupled through $\sigma_y$ and $\sigma_z$. However, because the spread and magnitude are expressed in separate terms, it is possible to adjust one without impacting the other. 
 
-\subsection{Bastankhah and Port\'e-Agel WEC Step (2)}
+\subsubsection{Bastankhah and Port\'e-Agel WEC Step (2)}
 We gained independent control of the wake spread from the wake velocity deficit by applying a factor, $\xi$, to $\sigma_y$ and $\sigma_z$ inside the exponential terms of \cref{eq:bpa}, as shown in \cref{eq:bpa_relax}.
 % \begin{equation}
 % 	\frac{\Delta U}{U_{\infty}} = \Bigg(1-\sqrt{1-\frac{C_T}{8\sigma^2/d_0^2}}~\Bigg) \exp{\Bigg(-\frac{1}{2}\bigg(\frac{z-z_h}{\xi\sigma}\bigg)^2\Bigg)}\exp{\Bigg(-\frac{1}{2}\bigg(\frac{y-\delta}{\xi\sigma}\bigg)^2\Bigg)}
@@ -413,7 +456,7 @@ The addition of $\xi$ allows manipulation of the shape of the design space. By i
 
 Local optima scattered throughout the design space are reduced as the spaces between wakes are filled with mixed wakes. Larger values of $\xi$ allow the smaller local optima to disappear completely. Smaller values of $\xi$ allow for more accurate wake widths but with an increase in the number and magnitude of local optima. When $\xi$ is set to 1, \cref{eq:bpa_relax} reduces to \cref{eq:bpa}.
 
-\subsection{Bastankhah and Port\'e-Agel WEC Step (3)}
+\subsubsection{Bastankhah and Port\'e-Agel WEC Step (3)}
 To gain the benefits of WEC without losing the accuracy of the wake model, the optimization must be run multiple times, in a continuation approach, with values of $\xi$ decreasing to unity. The results from optimizing with each value of $\xi$ can then be used to warm start the next optimization. In this way, the gradient-based optimization can intelligently explore the design space and then refine the model to find a final, more accurate, result. The iterative optimizations are generally fairly fast due to starting from the previous optimized solution, so WEC does not necessarily take as long to run as an equal number of independent optimizations. For the optimization results presented in this paper, $\xi$ took on the values [3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]. These values were selected primarily through trial and error. The selection of these values should be investigated in more depth in future work.
 
 \section{Test Cases and Optimization}
@@ -681,43 +724,6 @@ Future work should investigate potential improvements and best practices for WEC
 
 \ack 
 This work was supported by the National Science Foundation under Grant No. 1539384. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
-
-\section*{Appendix: Wake Spreading Angle Method}
-\subsection*{BPA Model}
-
-The BPA model, presented in \cite{bastankhah2016}, is given by \cref{eq:bpa,eq:sigmay,eq:sigmaz}. In order to control the wake spreading angle without impacting the velocity deficit, we need to define two new spreading terms, $\sigma_{y*}$, $\sigma_{z*}$, which we will adjust using the WEC angle multiplier $\xi_k$ as shown in \cref{eq:sigmay*,eq:sigmaz*}.
-\begin{equation}\label{eq:sigmay*}
-\sigma_{y*} = \xi_k k^* (x - x_0) + \frac{D_r \cos{\gamma}}{\sqrt{8}}
-\end{equation}
-%
-\begin{equation}\label{eq:sigmaz*}
-\sigma_{z*} = \xi_k k^* (x - x_0) + \frac{D_r}{\sqrt{8}}
-\end{equation}
-%
-We use these new terms, $\sigma_{y*}$, $\sigma_{z*}$, in the exponential terms of \cref{eq:bpa}, to obtain \cref{eq:bpa_angle}
-\begin{equation}
-\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg(1-\sqrt{1-\frac{C_T \cos{\gamma}}{8 \sigma_y \sigma_z/d^2}}~\Bigg) \exp{\bigg(-0.5\Big(\frac{y-\delta}{\sigma_{y*}}\Big)^2\bigg)}\exp{\bigg(-0.5\Big(\frac{z-z_h}{\sigma_{z*}}\Big)^2\bigg)}
-\label{eq:bpa_angle}
-\end{equation}
-
-Results using this method are forthcoming, but a preliminary investigation of the design space yields the cross-section shown in \cref{fig:wec_angle_cross_section}. In \cref{fig:wec_angle_cross_section} the impact of $\xi_k$ is much more pronounced for the turbine that is further upstream. 
-
-\begin{figure}[ht]
-	\centering
-	\begin{minipage}[t]{0.43\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-		\caption{Simple design space used to demonstrate the effects of the wake spreading angle relaxation factor, $\xi_k$, on the wind farm layout design space (see \cref{fig:wec_angle_cross_section}).}
-		\label{fig:smoothing_locations_angle}
-	\end{minipage}\hspace{1pc}%
-	\begin{minipage}[t]{0.52\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{angle}
-		\caption{The impact of the wake spread angle relaxation factor, $\xi_k$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_angle}). }
-		\label{fig:wec_angle_cross_section}
-	\end{minipage} 
-\end{figure}
-
 
 
 \section*{References}
