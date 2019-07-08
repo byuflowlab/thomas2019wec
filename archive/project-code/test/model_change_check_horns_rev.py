@@ -25,7 +25,7 @@ def niayifar_power_model(u):
 if __name__ == "__main__":
 
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
-    model = 0
+    model = 1
     wake_model_version = 2016
     print(MODELS[model])
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
                                         #4:TI by Niayifar and Porte Agel 2016 using area overlap ratio,
                                         #5:TI by Niayifar and Porte Agel 2016 using area overlap ratio and SM function]
 
-    nRotorPoints = 100
+    nRotorPoints = 1
     # location = 0.735
     # location = (0.7353288267358161 + 0.6398349246319044)/2.
     location = 0.69

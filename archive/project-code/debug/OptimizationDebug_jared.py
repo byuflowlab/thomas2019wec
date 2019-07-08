@@ -224,7 +224,7 @@ if __name__ == "__main__":
     # Tell code whether or not WEC is being used with a boolean variable "relax".
     relax = True
     # relax = False
-
+    relax_type = 'angle'
     # exp. fac. range
     high = 3.
     low = 1.
@@ -236,6 +236,7 @@ if __name__ == "__main__":
         output_directory = './output_files_%s_wec/' % opt_algorithm
 
         # Use a vector of expansion factors if WEC is being used.
+        if relax_type
         # expansion_factors = np.array([3.0, 2.75, 2.50, 2.25, 2.0, 1.75, 1.50, 1.25, 1.0, 1.0])
         # expansion_factors = np.array([5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75, 2.50, 2.25, 2.0, 1.75,
         #                               1.50, 1.25, 1.0, 1.0])
