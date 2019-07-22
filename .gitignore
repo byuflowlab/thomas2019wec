@@ -1,3 +1,6 @@
+*.0
+*.json
+openmdao_checks.*
 *.blg
 *.gz
 *.bbl

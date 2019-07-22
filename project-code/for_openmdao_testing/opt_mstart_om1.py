@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from openmdao.api import Problem, pyOptSparseDriver, view_connections, SqliteRecorder
+from openmdao.api import Problem, pyOptSparseDriver, view_connections, SqliteRecorder, profile
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
@@ -165,14 +165,14 @@ if __name__ == "__main__":
     wake_model_version = 2016
 
     if wec_method == 'diam':
-        output_directory = "./output_files/%s_wec_diam/" % opt_algorithm
+        output_directory = "./output_files/om1/%s_wec_diam/" % opt_algorithm
         relax = True
     elif wec_method == 'angle':
-        output_directory = "./output_files/%s_wec_angle/" % opt_algorithm
+        output_directory = "./output_files/om1/%s_wec_angle/" % opt_algorithm
         relax = True
     elif wec_method == 'none':
         relax = False
-        output_directory = "./output_files/%s/" % opt_algorithm
+        output_directory = "./output_files/om1/%s/" % opt_algorithm
     else:
         raise ValueError('wec_method must be diam, angle, or none')
 
@@ -431,7 +431,7 @@ if __name__ == "__main__":
 
         # set optimizer options
         prob.driver.opt_settings['Verify level'] = 1
-        prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
+        prob.driver.opt_settings['Major optimality tolerance'] = 1e-5
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
@@ -503,8 +503,10 @@ if __name__ == "__main__":
 
         prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
-        prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2,
+                                   active_tol=(2. * rotor_diameter) ** 2)
+        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
+                                   active_tol=2. * rotor_diameter)
 
         # prob.driver.add_objective('obj', scaler=1E0)
     prob.driver.add_objective('obj', scaler=1E-3)
@@ -558,6 +560,7 @@ if __name__ == "__main__":
     #     recorder.options['includes'] = ['turbineX', 'turbineY', 'AEP']
     #     prob.driver.add_recorder(recorder)
 
+    profile.setup(prob)
     print("almost time for setup")
     tic = time.time()
     print("entering setup at time = ", tic)
@@ -670,7 +673,7 @@ if __name__ == "__main__":
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = expansion_factor
                 elif wec_method == 'angle':
-                    prob['model_params:exp_rate_multiplier'] = expansion_factor
+                    prob['model_params:wec_spreading_angle'] = expansion_factor
 
             # run the problem
             mpi_print(prob, 'start %s run' % (MODELS[model]))
@@ -689,7 +692,7 @@ if __name__ == "__main__":
 
             if MODELS[model] is 'BPA':
                 prob['model_params:wec_factor'] = 1.0
-                prob['model_params:exp_rate_multiplier'] = 1.0
+                prob['model_params:wec_spreading_angle'] = 0.0
                 prob['model_params:ti_calculation_method'] = ti_calculation_method
                 prob['model_params:calc_k_star'] = calc_k_star_calc
 
@@ -742,7 +745,10 @@ if __name__ == "__main__":
             prob['model_params:calc_k_star'] = calc_k_star_opt
         tic = time.time()
         # cProfile.run('prob.run()')
+
+        profile.start()
         prob.run()
+        profile.stop()
         # quit()
         toc = time.time()
 
@@ -753,7 +759,7 @@ if __name__ == "__main__":
 
         if MODELS[model] is 'BPA':
             prob['model_params:wec_factor'] = 1.0
-            prob['model_params:exp_rate_multiplier'] = 1.0
+            prob['model_params:wec_spreading_angle'] = 0.0
             prob['model_params:ti_calculation_method'] = ti_calculation_method
             prob['model_params:calc_k_star'] = calc_k_star_calc
 
@@ -784,7 +790,6 @@ if __name__ == "__main__":
 
     toct = time.time()
     total_time = toct - tict
-
     if prob.root.comm.rank == 0:
 
         # print the results

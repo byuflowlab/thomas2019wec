@@ -15,8 +15,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import cProfile
-import sys
+from openmdao.devtools import iprofile
 
 
 def plot_round_farm(turbineX, turbineY, rotor_diameter, boundary_center, boundary_radius, min_spacing=2.,
@@ -89,7 +88,7 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
 
 
 if __name__ == "__main__":
-
+    iprofile.setup()
     ######################### for MPI functionality #########################
     from openmdao.utils import mpi as MPI
 
@@ -106,7 +105,7 @@ if __name__ == "__main__":
     #
     # def print(prob, *args):
     #     """ helper function to only print on rank 0 """
-    #     if prob.root.comm.rank == 0:
+    #     if prob.model.comm.rank == 0:
     #         print(*args)
 
 
@@ -165,14 +164,14 @@ if __name__ == "__main__":
     wake_model_version = 2016
 
     if wec_method == 'diam':
-        output_directory = "./output_files/%s_wec_diam/" % opt_algorithm
+        output_directory = "./output_files/om2/%s_wec_diam/" % opt_algorithm
         relax = True
     elif wec_method == 'angle':
-        output_directory = "./output_files/%s_wec_angle/" % opt_algorithm
+        output_directory = "./output_files/om2/%s_wec_angle/" % opt_algorithm
         relax = True
     elif wec_method == 'none':
         relax = False
-        output_directory = "./output_files/%s/" % opt_algorithm
+        output_directory = "./output_files/om2/%s/" % opt_algorithm
     else:
         raise ValueError('wec_method must be diam, angle, or none')
 
@@ -392,7 +391,7 @@ if __name__ == "__main__":
 
     if MODELS[model] == 'BPA':
         # initialize problem
-        prob = om.Problem(root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=gauss_wrapper,
@@ -402,7 +401,7 @@ if __name__ == "__main__":
                                               cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = om.Problem(root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=floris_wrapper,
@@ -410,16 +409,19 @@ if __name__ == "__main__":
                                               params_IdepVar_args={}))
     # elif MODELS[model] == 'JENSEN':
     #     initialize problem
-    # prob = Problem(root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+    # prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
     #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
     #                                       wake_model=jensen_wrapper,
     #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
     #                                       params_IdepVar_args={}))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
-    # prob.root.deriv_options['type'] = 'fd'
-    # prob.root.deriv_options['form'] = 'central'
-    # prob.root.deriv_options['step_size'] = 1.0e-8
+    # prob.model.deriv_options['type'] = 'fd'
+    # prob.model.deriv_options['form'] = 'central'
+    # prob.model.deriv_options['step_size'] = 1.0e-8
+
+    # set to use more efficient solver
+    prob.model.linear_solver = om.DirectSolver()
 
     prob.driver = om.pyOptSparseDriver()
 
@@ -441,7 +443,7 @@ if __name__ == "__main__":
         prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
         prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
 
-
+        prob.driver.options['dynamic_derivs_sparsity'] = True
 
     elif opt_algorithm == 'ga':
 
@@ -467,6 +469,7 @@ if __name__ == "__main__":
 
         prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
         prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+
 
 
     elif opt_algorithm == 'ps':
@@ -512,8 +515,8 @@ if __name__ == "__main__":
     prob.model.add_design_var('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
                            upper=np.ones(nTurbines) * 3. * boundary_radius)
 
-    # prob.root.ln_solver.options['single_voi_relevance_reduction'] = True
-    # prob.root.ln_solver.options['mode'] = 'rev'
+    # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
+    # prob.model.ln_solver.options['mode'] = 'rev'
 
     if show_start:
         boundary_circle = plt.Circle((boundary_center_x / rotor_diameter, boundary_center_y / rotor_diameter),
@@ -611,7 +614,7 @@ if __name__ == "__main__":
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
-    prob.run_once()
+    prob.run_model()
     AEP_init_calc = np.copy(prob['AEP'])
     print(prob, AEP_init_calc * 1E-6)
 
@@ -686,7 +689,7 @@ if __name__ == "__main__":
 
             if MODELS[model] is 'BPA':
                 prob['model_params:wec_factor'] = 1.0
-                prob['model_params:exp_rate_multiplier'] = 1.0
+                prob['model_params:wec_spreading_angle'] = 0.0
                 prob['model_params:ti_calculation_method'] = ti_calculation_method
                 prob['model_params:calc_k_star'] = calc_k_star_calc
 
@@ -695,7 +698,7 @@ if __name__ == "__main__":
             # print("compare: ", aep_run, prob['AEP'])
             print(prob, "AEP calc improvement = ", AEP_run_calc / AEP_init_calc)
 
-            if prob.root.comm.rank == 0:
+            if prob.model.comm.rank == 0:
                 # if save_aep:
                 #     np.savetxt(output_directory + '%s_multistart_aep_results_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
                 #         opt_algorithm, nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor),
@@ -732,14 +735,18 @@ if __name__ == "__main__":
     else:
         # run the problem
         print(prob, 'start %s run' % (MODELS[model]))
-        # cProfile.run('prob.run()')
+        # cProfile.run('prob.run_driver()')
         if MODELS[model] is 'BPA':
             # prob['model_params:wec_factor'] = 1.
             prob['model_params:ti_calculation_method'] = ti_opt_method
             prob['model_params:calc_k_star'] = calc_k_star_opt
         tic = time.time()
-        # cProfile.run('prob.run()')
+        # cProfile.run('prob.run_driver()')
+
+        iprofile.start()
         prob.run_driver()
+        iprofile.stop()
+
         # quit()
         toc = time.time()
 
@@ -750,14 +757,14 @@ if __name__ == "__main__":
 
         if MODELS[model] is 'BPA':
             prob['model_params:wec_factor'] = 1.0
-            prob['model_params:exp_rate_multiplier'] = 1.0
+            prob['model_params:wec_spreading_angle'] = 0.0
             prob['model_params:ti_calculation_method'] = ti_calculation_method
             prob['model_params:calc_k_star'] = calc_k_star_calc
 
         prob.run_model()
         AEP_run_calc = prob['AEP']
 
-        if prob.root.comm.rank == 0:
+        if prob.model.comm.rank == 0:
 
             if save_locations:
                 np.savetxt(output_directory + '%s_multistart_locations_%iturbs_%sWindRose_%idirs_%s_run%i.txt' % (
@@ -782,7 +789,7 @@ if __name__ == "__main__":
     toct = time.time()
     total_time = toct - tict
 
-    if prob.root.comm.rank == 0:
+    if prob.model.comm.rank == 0:
 
         # print the results
         print(prob, ('Opt. calculation took %.03f sec.' % (toct - tict)))
