@@ -15,6 +15,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
+import pickle
 import sys
 
 from openmdao.devtools import iprofile
@@ -118,14 +119,14 @@ if __name__ == "__main__":
     # set up this run
 
     # specify which starting layout should be used
-    layout_number = int(sys.argv[1])
-    # layout_number = 0
-    wec_method_number = int(sys.argv[2])
-    # wec_method_number = 1
-    model_number = int(sys.argv[3])
-    # model_number = 1
-    opt_alg_number = int(sys.argv[4])
-    # opt_alg_number = 0
+    # layout_number = int(sys.argv[1])
+    layout_number = 0
+    # wec_method_number = int(sys.argv[2])
+    wec_method_number = 0
+    # model_number = int(sys.argv[3])
+    model_number = 1
+    # opt_alg_number = int(sys.argv[4])
+    opt_alg_number = 0
 
 
     run_number = layout_number
@@ -161,7 +162,8 @@ if __name__ == "__main__":
     print_ti = False
     sort_turbs = True
 
-    turbine_type = 'NREL5MW'  # can be 'V80' or 'NREL5MW'
+    # turbine_type = 'NREL5MW'  # can be 'V80' or 'NREL5MW'
+    turbine_type = 'V80'  # can be 'V80' or 'NREL5MW'
 
     wake_model_version = 2016
 
@@ -192,7 +194,7 @@ if __name__ == "__main__":
         # expansion_factors = np.array([50., 0.0, 0.0])
         # expansion_factors = np.array([50., 25., 0.0, 0.0])
         # expansion_factors = np.array([60, 45., 30., 15., 0.0, 0.0])
-        expansion_factors = np.array([60, 50., 40., 30., 20., 10., 0.0, 0.0])
+        expansion_factors = np.array([50., 40., 30., 20., 10., 0.0, 0.0])
 
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
@@ -289,9 +291,9 @@ if __name__ == "__main__":
 
         filename = input_directory + "NREL5MWCPCT_dict.p"
         # filename = "../input_files/NREL5MWCPCT_smooth_dict.p"
-        import cPickle as pickle
 
-        data = pickle.load(open(filename, "rb"))
+        data = pickle.load(open(filename, "rb"), encoding='latin1')
+        # data = pickle.load(open(filename, "rb"))
         ct_curve = np.zeros([data['wind_speed'].size, 2])
         ct_curve_wind_speed = data['wind_speed']
         ct_curve_ct = data['CT']
@@ -429,8 +431,8 @@ if __name__ == "__main__":
         # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = 1
-        prob.driver.opt_settings['Major optimality tolerance'] = 1e-3
+        prob.driver.opt_settings['Verify level'] = 3
+        prob.driver.opt_settings['Major optimality tolerance'] = 1e-5
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model_number], run_number)
@@ -599,6 +601,9 @@ if __name__ == "__main__":
     config.sens_func_calls_array[:] = 0.0
 
     expansion_factor_last = 0.0
+
+    Jt = prob.check_totals(out_stream=None)
+    Jp = prob.check_partials(out_stream=None)
 
     tict = time.time()
     if relax:
