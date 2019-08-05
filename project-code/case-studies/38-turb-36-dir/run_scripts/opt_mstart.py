@@ -91,26 +91,26 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
 if __name__ == "__main__":
 
     ######################### for MPI functionality #########################
-    from openmdao.core.mpi_wrap import MPI
+    from openmdao.utils import mpi as MPI
 
-    if MPI:  # pragma: no cover
-        # if you called this script with 'mpirun', then use the petsc data passing
-        from openmdao.core.petsc_impl import PetscImpl as impl
+    # if MPI:  # pragma: no cover
+    #     # if you called this script with 'mpirun', then use the petsc data passing
+    #     from openmdao.utils import PetscImpl as impl
+    #
+    #     print("In MPI, impl = ", impl)
+    #
+    # else:
+    #     # if you didn't use 'mpirun', then use the numpy data passing
+    #     from openmdao.api import BasicImpl as impl
+    #
+    #
+    # def print(*args):
+    #     """ helper function to only print on rank 0 """
+    #     if prob.root.comm.rank == 0:
+    #         print(*args)
 
-        print("In MPI, impl = ", impl)
 
-    else:
-        # if you didn't use 'mpirun', then use the numpy data passing
-        from openmdao.api import BasicImpl as impl
-
-
-    def mpi_print(prob, *args):
-        """ helper function to only print on rank 0 """
-        if prob.root.comm.rank == 0:
-            print(*args)
-
-
-    prob = Problem(impl=impl)
+    # prob = Problem(impl=impl)
 
     #########################################################################
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # layout_number = int(sys.argv[1])
     layout_number = 0
     # relax_method = int(sys.argv[2])
-    wec_method_number = 2
+    wec_method_number = 0
     # model_number = int(sys.argv[3])
     model = 1
     # opt_alg_number = int(sys.argv[4])
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         relax = True
     elif wec_method == 'none':
         relax = False
-        output_directory = "../output_fiRles/%s/" % opt_algorithm
+        output_directory = "../output_files/%s/" % opt_algorithm
     else:
         raise ValueError('wec_method must be diam, angle, or none')
 
@@ -283,9 +283,9 @@ if __name__ == "__main__":
 
         filename = input_directory + "NREL5MWCPCT_dict.p"
         # filename = "../input_files/NREL5MWCPCT_smooth_dict.p"
-        import cPickle as pickle
+        import pickle
 
-        data = pickle.load(open(filename, "rb"))
+        data = pickle.load(open(filename, "rb"), encoding='latin1')
         ct_curve = np.zeros([data['wind_speed'].size, 2])
         ct_curve_wind_speed = data['wind_speed']
         ct_curve_ct = data['CT']
@@ -393,35 +393,34 @@ if __name__ == "__main__":
 
     if MODELS[model] == 'BPA':
         # initialize problem
-        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=gauss_wrapper,
                                               params_IdepVar_func=add_gauss_params_IndepVarComps,
-                                              params_IndepVar_args={'nRotorPoints': nRotorPoints},
+                                              params_IdepVar_args={'nRotorPoints': nRotorPoints},
                                               wake_model_options=wake_model_options,
-                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
-                                              rec_func_calls=rec_func_calls))
+                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IndepVar_args={}))
+                                              params_IdepVar_args={}))
     # elif MODELS[model] == 'JENSEN':
     #     initialize problem
-    # prob = Problem(impl=impl, root=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+    # prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
     #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
     #                                       wake_model=jensen_wrapper,
     #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IndepVar_args={}))
+    #                                       params_IdepVar_args={}))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
-    # prob.root.deriv_options['type'] = 'fd'
-    # prob.root.deriv_options['form'] = 'central'
-    # prob.root.deriv_options['step_size'] = 1.0e-8
+    # prob.model.deriv_options['type'] = 'fd'
+    # prob.model.deriv_options['form'] = 'central'
+    # prob.model.deriv_options['step_size'] = 1.0e-8
 
     prob.driver = pyOptSparseDriver()
 
@@ -432,7 +431,7 @@ if __name__ == "__main__":
 
         # set optimizer options
         prob.driver.opt_settings['Verify level'] = 0
-        prob.driver.opt_settings['Major optimality tolerance'] = 5e-3
+        prob.driver.opt_settings['Major optimality tolerance'] = 1e-2
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
@@ -440,12 +439,13 @@ if __name__ == "__main__":
             'Summary file'] = output_directory + 'SNOPT_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
 
-        prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2,
-                                   active_tol=(2. * rotor_diameter) ** 2)
-        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2,
-                                   active_tol=2. * rotor_diameter)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)#,
+                                   #active_tol=(2. * rotor_diameter) ** 2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)#,
+                                   #active_tol=2. * rotor_diameter)
 
 
+        prob.driver.options['dynamic_derivs_sparsity'] = True
 
     elif opt_algorithm == 'ga':
 
@@ -469,8 +469,8 @@ if __name__ == "__main__":
 
         prob.driver.opt_settings['file_number'] = run_number
 
-        prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
 
 
     elif opt_algorithm == 'ps':
@@ -504,20 +504,20 @@ if __name__ == "__main__":
 
         prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
-        prob.driver.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.driver.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
 
         # prob.driver.add_objective('obj', scaler=1E0)
-    prob.driver.add_objective('obj', scaler=1E-3)
+    prob.model.add_objective('obj', scaler=1E-3)
 
     # select design variables
-    prob.driver.add_desvar('turbineX', scaler=1E1, lower=np.zeros(nTurbines),
+    prob.model.add_design_var('turbineX', scaler=1E1, lower=np.zeros(nTurbines),
                            upper=np.ones(nTurbines) * 3. * boundary_radius)
-    prob.driver.add_desvar('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
+    prob.model.add_design_var('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
                            upper=np.ones(nTurbines) * 3. * boundary_radius)
 
-    prob.root.ln_solver.options['single_voi_relevance_reduction'] = True
-    prob.root.ln_solver.options['mode'] = 'rev'
+    # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
+    # prob.model.ln_solver.options['mode'] = 'rev'
 
     if show_start:
         boundary_circle = plt.Circle((boundary_center_x / rotor_diameter, boundary_center_y / rotor_diameter),
@@ -564,10 +564,10 @@ if __name__ == "__main__":
     print("entering setup at time = ", tic)
     prob.setup(check=True)
     toc = time.time()
-    mpi_print(prob, "setup complete at time = ", toc)
+    print("setup complete at time = ", toc)
 
     # print the results
-    mpi_print(prob, ('Problem setup took %.03f sec.' % (toc - tic)))
+    print(('Problem setup took %.03f sec.' % (toc - tic)))
 
     # assign initial values to design variables
     prob['turbineX'] = turbineX
@@ -615,18 +615,18 @@ if __name__ == "__main__":
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
-    prob.run_once()
-    AEP_init_calc = prob['AEP']
-    mpi_print(prob, AEP_init_calc * 1E-6)
+    prob.run_model()
+    AEP_init_calc = np.copy(prob['AEP'])
+    print(AEP_init_calc * 1E-6)
 
     if MODELS[model] is 'BPA':
         prob['model_params:ti_calculation_method'] = ti_opt_method
         prob['model_params:calc_k_star'] = calc_k_star_opt
 
-    prob.run_once()
-    AEP_init_opt = prob['AEP']
+    prob.run_model()
+    AEP_init_opt = np.copy(prob['AEP'])
     AEP_run_opt = np.copy(AEP_init_opt)
-    mpi_print(prob, AEP_init_opt * 1E-6)
+    print(AEP_init_opt * 1E-6)
 
     config.obj_func_calls_array[:] = 0.0
     config.sens_func_calls_array[:] = 0.0
@@ -643,7 +643,7 @@ if __name__ == "__main__":
             if expansion_factor_last == expansion_factor:
                 ti_opt_method = final_ti_opt_method
 
-            mpi_print(prob, "starting run with exp. fac = ", expansion_factor)
+            print("starting run with exp. fac = ", expansion_factor)
 
             if opt_algorithm == 'snopt':
                 prob.driver.opt_settings['Print file'] = output_directory + \
@@ -671,35 +671,35 @@ if __name__ == "__main__":
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = expansion_factor
                 elif wec_method == 'angle':
-                    prob['model_params:exp_rate_multiplier'] = expansion_factor
+                    prob['model_params:wec_spreading_angle'] = expansion_factor
 
             # run the problem
-            mpi_print(prob, 'start %s run' % (MODELS[model]))
+            print('start %s run' % (MODELS[model]))
             tic = time.time()
-            prob.run()
+            prob.run_driver()
             toc = time.time()
             # print(np.sum(config.obj_func_calls_array))
             # print(np.sum(config.sens_func_calls_array))
-            mpi_print(prob, 'end %s run' % (MODELS[model]))
+            print('end %s run' % (MODELS[model]))
 
             run_time = toc - tic
             # print(run_time, expansion_factor)
 
-            AEP_run_opt = prob['AEP']
-            # mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
+            AEP_run_opt = np.copy(prob['AEP'])
+            # print("AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
             if MODELS[model] is 'BPA':
                 prob['model_params:wec_factor'] = 1.0
-                prob['model_params:exp_rate_multiplier'] = 1.0
+                prob['model_params:wec_spreading_angle'] = 0.0
                 prob['model_params:ti_calculation_method'] = ti_calculation_method
                 prob['model_params:calc_k_star'] = calc_k_star_calc
 
-            prob.run_once()
-            AEP_run_calc = prob['AEP']
+            prob.run_model()
+            AEP_run_calc = np.copy(prob['AEP'])
             # print("compare: ", aep_run, prob['AEP'])
-            mpi_print(prob, "AEP calc improvement = ", AEP_run_calc / AEP_init_calc)
+            print("AEP calc improvement = ", AEP_run_calc / AEP_init_calc)
 
-            if prob.root.comm.rank == 0:
+            if prob.model.comm.rank == 0:
                 # if save_aep:
                 #     np.savetxt(output_directory + '%s_multistart_aep_results_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
                 #         opt_algorithm, nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor),
@@ -735,33 +735,33 @@ if __name__ == "__main__":
             expansion_factor_last = expansion_factor
     else:
         # run the problem
-        mpi_print(prob, 'start %s run' % (MODELS[model]))
-        # cProfile.run('prob.run()')
+        print('start %s run' % (MODELS[model]))
+        # cProfile.run('prob.run_driver()')
         if MODELS[model] is 'BPA':
             # prob['model_params:wec_factor'] = 1.
             prob['model_params:ti_calculation_method'] = ti_opt_method
             prob['model_params:calc_k_star'] = calc_k_star_opt
         tic = time.time()
-        # cProfile.run('prob.run()')
-        prob.run()
+        # cProfile.run('prob.run_driver()')
+        prob.run_driver()
         # quit()
         toc = time.time()
 
         run_time = toc - tic
 
-        AEP_run_opt = prob['AEP']
-        mpi_print(prob, "AEP improvement = ", AEP_run_opt / AEP_init_opt)
+        AEP_run_opt = np.copy(prob['AEP'])
+        print("AEP improvement = ", AEP_run_opt / AEP_init_opt)
 
         if MODELS[model] is 'BPA':
             prob['model_params:wec_factor'] = 1.0
-            prob['model_params:exp_rate_multiplier'] = 1.0
+            prob['model_params:wec_spreading_angle'] = 0.0
             prob['model_params:ti_calculation_method'] = ti_calculation_method
             prob['model_params:calc_k_star'] = calc_k_star_calc
 
-        prob.run_once()
-        AEP_run_calc = prob['AEP']
+        prob.run_model()
+        AEP_run_calc = np.copy(prob['AEP'])
 
-        if prob.root.comm.rank == 0:
+        if prob.model.comm.rank == 0:
 
             if save_locations:
                 np.savetxt(output_directory + '%s_multistart_locations_%iturbs_%sWindRose_%idirs_%s_run%i.txt' % (
@@ -783,23 +783,26 @@ if __name__ == "__main__":
                            header=header)
                 f.close()
 
+    turbineX_end = np.copy(prob['turbineX'])
+    turbineY_end = np.copy(prob['turbineY'])
+
     toct = time.time()
     total_time = toct - tict
 
-    if prob.root.comm.rank == 0:
+    if prob.model.comm.rank == 0:
 
         # print the results
-        mpi_print(prob, ('Opt. calculation took %.03f sec.' % (toct - tict)))
+        print(('Opt. calculation took %.03f sec.' % (toct - tict)))
 
         for direction_id in range(0, windDirections.size):
-            mpi_print(prob, 'yaw%i (deg) = ' % direction_id, prob['yaw%i' % direction_id])
+            print('yaw%i (deg) = ' % direction_id, prob['yaw%i' % direction_id])
 
-        mpi_print(prob, 'turbine X positions in wind frame (m): %s' % prob['turbineX'])
-        mpi_print(prob, 'turbine Y positions in wind frame (m): %s' % prob['turbineY'])
-        mpi_print(prob, 'wind farm power in each direction (kW): %s' % prob['dirPowers'])
-        mpi_print(prob, 'Initial AEP (kWh): %s' % AEP_init_opt)
-        mpi_print(prob, 'Final AEP (kWh): %s' % AEP_run_opt)
-        mpi_print(prob, 'AEP improvement: %s' % (AEP_run_opt / AEP_init_opt))
+        print('turbine X positions in wind frame (m): %s' % prob['turbineX'])
+        print('turbine Y positions in wind frame (m): %s' % prob['turbineY'])
+        print('wind farm power in each direction (kW): %s' % prob['dirPowers'])
+        print('Initial AEP (kWh): %s' % AEP_init_opt)
+        print('Final AEP (kWh): %s' % AEP_run_calc)
+        print('AEP improvement: %s' % (AEP_run_calc / AEP_init_calc))
 
-    # plot_round_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x, boundary_y, boundary_x[1] - boundary_x[0],
-#                      show_start=show_end)
+    plot_round_farm(turbineX_end, turbineY_end, rotor_diameter, [boundary_center_x, boundary_center_y], boundary_radius,
+                    show_start=show_end)
