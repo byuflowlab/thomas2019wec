@@ -122,14 +122,14 @@ if __name__ == "__main__":
     # set up this run
 
     # specify which starting layout should be used
-    # layout_number = int(sys.argv[1])
-    layout_number = 3
-    # wec_method_number = int(sys.argv[2])
-    wec_method_number = 0
-    # model_number = int(sys.argv[3])
-    model_number = 1
-    # opt_alg_number = int(sys.argv[4])
-    opt_alg_number = 0
+    layout_number = int(sys.argv[1])
+    #layout_number = 3
+    wec_method_number = int(sys.argv[2])
+    #wec_method_number = 0
+    model_number = int(sys.argv[3])
+    #model_number = 1
+    opt_alg_number = int(sys.argv[4])
+    #opt_alg_number = 0
 
 
     run_number = layout_number
@@ -149,8 +149,8 @@ if __name__ == "__main__":
     # pop_size = 760
 
     # save and show options
-    show_start = True
-    show_end = True
+    show_start = False
+    show_end = False
     save_start = False
     save_end = False
 
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         # expansion_factors = np.array([50., 0.0, 0.0])
         # expansion_factors = np.array([50., 25., 0.0, 0.0])
         # expansion_factors = np.array([60, 45., 30., 15., 0.0, 0.0])
-        expansion_factors = np.array([50., 40., 30., 20., 10., 0.0, 0.0])
+        expansion_factors = np.array([60., 50., 40., 30., 20., 10., 0.0, 0.0])
 
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
