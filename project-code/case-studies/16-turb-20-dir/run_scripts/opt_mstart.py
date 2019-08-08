@@ -414,7 +414,7 @@ if __name__ == "__main__":
     # prob.model.deriv_options['form'] = 'central'
     # prob.model.deriv_options['step_size'] = 1.0e-8
     from openmdao.api import DirectSolver
-    prob.model.linear_solver = DirectSolver()
+    #prob.model.linear_solver = DirectSolver()
     prob.driver = pyOptSparseDriver()
 
     if opt_algorithm == 'snopt':
@@ -726,7 +726,7 @@ if __name__ == "__main__":
     toct = time.time()
     total_time = toct - tict
 
-    if prob.root.comm.rank == 0:
+    if prob.model.comm.rank == 0:
 
         # print the results
         print(('Opt. calculation took %.03f sec.' % (toct - tict)))
