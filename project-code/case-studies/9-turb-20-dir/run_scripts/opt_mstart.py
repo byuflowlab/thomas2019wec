@@ -426,7 +426,11 @@ if __name__ == "__main__":
     # prob.model.deriv_options['step_size'] = 1.0e-8
 
     # set to use more efficient solver
-    prob.model.linear_solver = om.DirectSolver()
+    prob.model.linear_solver = om.LinearBlockGS()
+    prob.model.linear_solver.options['iprint'] = 0
+
+    prob.model.nonlinear_solver = om.NonlinearBlockGS()
+    prob.model.nonlinear_solver.options['iprint'] = 0
 
     prob.driver = om.pyOptSparseDriver()
 

@@ -1,6 +1,8 @@
 from __future__ import print_function
 
-from openmdao.api import Problem, pyOptSparseDriver, view_connections, SqliteRecorder
+import openmdao.api as om
+from openmdao.devtools import iprofile
+
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
@@ -393,37 +395,47 @@ if __name__ == "__main__":
 
     if MODELS[model] == 'BPA':
         # initialize problem
-        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=gauss_wrapper,
                                               params_IdepVar_func=add_gauss_params_IndepVarComps,
                                               params_IdepVar_args={'nRotorPoints': nRotorPoints},
                                               wake_model_options=wake_model_options,
-                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
+                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
+                                              record_function_calls=True))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IdepVar_args={}))
+                                              params_IdepVar_args={},
+                                              record_function_calls=True))
     # elif MODELS[model] == 'JENSEN':
     #     initialize problem
-    # prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+    # prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
     #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
     #                                       wake_model=jensen_wrapper,
     #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IdepVar_args={}))
+    #                                       params_IdepVar_args={},
+    #                                               record_function_calls=True))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
     # prob.model.deriv_options['type'] = 'fd'
     # prob.model.deriv_options['form'] = 'central'
     # prob.model.deriv_options['step_size'] = 1.0e-8
-    from openmdao.api import DirectSolver
-    prob.model.linear_solver = DirectSolver()
-    prob.driver = pyOptSparseDriver()
+    # prob.model.linear_solver = om.LinearBlockGS()
+    # prob.model.linear_solver.options['iprint'] = 0
+    # prob.model.linear_solver.options['maxiter'] = 5
+    #
+    # prob.model.nonlinear_solver = om.NonlinearBlockGS()
+    # prob.model.nonlinear_solver.options['iprint'] = 0
+
+    # prob.model.linear_solver = om.DirectSolver()
+
+    prob.driver = om.pyOptSparseDriver()
 
     if opt_algorithm == 'snopt':
         # set up optimizer
@@ -530,6 +542,27 @@ if __name__ == "__main__":
     #     recorder.options['record_derivs'] = False
     #     recorder.options['includes'] = ['turbineX', 'turbineY', 'AEP']
     #     prob.driver.add_recorder(recorder)
+
+    # recorder = om.SqliteRecorder(output_directory + 'recorded_data.sql')
+    #     # prob.driver.add_recorder(recorder)
+    #     # prob.driver.recording_options['includes'] = ['']
+    #     # prob.driver.recording_options['excludes'] = ['*']
+    #     # prob.driver.recording_options['record_constraints'] = False
+    #     # prob.driver.recording_options['record_derivatives'] = False
+    #     # prob.driver.recording_options['record_desvars'] = False
+    #     # prob.driver.recording_options['record_inputs'] = False
+    #     # prob.driver.recording_options['record_model_metadata'] = True
+    #     # prob.driver.recording_options['record_objectives'] = False
+    #     # prob.driver.recording_options['record_responses'] = False
+
+    # set up profiling
+    # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
+    # methods = [
+    #     ('*', (WindFarmAEP,))
+    # ]
+    #
+    # iprofile.setup(methods=methods)
+
 
     print("almost time for setup")
     tic = time.time()
@@ -649,7 +682,15 @@ if __name__ == "__main__":
             # run the problem
             print('start %s run' % (MODELS[model]))
             tic = time.time()
+            # iprofile.start()
+            config.obj_func_calls_array[prob.comm.rank] = 0.0
+            config.sens_func_calls_array[prob.comm.rank] = 0.0
             prob.run_driver()
+            # quit()
+            toc = time.time()
+            obj_calls = np.copy(config.obj_func_calls_array[0])
+            sens_calls = np.copy(config.sens_func_calls_array[0])
+            # iprofile.stop()
             toc = time.time()
             # print(np.sum(config.obj_func_calls_array))
             # print(np.sum(config.sens_func_calls_array))
@@ -702,7 +743,7 @@ if __name__ == "__main__":
 
                     np.savetxt(f, np.c_[run_number, expansion_factor, ti_calculation_method, ti_opt_method,
                                         AEP_init_calc, AEP_init_opt, AEP_run_calc, AEP_run_opt, run_time,
-                                        config.obj_func_calls_array[0], config.sens_func_calls_array[0]],
+                                        obj_calls, sens_calls],
                                header=header)
                     f.close()
             expansion_factor_last = expansion_factor
@@ -716,9 +757,13 @@ if __name__ == "__main__":
             prob['model_params:calc_k_star'] = np.copy(calc_k_star_opt)
         tic = time.time()
         # cProfile.run('prob.run_driver()')
+        config.obj_func_calls_array[prob.comm.rank] = 0.0
+        config.sens_func_calls_array[prob.comm.rank] = 0.0
         prob.run_driver()
         # quit()
         toc = time.time()
+        obj_calls = np.copy(config.obj_func_calls_array[0])
+        sens_calls = np.copy(config.sens_func_calls_array[0])
 
         run_time = toc - tic
 
@@ -752,7 +797,7 @@ if __name__ == "__main__":
 
                 np.savetxt(f, np.c_[run_number, ti_calculation_method, ti_opt_method,
                                     AEP_init_calc, AEP_init_opt, AEP_run_calc, AEP_run_opt, run_time,
-                                    config.obj_func_calls_array[0], config.sens_func_calls_array[0]],
+                                    obj_calls, sens_calls],
                            header=header)
                 f.close()
 

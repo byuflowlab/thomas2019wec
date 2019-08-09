@@ -391,7 +391,8 @@ if __name__ == "__main__":
                                               params_IdepVar_func=add_gauss_params_IndepVarComps,
                                               params_IdepVar_args={'nRotorPoints': nRotorPoints},
                                               wake_model_options=wake_model_options,
-                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
+                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
+                                              record_function_calls = rec_func_calls))
 
     elif MODELS[model] == 'FLORIS':
         # initialize problem
@@ -400,21 +401,21 @@ if __name__ == "__main__":
                                               use_rotor_components=False,
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IdepVar_args={}))
+                                              params_IdepVar_args={}, record_function_calls = rec_func_calls))
     # elif MODELS[model] == 'JENSEN':
     #     initialize problem
     # prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
     #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
     #                                       wake_model=jensen_wrapper,
     #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IdepVar_args={}))
+    #                                       params_IdepVar_args={}, record_function_calls = rec_func_calls))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
     # prob.model.deriv_options['type'] = 'fd'
     # prob.model.deriv_options['form'] = 'central'
     # prob.model.deriv_options['step_size'] = 1.0e-8
-    from openmdao.api import DirectSolver
-    prob.model.linear_solver = DirectSolver()
+    # from openmdao.api import DirectSolver
+    # prob.model.linear_solver = DirectSolver()
     prob.driver = pyOptSparseDriver()
 
     if opt_algorithm == 'snopt':
@@ -614,9 +615,16 @@ if __name__ == "__main__":
 
             # run the problem
             print('start %s run' % (MODELS[model]))
+
+            config.obj_func_calls_array[prob.comm.rank] = 0.0
+            config.sens_func_calls_array[prob.comm.rank] = 0.0
             tic = time.time()
             prob.run_driver()
+            # quit()
             toc = time.time()
+            obj_calls = np.copy(config.obj_func_calls_array[0])
+            sens_calls = np.copy(config.sens_func_calls_array[0])
+
             # print(np.sum(config.obj_func_calls_array))
             # print(np.sum(config.sens_func_calls_array))
             print('end %s run' % (MODELS[model]))
@@ -668,7 +676,7 @@ if __name__ == "__main__":
 
                     np.savetxt(f, np.c_[run_number, expansion_factor, ti_calculation_method, ti_opt_method,
                                         AEP_init_calc, AEP_init_opt, AEP_run_calc, AEP_run_opt, run_time,
-                                        config.obj_func_calls_array[0], config.sens_func_calls_array[0]],
+                                        obj_calls, sens_calls],
                                header=header)
                     f.close()
             expansion_factor_last = expansion_factor
@@ -680,11 +688,16 @@ if __name__ == "__main__":
             # prob['model_params:wec_factor'] = 1.
             prob['model_params:ti_calculation_method'] = np.copy(ti_opt_method)
             prob['model_params:calc_k_star'] = np.copy(calc_k_star_opt)
+
+        config.obj_func_calls_array[prob.comm.rank] = 0.0
+        config.sens_func_calls_array[prob.comm.rank] = 0.0
+
         tic = time.time()
-        # cProfile.run('prob.run_driver()')
         prob.run_driver()
-        # quit()
         toc = time.time()
+
+        obj_calls = np.copy(config.obj_func_calls_array[0])
+        sens_calls = np.copy(config.sens_func_calls_array[0])
 
         run_time = toc - tic
 
@@ -718,7 +731,7 @@ if __name__ == "__main__":
 
                 np.savetxt(f, np.c_[run_number, ti_calculation_method, ti_opt_method,
                                     AEP_init_calc, AEP_init_opt, AEP_run_calc, AEP_run_opt, run_time,
-                                    config.obj_func_calls_array[0], config.sens_func_calls_array[0]],
+                                    obj_calls, sens_calls],
                            header=header)
                 f.close()
     turbx = np.copy(prob['turbineX'])
