@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from wakeexchange.GeneralWindFarmComponents import calculate_boundary, calculate_distance
+from plantenergy.GeneralWindFarmComponents import calculate_boundary, calculate_distance
 from math import cos, sin
 
 def rotate(origin, point, angle):
@@ -134,7 +134,7 @@ def generate_amalia_layouts(nLayouts, nTurbines, rotor_diameter, base_spacing, o
 
     if nLayouts > 1:
         for L in np.arange(1, nLayouts):
-            print L
+            print(L)
             turbineX, turbineY = amalia_farm_random_start(turbineX.size, boundaryVertices, boundaryNormals,
                                                           rotor_diameter, min_spacing=1)
             # print turbineX, turbineY
@@ -150,12 +150,12 @@ if __name__ == "__main__":
 
     rotor_diameter = 80.
 
-    nLayouts = 200
+    nLayouts = 2
     nTurbines = 60
     base_spacing = 5.
 
     output_directory = "./layouts/"
 
-    show_plots = False
+    show_plots = True
 
     generate_amalia_layouts(nLayouts, nTurbines, rotor_diameter, base_spacing, output_directory, show=show_plots)

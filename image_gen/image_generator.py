@@ -218,94 +218,127 @@ def get_statistics_38_turbs():
     sr_high_aep = np.max(sr_run_end_aep)*scale_aep
     sr_best_layout = sr_id[np.argmax(sr_run_end_aep)]
 
-    print "nturbs: ", nTurbines
-    print "nvars: ", nvars
-    print "ncons: ", nCons
+    print( "nturbs: ", nTurbines)
+    print( "nvars: ", nvars)
+    print( "ncons: ", nCons)
 
-    print " "
+    print( " ")
 
-    print "snopt mstart results: "
-    print "med fcalls: ", s_med_fcalls
-    print "ave fcalls: ", s_ave_fcalls
-    print "std fcalls: ", s_std_fcalls
-    print "low fcalls: ", s_low_fcalls
-    print "high fcalls: ", s_high_fcalls
-    print "base aep: ", s_base_aep
-    print "med aep: ", s_med_aep
-    print "ave aep: ", s_ave_aep
-    print "std aep: ", s_std_aep
-    print "low aep: ", s_low_aep
-    print "high aep: ", s_high_aep
-    print "best layout: ", s_best_layout
+    print( "snopt mstart results: ")
+    print( "med fcalls: ", s_med_fcalls)
+    print( "ave fcalls: ", s_ave_fcalls)
+    print( "std fcalls: ", s_std_fcalls)
+    print( "low fcalls: ", s_low_fcalls)
+    print( "high fcalls: ", s_high_fcalls)
+    print( "base aep: ", s_base_aep)
+    print( "med aep: ", s_med_aep)
+    print( "ave aep: ", s_ave_aep)
+    print( "std aep: ", s_std_aep)
+    print( "low aep: ", s_low_aep)
+    print( "high aep: ", s_high_aep)
+    print( "best layout: ", s_best_layout)
 
-    print " "
+    print( " ")
 
-    print "snopt relax results: "
-    print "med fcalls: ", sr_med_fcalls
-    print "ave fcalls: ", sr_ave_fcalls
-    print "std fcalls: ", sr_std_fcalls
-    print "low fcalls: ", sr_low_fcalls
-    print "high fcalls: ", sr_high_fcalls
-    print "base aep: ", sr_base_aep
-    print "med aep: ", sr_med_aep
-    print "ave aep: ", sr_ave_aep
-    print "std aep: ", sr_std_aep
-    print "low aep: ", sr_low_aep
-    print "high aep: ", sr_high_aep
-    print "best layout: ", sr_best_layout
+    print( "snopt relax results: ")
+    print( "med fcalls: ", sr_med_fcalls)
+    print( "ave fcalls: ", sr_ave_fcalls)
+    print( "std fcalls: ", sr_std_fcalls)
+    print( "low fcalls: ", sr_low_fcalls)
+    print( "high fcalls: ", sr_high_fcalls)
+    print( "base aep: ", sr_base_aep)
+    print( "med aep: ", sr_med_aep)
+    print( "ave aep: ", sr_ave_aep)
+    print( "std aep: ", sr_std_aep)
+    print( "low aep: ", sr_low_aep)
+    print( "high aep: ", sr_high_aep)
+    print( "best layout: ", sr_best_layout)
 
-    print " "
+    print( " ")
 
     return
 
-def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
+def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
-    # load data
-    data_snopt_mstart = np.loadtxt("./image_data/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-    data_snop_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    if nturbs == 16:
+        data_snopt_no_wec = np.loadtxt(
+            "./image_data/opt_results/snopt_no_wec_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snop_weca = np.loadtxt(
+            "./image_data/opt_results/snopt_weca_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snop_wecd = np.loadtxt(
+            "./image_data/opt_results/snopt_wecd_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
+    elif nturbs == 38:
+                # load data
+        data_snopt_no_wec = np.loadtxt(
+            "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_snop_weca = np.loadtxt(
+            "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_snop_wecd = np.loadtxt(
+            "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    else:
+        ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
-    sr_id = data_snop_relax[:, 0]
-    sr_ef = data_snop_relax[:, 1]
-    sr_orig_aep = data_snop_relax[0, 5]
-    # sr_run_start_aep = data_snop_relax[0, 7]
-    sr_run_end_aep = data_snop_relax[sr_ef==1, 7]
-    sr_run_time = data_snop_relax[:, 8]
-    sr_fcalls = data_snop_relax[:, 9]
-    sr_scalls = data_snop_relax[:, 10]
+    swa_id = data_snop_weca[:, 0]
+    swa_ef = data_snop_weca[:, 1]
+    swa_ti_opt = data_snop_weca[:, 3]
+    swa_orig_aep = data_snop_weca[0, 5]
+    # swa_run_start_aep = data_snop_weca[0, 7]
+    swa_run_end_aep = data_snop_weca[swa_ti_opt==5, 7]
+    swa_run_time = data_snop_weca[:, 8]
+    swa_fcalls = data_snop_weca[:, 9]
+    swa_scalls = data_snop_weca[:, 10]
 
-    sr_tfcalls = sr_fcalls[sr_ef == 1]
-    sr_tscalls = sr_fcalls[sr_ef == 1]
+    swa_tfcalls = swa_fcalls[swa_ti_opt == 5]
+    swa_tscalls = swa_fcalls[swa_ti_opt == 5]
 
-    sr_run_improvement = sr_run_end_aep / sr_orig_aep - 1.
-    sr_mean_run_improvement = np.average(sr_run_improvement)
-    sr_std_improvement = np.std(sr_run_improvement)
+    swa_run_improvement = swa_run_end_aep / swa_orig_aep - 1.
+    swa_mean_run_improvement = np.average(swa_run_improvement)
+    swa_std_improvement = np.std(swa_run_improvement)
+
+    swd_id = data_snop_wecd[:, 0]
+    swd_ef = data_snop_wecd[:, 1]
+    swd_ti_opt = data_snop_wecd[:, 3]
+    swd_orig_aep = data_snop_wecd[0, 5]
+    # swd_run_start_aep = data_snop_weca[0, 7]
+    swd_run_end_aep = data_snop_wecd[swd_ti_opt == 5, 7]
+    swd_run_time = data_snop_wecd[:, 8]
+    swd_fcalls = data_snop_wecd[:, 9]
+    swd_scalls = data_snop_wecd[:, 10]
+
+    swd_tfcalls = swd_fcalls[swd_ti_opt == 5]
+    swd_tscalls = swd_fcalls[swd_ti_opt == 5]
+
+    swd_run_improvement = swd_run_end_aep / swa_orig_aep - 1.
+    swd_mean_run_improvement = np.average(swd_run_improvement)
+    swd_std_improvement = np.std(swd_run_improvement)
 
     # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
     # run time (s), obj func calls, sens func calls
-    sm_id = data_snopt_mstart[:, 0]
-    sm_ef = np.ones_like(sm_id)
-    sm_orig_aep = data_snopt_mstart[0, 4]
-    # sr_run_start_aep = data_snop_relax[0, 7]
-    sm_run_end_aep = data_snopt_mstart[:, 6]
-    sm_run_time = data_snopt_mstart[:, 7]
-    sm_fcalls = data_snopt_mstart[:, 8]
-    sm_scalls = data_snopt_mstart[:, 9]
+    snw_id = data_snopt_no_wec[:, 0]
+    snw_ef = np.ones_like(snw_id)
+    snw_orig_aep = data_snopt_no_wec[0, 4]
+    # swa_run_start_aep = data_snop_relax[0, 7]
+    snw_run_end_aep = data_snopt_no_wec[:, 6]
+    snw_run_time = data_snopt_no_wec[:, 7]
+    snw_fcalls = data_snopt_no_wec[:, 8]
+    snw_scalls = data_snopt_no_wec[:, 9]
 
-    # sm_run_improvement = sm_run_end_aep / sm_orig_aep - 1.
-    sm_run_improvement = sm_run_end_aep / sr_orig_aep - 1.
-    sm_mean_run_improvement = np.average(sm_run_improvement)
-    sm_std_improvement = np.std(sr_run_improvement)
+    # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
+    snw_run_improvement = snw_run_end_aep / swa_orig_aep - 1.
+    snw_mean_run_improvement = np.average(snw_run_improvement)
+    snw_std_improvement = np.std(snw_run_improvement)
 
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
-    labels = list(['SNOPT', 'SNOPT+WEC'])
+    labels = list(['SNOPT', 'SNOPT+WECA', 'SNOPT+WECD'])
     # labels = list('abcd')
-    # data = list([sm_run_improvement, sr_run_improvement, ps_run_improvement, ga_run_improvement])
+    # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
-    data = list([sm_run_end_aep*aep_scale, sr_run_end_aep*aep_scale])
+    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP (GWh)')
@@ -320,6 +353,7 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
     ax.spines['right'].set_visible(False)
     plt.tick_params(top='off', right='off')
 
+    plt.tight_layout()
     if save_figs:
         plt.savefig(filename+'_aep.pdf', transparent=True)
 
@@ -328,7 +362,7 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
 
     fig, ax = plt.subplots(1)
 
-    data = list([sm_run_improvement*100, sr_run_improvement*100])
+    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP Improvement (%)')
@@ -341,6 +375,7 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
     ax.spines['right'].set_visible(False)
     plt.tick_params(top='off', right='off')
 
+    plt.tight_layout()
     if save_figs:
         plt.savefig(filename+'_percentaep.pdf', transparent=True)
 
@@ -350,11 +385,11 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
     fig, ax = plt.subplots(1)
 
     scale_by = 1E5
-    # data = np.array([sm_fcalls+sm_scalls, sr_fcalls+sr_scalls, ps_fcalls, ga_fcalls])/scale_by
-    data = list([(sm_fcalls+sm_scalls)/scale_by, (sr_tfcalls+sr_tscalls)/scale_by])
+    # data = np.array([snw_fcalls+snw_scalls, swa_fcalls+swa_scalls, ps_fcalls, ga_fcalls])/scale_by
+    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by])
     ax.boxplot(data, meanline=True, labels=labels)
-    # ax.hist(sm_fcalls+sm_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
-    # ax.hist((sr_fcalls+sr_scalls)[sr_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
+    # ax.hist(snw_fcalls+snw_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
+    # ax.hist((swa_fcalls+swa_scalls)[swa_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
     # ax.hist(ps_fcalls, bins=25, alpha=0.25, color='g', label='ALPSO', range=[0., 5E3])
     # ax.hist(ga_fcalls, bins=25, alpha=0.25, color='y', label='NSGA II', range=[0., 5E3])
 
@@ -369,7 +404,7 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     plt.tick_params(top='off', right='off')
-
+    plt.tight_layout()
     if save_figs:
         plt.savefig(filename+'_fcalls.pdf', transparent=True)
 
@@ -380,9 +415,9 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
 
     scale_by = 1E3
 
-    data = list([(sm_fcalls + sm_scalls)/ scale_by, (sr_tfcalls + sr_tscalls)/ scale_by])
+    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by])
 
-    bp = ax.boxplot(data, meanline=True, labels=labels, widths=(0.45, 0.45))
+    bp = ax.boxplot(data, meanline=True, labels=labels)
 
     ## change outline color, fill color and linewidth of the boxes
     linewidth = 2
@@ -431,17 +466,21 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
 
     fig, ax = plt.subplots(1)
 
-    sr_time = np.zeros(200)
+    swa_time = np.zeros(200)
     for i in np.arange(0, 200):
-        sr_time[i] = np.sum(sr_run_time[sr_id==i])
+        swa_time[i] = np.sum(swa_run_time[swa_id==i])
 
-    # data = list([sm_run_time/60., sr_time/60., ps_run_time/60., ga_run_time/60.])
-    data = list([sm_run_time/60., sr_time/60.])
+    swd_time = np.zeros(200)
+    for i in np.arange(0, 200):
+        swd_time[i] = np.sum(swd_run_time[swd_id == i])
+
+    # data = list([snw_run_time/60., swa_time/60., ps_run_time/60., ga_run_time/60.])
+    data = list([snw_run_time/60., swa_time/60., swd_time/60.])
     ax.boxplot(data, meanline=True, labels=labels)
     # y_formatter = ticker.ScalarFormatter(useOffset=True)
     # ax.yaxis.set_major_formatter(y_formatter)
-    # ax.hist(sm_run_time/60, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 80], log=True)
-    # ax.hist(sr_time/60, bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 80], log=True)
+    # ax.hist(snw_run_time/60, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 80], log=True)
+    # ax.hist(swa_time/60, bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 80], log=True)
     # ax.hist(ps_run_time/60, bins=25, alpha=0.25, color='g', label='ALPSO', range=[0., 80], log=True)
     # ax.hist(ga_run_time/60, bins=25, alpha=0.25, color='y', label='NSGA II', range=[0., 80], log=True)
 
@@ -456,6 +495,8 @@ def plot_optimization_results_38_turbs(filename, save_figs, show_figs):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     plt.tick_params(top='off', right='off')
+
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename+'_time.pdf', transparent=True)
@@ -561,7 +602,7 @@ def plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs):
     # data = np.array([sm_fcalls+sm_scalls, sr_fcalls+sr_scalls, ps_fcalls, ga_fcalls])/scale_by
     # data = list([(sm_fcalls+sm_scalls)/scale_by, (sr_tfcalls+sr_tscalls)/scale_by])
     # ax.boxplot(data, meanline=True, labels=labels)
-    print sr_run_improvement
+    print( sr_run_improvement)
     # ax.hist(sm_fcalls+sm_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
     ax.hist(100*sr_run_improvement, bins=25, alpha=0.75, color='b', label='SNOPT Relax', histtype=u'step')
     # ax.hist(ps_fcalls, bins=25, alpha=0.25, color='g', label='ALPSO', range=[0., 5E3])
@@ -621,7 +662,7 @@ def plot_round_farm_finish_pres(filename, save_figs, show_figs):
 
     sr_best_layout_id = sr_id[np.argmax(sr_run_end_aep)]
 
-    print sr_best_layout_id
+    print( sr_best_layout_id)
 
     # define turbine dimensions
     rotor_diameter = 126.4
@@ -848,8 +889,8 @@ def plot_results_nruns(filename, save_figs, show_figs):
             max_aep = np.max(end_aep)
             max_aep_id = id[np.argmax(end_aep)]
 
-            print labels[plot_num], "mean imp:", mean_improvement, "std. imp:", std_improvement,
-            print "max imp:", max_improvement, 'max AEP:', max_aep, 'max AEP run:', max_aep_id
+            print( labels[plot_num], "mean imp:", mean_improvement, "std. imp:", std_improvement)
+            print( "max imp:", max_improvement, 'max AEP:', max_aep, 'max AEP run:', max_aep_id)
 
             data_aep.append(end_aep*aep_scale)
             data_run_time.append(run_time)
@@ -957,7 +998,7 @@ def plot_shear_fit(filename, save_figs, show_figs):
 
     ax.plot(plot_data_les[:, 1], plot_data_les[:, 0], 'o', label='LES')
     ax.plot(plot_data_func[:, 1], plot_data_func[:, 0], label='Shear Func')
-    # print plot_data_les, plot_data_func
+    # print( plot_data_les, plot_data_func)
     ax.set_xlabel('Wind Speed, m/s')
     ax.set_ylabel('Height, m')
     ax.set_xlim([0, 13])
@@ -1096,7 +1137,7 @@ def plot_model_contours_vertical(filename, save_figs, show_figs, before=False):
     zmax = np.max(z)
     zmin = np.min(z)
 
-    print x.shape, z.shape, v.shape
+    print( x.shape, z.shape, v.shape)
     colormap = "YlOrBr_r"
     colormap = "YlOrRd_r"
     colormap = "Blues_r"
@@ -1214,10 +1255,10 @@ def plot_power_direction_horns_rev(filename, save_figs=False, show_figs=True, nr
     if show_figs:
         plt.show()
 
-    print "for horns rev directional"
-    # print "no ti error" (our_model[our_model[:, 0]==npa_les[:,0], 1]-npa_les[:, 1])/npa_les[:, 1]
-    # print "hard max error"(our_model[:, 2] - npa_les[:, 1]) / npa_les
-    # print "smooth max error"(our_model[:, 3] - npa_les[:, 1]) / npa_les
+    print( "for horns rev directional")
+    # print( "no ti error" (our_model[our_model[:, 0]==npa_les[:,0], 1]-npa_les[:, 1])/npa_les[:, 1])
+    # print( "hard max error"(our_model[:, 2] - npa_les[:, 1]) / npa_les)
+    # print( "smooth max error"(our_model[:, 3] - npa_les[:, 1]) / npa_les)
 
     return
 
@@ -1293,10 +1334,10 @@ def plot_power_direction_error_horns_rev(filename, save_figs=False, show_figs=Tr
     if show_figs:
         plt.show()
 
-    # print "for horns rev directional"
-    # print "no ti error" (our_model[our_model[:, 0]==npa_les[:,0], 1]-npa_les[:, 1])/npa_les[:, 1]
-    # print "hard max error"(our_model[:, 2] - npa_les[:, 1]) / npa_les
-    # print "smooth max error"(our_model[:, 3] - npa_les[:, 1]) / npa_les
+    # print( "for horns rev directional")
+    # print( "no ti error" (our_model[our_model[:, 0]==npa_les[:,0], 1]-npa_les[:, 1])/npa_les[:, 1])
+    # print( "hard max error"(our_model[:, 2] - npa_les[:, 1]) / npa_les)
+    # print( "smooth max error"(our_model[:, 3] - npa_les[:, 1]) / npa_les)
 
     return
 
@@ -1337,15 +1378,15 @@ def plot_power_row_horns_rev(filename, save_figs=False, show_figs=True, nrpt=1):
     if show_figs:
         plt.show()
 
-    print "for horns rev by row"
-    print "npa ave error", np.average(np.abs(((npa_model[:, 1]-npa_les[:, 1])/npa_les[:, 1])))
-    print "npa max error", np.max(np.abs((npa_model[:, 1]-npa_les[:, 1]))/npa_les[:, 1])
-    print "no ti ave error", np.average(np.abs((our_model[:, 1]-npa_les[:, 1]))/npa_les[:, 1])
-    print "no ti max error", np.max(np.abs((our_model[:, 1]+1-npa_les[:, 1]))/npa_les[:, 1])
-    print "hard max ave error", np.average(np.abs((our_model[:, 2]-npa_les[:, 1])/npa_les[:, 1]))
-    print "hard max max error", np.max(np.abs((our_model[:, 2]-npa_les[:, 1])/npa_les[:, 1]))
-    print "smooth max ave error", np.average(np.abs((our_model[:, 3]-npa_les[:, 1])/npa_les[:, 1]))
-    print "smooth max maxerror", np.max(np.abs((our_model[:, 3]-npa_les[:, 1])/npa_les[:, 1]))
+    print( "for horns rev by row")
+    print( "npa ave error", np.average(np.abs(((npa_model[:, 1]-npa_les[:, 1])/npa_les[:, 1]))))
+    print( "npa max error", np.max(np.abs((npa_model[:, 1]-npa_les[:, 1]))/npa_les[:, 1]))
+    print( "no ti ave error", np.average(np.abs((our_model[:, 1]-npa_les[:, 1]))/npa_les[:, 1]))
+    print( "no ti max error", np.max(np.abs((our_model[:, 1]+1-npa_les[:, 1]))/npa_les[:, 1]))
+    print( "hard max ave error", np.average(np.abs((our_model[:, 2]-npa_les[:, 1])/npa_les[:, 1])))
+    print( "hard max max error", np.max(np.abs((our_model[:, 2]-npa_les[:, 1])/npa_les[:, 1])))
+    print( "smooth max ave error", np.average(np.abs((our_model[:, 3]-npa_les[:, 1])/npa_les[:, 1])))
+    print( "smooth max maxerror", np.max(np.abs((our_model[:, 3]-npa_les[:, 1])/npa_les[:, 1])))
 
     return
 
@@ -1364,7 +1405,7 @@ def plot_turb_power_error_baseline(filename, save_figs=False, show_figs=True):
     for dir, i in zip(windDirections, np.arange(0, nDirections)):
         sowfa_turb_powers[:, i] = sowfa_data[sowfa_data[:, 0] == dir, 4] / 1000.
 
-    print sowfa_turb_powers[sowfa_turb_powers[:, 23:26]==310, 23:26]
+    print( sowfa_turb_powers[sowfa_turb_powers[:, 23:26]==310, 23:26])
     quit()
     turb_error = ((bp_turb_data - sowfa_turb_powers)/sowfa_turb_powers)
     fig, ax = plt.subplots(figsize=(12,12))
@@ -1465,9 +1506,9 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     else:
         raise ValueError('incorrect layout specified')
 
-    print np.average(turbineX)
+    print( np.average(turbineX))
 
-    print turbineX, turbineY
+    print( turbineX, turbineY)
 
     nTurbines = turbineX.size
 
@@ -1537,8 +1578,11 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
 
-    # filename = "./images/38turbs_results"
-    # plot_optimization_results_38_turbs(filename, save_figs, show_figs)
+    filename = "./images/16turbs_results"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
+
+    filename = "./images/38turbs_results"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
@@ -1552,8 +1596,8 @@ if __name__ == "__main__":
     # filename = "round_farm_38Turbines_5DSpacing_finish.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='finish',turb_nums=True)
 
-    filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
-    plot_results_nruns(filename, save_figs, show_figs)
+    # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
+    # plot_results_nruns(filename, save_figs, show_figs)
 
     # filename = "./images/one_hundred_sampling_points.pdf"
     # plot_100_rotor_points(filename, save_figs, show_figs, npoints=40)
