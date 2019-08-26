@@ -229,7 +229,7 @@ if __name__ == "__main__":
 
     nRotorPoints = 1
 
-    wind_rose_file = 'nantucket'  # can be one of: 'amalia', 'nantucket', 'directional
+    wind_rose_file = 'amalia'  # can be one of: 'amalia', 'nantucket', 'directional
 
     TI = 0.108
     k_calc = 0.3837 * TI + 0.003678
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     turbineY = np.copy(layout_data[:, 1])*rotor_diameter
 
     # generate boundary constraint
-    boundaryVertices, boundaryNormals = calculate_boundary(layout_data)
+    boundaryVertices, boundaryNormals = calculate_boundary(layout_data*rotor_diameter)
     nVertices = boundaryVertices.shape[0]
 
     turbineX_init = np.copy(turbineX)
@@ -353,7 +353,7 @@ if __name__ == "__main__":
         windFrequencies = windRose[:, 2]
         size = np.size(windDirections)
     elif wind_rose_file is 'amalia':
-        windRose = np.loadtxt(input_directory + 'amalia.txt')
+        windRose = np.loadtxt(input_directory + 'windrose_amalia_directionally_averaged_speeds.txt')
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
@@ -470,7 +470,7 @@ if __name__ == "__main__":
         prob.driver.opt_settings['file_number'] = run_number
 
         prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(nVertices * turbineX.size)), scaler=1E-2)
 
 
     elif opt_algorithm == 'ps':
@@ -505,16 +505,16 @@ if __name__ == "__main__":
         prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
         prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(nVertices * turbineX.size)), scaler=1E-2)
 
         # prob.driver.add_objective('obj', scaler=1E0)
-    prob.model.add_objective('obj', scaler=1E-1)
+    prob.model.add_objective('obj', scaler=1E-2)
 
     # select design variables
     prob.model.add_design_var('turbineX', scaler=1E1, lower=np.zeros(nTurbines),
-                           upper=np.ones(nTurbines) * 50. * rotor_diameter)
-    prob.model.add_design_var('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
                            upper=np.ones(nTurbines) * 62. * rotor_diameter)
+    prob.model.add_design_var('turbineY', scaler=1E1, lower=np.zeros(nTurbines),
+                           upper=np.ones(nTurbines) * 50. * rotor_diameter)
 
     # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
     # prob.model.ln_solver.options['mode'] = 'rev'
