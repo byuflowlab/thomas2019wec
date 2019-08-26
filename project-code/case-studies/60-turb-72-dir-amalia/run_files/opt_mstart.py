@@ -353,7 +353,7 @@ if __name__ == "__main__":
         windFrequencies = windRose[:, 2]
         size = np.size(windDirections)
     elif wind_rose_file is 'amalia':
-        windRose = np.loadtxt(input_directory + 'windrose_amalia_directionally_averaged_speeds.txt')
+        windRose = np.loadtxt(input_directory + 'windrose_amalia_directionally_averaged_speeds_36dir.txt')
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
