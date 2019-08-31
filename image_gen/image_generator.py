@@ -263,33 +263,41 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     if nturbs == 16:
         data_snopt_no_wec = np.loadtxt(
             "./image_data/opt_results/snopt_no_wec_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snop_weca = np.loadtxt(
+        data_snopt_weca = np.loadtxt(
             "./image_data/opt_results/snopt_weca_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snop_wecd = np.loadtxt(
+        data_snopt_wecd = np.loadtxt(
             "./image_data/opt_results/snopt_wecd_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
 
     elif nturbs == 38:
                 # load data
         data_snopt_no_wec = np.loadtxt(
             "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        data_snop_weca = np.loadtxt(
+        data_snopt_weca = np.loadtxt(
             "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        data_snop_wecd = np.loadtxt(
+        data_snopt_wecd = np.loadtxt(
             "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    elif nturbs == 60:
+                # load data
+        data_snopt_no_wec = np.loadtxt(
+            "./image_data/opt_results/snopt_no_wec_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+        data_snopt_weca = np.loadtxt(
+            "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+        data_snopt_wecd = np.loadtxt(
+            "./image_data/opt_results/snopt_wec_diam_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
     else:
         ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
-    swa_id = data_snop_weca[:, 0]
-    swa_ef = data_snop_weca[:, 1]
-    swa_ti_opt = data_snop_weca[:, 3]
-    swa_orig_aep = data_snop_weca[0, 5]
-    # swa_run_start_aep = data_snop_weca[0, 7]
-    swa_run_end_aep = data_snop_weca[swa_ti_opt==5, 7]
-    swa_run_time = data_snop_weca[:, 8]
-    swa_fcalls = data_snop_weca[:, 9]
-    swa_scalls = data_snop_weca[:, 10]
+    swa_id = data_snopt_weca[:, 0]
+    swa_ef = data_snopt_weca[:, 1]
+    swa_ti_opt = data_snopt_weca[:, 3]
+    swa_orig_aep = data_snopt_weca[0, 5]
+    # swa_run_start_aep = data_snopt_weca[0, 7]
+    swa_run_end_aep = data_snopt_weca[swa_ti_opt==5, 7]
+    swa_run_time = data_snopt_weca[:, 8]
+    swa_fcalls = data_snopt_weca[:, 9]
+    swa_scalls = data_snopt_weca[:, 10]
 
     swa_tfcalls = swa_fcalls[swa_ti_opt == 5]
     swa_tscalls = swa_fcalls[swa_ti_opt == 5]
@@ -298,15 +306,15 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     swa_mean_run_improvement = np.average(swa_run_improvement)
     swa_std_improvement = np.std(swa_run_improvement)
 
-    swd_id = data_snop_wecd[:, 0]
-    swd_ef = data_snop_wecd[:, 1]
-    swd_ti_opt = data_snop_wecd[:, 3]
-    swd_orig_aep = data_snop_wecd[0, 5]
-    # swd_run_start_aep = data_snop_weca[0, 7]
-    swd_run_end_aep = data_snop_wecd[swd_ti_opt == 5, 7]
-    swd_run_time = data_snop_wecd[:, 8]
-    swd_fcalls = data_snop_wecd[:, 9]
-    swd_scalls = data_snop_wecd[:, 10]
+    swd_id = data_snopt_wecd[:, 0]
+    swd_ef = data_snopt_wecd[:, 1]
+    swd_ti_opt = data_snopt_wecd[:, 3]
+    swd_orig_aep = data_snopt_wecd[0, 5]
+    # swd_run_start_aep = data_snopt_weca[0, 7]
+    swd_run_end_aep = data_snopt_wecd[swd_ti_opt == 5, 7]
+    swd_run_time = data_snopt_wecd[:, 8]
+    swd_fcalls = data_snopt_wecd[:, 9]
+    swd_scalls = data_snopt_wecd[:, 10]
 
     swd_tfcalls = swd_fcalls[swd_ti_opt == 5]
     swd_tscalls = swd_fcalls[swd_ti_opt == 5]
@@ -320,7 +328,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     snw_id = data_snopt_no_wec[:, 0]
     snw_ef = np.ones_like(snw_id)
     snw_orig_aep = data_snopt_no_wec[0, 4]
-    # swa_run_start_aep = data_snop_relax[0, 7]
+    # swa_run_start_aep = data_snopt_relax[0, 7]
     snw_run_end_aep = data_snopt_no_wec[:, 6]
     snw_run_time = data_snopt_no_wec[:, 7]
     snw_fcalls = data_snopt_no_wec[:, 8]
@@ -1552,6 +1560,172 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     if show_figs:
         plt.show()
 
+def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
+    # font = {'size': 13}
+    # plt.rc('font', **font)
+    #
+    # plt.rcParams['xtick.major.pad'] = '8'
+    # plt.rcParams['ytick.major.pad'] = '8'
+
+    # define turbine dimensions
+    rotor_diameter = 80.
+
+    # set domain
+    xmax = 5500.
+    xmin = -500.0
+    ymax = 6000.
+    ymin = -500.0
+
+    # define wind farm area
+    boundary_center_x = 2500.
+    boundary_center_y = 2500.
+    boundary_radius = 2000.
+
+    # load data
+    data_directory = './image_data/layouts/60_turbs/'
+    if layout == 'start':
+        data_file = 'nTurbs60_spacing5_layout_0.txt'
+        plot_data = np.loadtxt(data_directory + data_file)
+
+        # parse data
+        turbineX = (plot_data[:, 0])*rotor_diameter - boundary_radius + rotor_diameter/2. + boundary_center_x
+        turbineY = (plot_data[:, 1])*rotor_diameter - boundary_radius + rotor_diameter/2. + boundary_center_y
+    elif layout == 'finish':
+        data_file = 'snopt_multistart_locations_60turbs_nantucketWindRose_36dirs_BPA_run0_EF0.000_TItype5.txt'
+        plot_data = np.loadtxt(data_directory + data_file)
+
+        # parse data
+        turbineX = (plot_data[:, 2])- boundary_radius  + boundary_center_x
+        turbineY = (plot_data[:, 3])- boundary_radius  + boundary_center_x
+    else:
+        raise ValueError('incorrect layout specified')
+
+    print( np.average(turbineX))
+
+    print( turbineX, turbineY)
+
+    nTurbines = turbineX.size
+
+    # create figure and axes
+    fig, ax = plt.subplots()
+
+    # create and add domain boundary
+    les_domain = plt.Rectangle([0., 0.], 5000., 5000., facecolor='none', edgecolor='b', linestyle=':', label='Domain')
+    ax.add_patch(les_domain)
+
+    # create and add wind farm boundary
+    
+    boundary_circle = plt.Circle((boundary_center_x, boundary_center_y),
+                                 boundary_radius, facecolor='none', edgecolor='r', linestyle='--')
+    ax.add_patch(boundary_circle)
+
+    # create and add wind turbines
+    for x, y in zip(turbineX, turbineY):
+        circle_start = plt.Circle((x, y), rotor_diameter/2., facecolor='none', edgecolor='k', linestyle='-', label='Start')
+        ax.add_artist(circle_start)
+
+    if turb_nums:
+        for i in np.arange(nTurbines):
+            ax.annotate(i, (turbineX[i]+rotor_diameter/2., turbineY[i]+rotor_diameter/2.))
+
+    # pretty the plot
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+    plt.axis('equal')
+    ax.legend([boundary_circle, les_domain], ['LES Domain','Farm Boundary'],
+              ncol=2, frameon=False, loc=2)
+    ax.set_xlabel('Turbine X Position (m)')
+    ax.set_ylabel('Turbine Y Position (m)')
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
+
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+    if show_figs:
+        plt.show()
+
+def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs):
+
+    # load data
+    data = np.loadtxt("./image_data/smoothing_by_angle_crosswake.txt")
+
+    location = data[:, 0]
+
+    fig, ax = plt.subplots(1)
+
+    colors = ['b', 'r', 'r', 'c', 'y', 'm', 'c', 'c']
+
+    for i, j in zip(np.array([1, 2, 3, 4, 5, 6, 7, 8]), np.arange(0, 6)):
+        ax.plot(location, data[:, i]/1E6, label="$\\xi = %i$", color=colors[j])
+    xi = 1
+    plt.text(-1., data[location==0, 1]/1E6+0.25, "No WEC", color=colors[0])
+    xi = 4
+    plt.text(-1.75, data[location==0, 4]/1E6+0.25, "Moderate WEC", color=colors[1])
+    # xi = 5
+    # plt.text(-1, data[location==0, xi]/1E6+0.5, "$\\xi = %i$" % xi, color=colors[2])
+    xi = 7
+    plt.text(-1, data[location==0, 6]/1E6-.25, "High WEC", color=colors[2])
+
+    ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($Y/D_r$)")
+    ax.set_ylabel('Annual Energy Production (GWh)')
+    # ax.set_xlim([10, 20])
+    ax.set_ylim([10, 20])
+    plt.yticks([10, 20])
+    plt.xticks([-6, 0, 6])
+    # ax.legend(ncol=2, loc=2, frameon=False, )  # show plot
+    # tick_spacing = 1
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+    #
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+
+    #
+    plt.tight_layout()
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
+def plot_smoothing_visualization(filename, save_figs, show_figs):
+
+    # load data
+    data = np.loadtxt("./image_data/smoothing_initial_test.txt")
+
+    location = data[:, 0]
+
+    fig, ax = plt.subplots(1)
+
+    for i in np.arange(1, 8):
+        ax.plot(location, data[:, i]/1E6, label="$\\xi = %i$" % i)
+
+    ax.set_xlabel("Downstream Turbine's Crosswind Location ($X/D_r$)")
+    ax.set_ylabel('AEP (GWh)')
+    # ax.set_xlim([10, 20])
+    ax.set_ylim([10, 23])
+    ax.legend(ncol=3, loc=2, frameon=False, )  # show plot
+    # tick_spacing = 1
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+    #
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+    #
+    plt.tight_layout()
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
 if __name__ == "__main__":
 
     show_figs = True
@@ -1578,11 +1752,14 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
 
-    filename = "./images/16turbs_results"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
+    # filename = "./images/16turbs_results"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
+    #
+    # filename = "./images/38turbs_results"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/38turbs_results"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = "./images/60turbs_results"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
@@ -1598,6 +1775,9 @@ if __name__ == "__main__":
 
     # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
     # plot_results_nruns(filename, save_figs, show_figs)
+
+    filename = "amalia_farm_60Turbines_5DSpacing_start.pdf"
+    plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=True)
 
     # filename = "./images/one_hundred_sampling_points.pdf"
     # plot_100_rotor_points(filename, save_figs, show_figs, npoints=40)
@@ -1634,3 +1814,6 @@ if __name__ == "__main__":
 
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
+
+    # filename = "./images/smoothing_angle_crosswake.pdf"
+    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs)

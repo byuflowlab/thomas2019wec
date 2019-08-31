@@ -316,6 +316,9 @@ if __name__ == "__main__":
     boundaryVertices, boundaryNormals = calculate_boundary(layout_data*rotor_diameter)
     nVertices = boundaryVertices.shape[0]
 
+    # print(nVertices)
+    # quit()
+
     turbineX_init = np.copy(turbineX)
     turbineY_init = np.copy(turbineY)
 
