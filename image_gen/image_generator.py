@@ -742,6 +742,7 @@ def plot_round_farm_finish_pres(filename, save_figs, show_figs):
 
     return
 
+
 def get_statistics_nruns():
 
     return
@@ -1560,6 +1561,32 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     if show_figs:
         plt.show()
 
+def plot_any_farm(filename, save_figs, show_figs, nturbs=60):
+
+    from plantenergy import visualization_tools as vt
+    from plantenergy.GeneralWindFarmComponents import calculate_boundary
+
+    data_file = './image_data/layouts/%i_turbs/nTurbs%i_spacing5_layout_0.txt' % (nturbs, nturbs)
+    layout_data = np.loadtxt(data_file)
+
+    rotor_diam = 80.
+    turb_x = layout_data[:, 0]*rotor_diam
+    turb_y = layout_data[:, 1]*rotor_diam
+
+    boundaryVertices, boundaryNormals = calculate_boundary(layout_data * rotor_diam)
+
+    farm_plot = vt.wind_farm_plot(turb_x, turb_y, rotor_diam, boundaryVertices[:, 0],boundaryVertices[:, 1])
+    farm_plot.plot_wind_farm()
+    farm_plot.legend.remove()
+    plt.tight_layout()
+    if save_figs:
+        farm_plot.save_wind_farm(filename)
+    if show_figs:
+        farm_plot.show_wind_farm()
+
+
+
+
 def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     # font = {'size': 13}
     # plt.rc('font', **font)
@@ -1777,7 +1804,7 @@ if __name__ == "__main__":
     # plot_results_nruns(filename, save_figs, show_figs)
 
     filename = "amalia_farm_60Turbines_5DSpacing_start.pdf"
-    plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=True)
+    plot_any_farm(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/one_hundred_sampling_points.pdf"
     # plot_100_rotor_points(filename, save_figs, show_figs, npoints=40)

@@ -501,22 +501,22 @@ if __name__ == "__main__":
 
         prob.driver.opt_settings['maxOuterIter'] = 10000
 
-        prob.driver.opt_settings['SwarmSize'] = 10 * nTurbines * 2
+        prob.driver.opt_settings['SwarmSize'] = 24
 
         prob.driver.opt_settings['xinit'] = 1  # Initial Position Flag (0 - no position, 1 - position given)
 
         prob.driver.opt_settings[
             'Scaling'] = 1  # Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1, 1])
 
-        prob.driver.opt_settings['rtol'] = 1E-3  # Relative Tolerance for Lagrange Multipliers
-
-        prob.driver.opt_settings['atol'] = 1E-2  # Absolute Tolerance for Lagrange Function
-
-        prob.driver.opt_settings['dtol'] = 1E-1  # Relative Tolerance in Distance of All Particles to Terminate (GCPSO)
-
-        prob.driver.opt_settings['itol'] = 1E-3  # Absolute Tolerance for Inequality constraints
-
-        prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
+        # prob.driver.opt_settings['rtol'] = 1E-3  # Relative Tolerance for Lagrange Multipliers
+        #
+        # prob.driver.opt_settings['atol'] = 1E-2  # Absolute Tolerance for Lagrange Function
+        #
+        # prob.driver.opt_settings['dtol'] = 1E-1  # Relative Tolerance in Distance of All Particles to Terminate (GCPSO)
+        #
+        # prob.driver.opt_settings['itol'] = 1E-3  # Absolute Tolerance for Inequality constraints
+        #
+        # prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
         prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
         prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
