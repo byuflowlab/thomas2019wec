@@ -267,6 +267,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
             "./image_data/opt_results/snopt_weca_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
             "./image_data/opt_results/snopt_wecd_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_ps = np.loadtxt(
+            "./image_data/opt_results/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
 
     elif nturbs == 38:
                 # load data
@@ -276,6 +278,9 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
             "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
             "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_ps = np.loadtxt(
+            "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
     elif nturbs == 60:
                 # load data
         data_snopt_no_wec = np.loadtxt(
@@ -284,6 +289,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
             "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
             "./image_data/opt_results/snopt_wec_diam_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+        data_ps = np.loadtxt(
+            "./image_data/opt_results/ps_multistart_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
     else:
         ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
 
@@ -339,14 +346,28 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     snw_mean_run_improvement = np.average(snw_run_improvement)
     snw_std_improvement = np.std(snw_run_improvement)
 
+    ps_id = data_ps[:, 0]
+    ps_ef = np.ones_like(ps_id)
+    ps_orig_aep = data_ps[0, 4]
+    # swa_run_start_aep = data_ps[0, 7]
+    ps_run_end_aep = data_ps[:, 6]
+    ps_run_time = data_ps[:, 7]
+    ps_fcalls = data_ps[:, 8]
+    ps_scalls = data_ps[:, 9]
+
+    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+    ps_run_improvement = ps_run_end_aep / swa_orig_aep - 1.
+    ps_mean_run_improvement = np.average(ps_run_improvement)
+    ps_std_improvement = np.std(ps_run_improvement)
+
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
-    labels = list(['SNOPT', 'SNOPT+WECA', 'SNOPT+WECD'])
+    labels = list(['SNOPT', 'SNOPT+WECA', 'SNOPT+WECD', 'ALPSO'])
     # labels = list('abcd')
     # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
-    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale])
+    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP (GWh)')
@@ -370,7 +391,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     fig, ax = plt.subplots(1)
 
-    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100])
+    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, ps_run_improvement*100])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP Improvement (%)')
@@ -394,7 +415,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E5
     # data = np.array([snw_fcalls+snw_scalls, swa_fcalls+swa_scalls, ps_fcalls, ga_fcalls])/scale_by
-    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by])
+    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
     ax.boxplot(data, meanline=True, labels=labels)
     # ax.hist(snw_fcalls+snw_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
     # ax.hist((swa_fcalls+swa_scalls)[swa_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
@@ -423,7 +444,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E3
 
-    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by])
+    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
 
     bp = ax.boxplot(data, meanline=True, labels=labels)
 
@@ -483,7 +504,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
         swd_time[i] = np.sum(swd_run_time[swd_id == i])
 
     # data = list([snw_run_time/60., swa_time/60., ps_run_time/60., ga_run_time/60.])
-    data = list([snw_run_time/60., swa_time/60., swd_time/60.])
+    data = list([snw_run_time/60., swa_time/60., swd_time/60., ps_run_time/60.])
     ax.boxplot(data, meanline=True, labels=labels)
     # y_formatter = ticker.ScalarFormatter(useOffset=True)
     # ax.yaxis.set_major_formatter(y_formatter)
@@ -519,6 +540,7 @@ def plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs):
     # load data
     # data_snopt_mstart = np.loadtxt("./image_data/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
     data_snop_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    data_ps = np.loadtxt("./image_data/ps_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
@@ -1785,8 +1807,8 @@ if __name__ == "__main__":
     # filename = "./images/38turbs_results"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    # filename = "./images/60turbs_results"
-    # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
+    filename = "./images/60turbs_results"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
@@ -1803,8 +1825,8 @@ if __name__ == "__main__":
     # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
     # plot_results_nruns(filename, save_figs, show_figs)
 
-    filename = "amalia_farm_60Turbines_5DSpacing_start.pdf"
-    plot_any_farm(filename, save_figs, show_figs, nturbs=60)
+    # filename = "amalia_farm_60Turbines_5DSpacing_start.pdf"
+    # plot_any_farm(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/one_hundred_sampling_points.pdf"
     # plot_100_rotor_points(filename, save_figs, show_figs, npoints=40)
