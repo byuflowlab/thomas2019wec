@@ -363,7 +363,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
-    labels = list(['SNOPT', 'SNOPT+WECA', 'SNOPT+WECD', 'ALPSO'])
+    labels = list(['SNOPT', 'WECA', 'WECD', 'ALPSO'])
     # labels = list('abcd')
     # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
@@ -650,6 +650,7 @@ def plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     plt.tick_params(top='off', right='off')
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename+'_aep.pdf', transparent=True)
@@ -1801,13 +1802,13 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
 
-    # filename = "./images/16turbs_results"
-    # plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
+    filename = "./images/16turbs_results_alpso"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
     #
-    # filename = "./images/38turbs_results"
-    # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
+    filename = "./images/38turbs_results_alpso"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/60turbs_results"
+    filename = "./images/60turbs_results_alpso"
     plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/38turbs_results_hist"

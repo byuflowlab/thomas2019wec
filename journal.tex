@@ -71,7 +71,7 @@ The WEC method is comprised of three basic steps:
     \item If necessary, add a factor to the model such that the wake spread can be directly controlled without significantly altering the wake deficit in the center of the wake. (While we assume that it is important to avoid altering the velocity in the wake significantly, this assumption should be the subject of future study.)
     \item Run a series of optimizations such that the wake spread is larger than normal for the first optimization, and then reduces with each subsequent optimization until the wake spread is no longer altered from the original model. The result of each optimization after the first should be started using the optimal layout found in the previous optimization.
 \end{enumerate}
-By spreading the wakes, we can effectively fill in the gaps between wakes so that a gradient-based optimization algorithm can bypass local optima and proceed to a better solution. Another way of thinking about this is that by spreading the wakes, more turbines see the influence of each wake, which provides more information to the gradient-based optimization algorithm about the design space through the Jacobian.
+By spreading the wakes, we can effectively fill in the gaps between wakes so that a gradient-based optimization algorithm can bypass local optima and proceed to a better solution. Another way of thinking about this is that by spreading the wakes, more turbines see the influence of each wake, which provides more information to the gradient-based optimization algorithm about the design space through the Jacobian. We have investigated three ways of spreading the wake: (1) multiplying the wake spreading angle (WECA), (2) multiplying the initial wake diameter (WECD), and (3) a sort of hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at an estimated point of far wake onset and allowing the wake to follow an angled line from the edge of the turbine to the expanded far wake diameter (WECH). 
 
 \section{Wake and Wind Farm Models}
 Because of the general nature of the proposed method, it could theoretically be applied to a range of wake models. In this study we have applied WEC to the cosine version of the Jensen model \cite{jensen1983}, the FLORIS model \cite{gebraad2014,thomas2017-Improving-FLORIS}, and the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}. We also used various other models necessary for combining wakes and calculating wind farm AEP.
@@ -311,6 +311,27 @@ Results using this method are forthcoming, but a preliminary investigation of th
 
 \subsubsection{Bastankhah and Port\'e-Agel WEC Step (3)}
 To gain the benefits of WEC without losing the accuracy of the wake model, the optimization must be run multiple times, in a continuation approach, with values of $\xi$ decreasing to unity. The results from optimizing with each value of $\xi$ can then be used to warm start the next optimization. In this way, the gradient-based optimization can intelligently explore the design space and then refine the model to find a final, more accurate, result. The iterative optimizations are generally fairly fast due to starting from the previous optimized solution, so WEC does not necessarily take as long to run as an equal number of independent optimizations. For the optimization results presented in this paper, $\xi$ took on the values [3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]. These values were selected primarily through trial and error. The selection of these values should be investigated in more depth in future work.
+
+\subsubsection{Application of WECH to the Bastankhah and Port\'{e}-Agel Model}
+The basic theory for applying WECH to the Bastankhah and Port\'{e}-Agel model is shown in \cref{eq:sig0,eq:sig0wech,eq:sigywech}.
+%
+\begin{equation}\label{eq:sig0}
+\sigma_{yo} = D_r\frac{\cos(\gamma)}{\sqrt(8)}
+\end{equation}
+%
+\begin{equation}\label{eq:sig0wech}
+\sigma_{yo_{WEC}} = \xi \sigma_{yo}
+\end{equation}
+%
+\begin{align}\label{eq:sigywech}
+\sigma_{y_{WEC}} = &
+\begin{cases}
+\xi (k_y (x-x_0) + d \frac{\cos(\gamma)}{\sqrt(8)}) & x > x_0 \\
+\sigma_0 + x \frac{\sigma_{y0_{WEC}}-\sigma_0}{x_0} & x \le x_0 \\
+\end{cases}
+\end{align}
+%
+Where $\sigma_{yo}$ is the wake spread at the onset of the far wake, $\sigma_{yo_{WEC}}$ is the wake spread at the onset of far wake after the application of the expansion factor, and $\sigma_{y_{WEC}}$ is the horizontal wake spread to be used in the exponential terms of the Bastankhah and Port\'{e}-Agel model.
 
 \subsection{Applying WEC to the Jensen Cosine Wake Model}
 In this section we apply WEC, step by step as presented in \cref{sec:dsrop}, to the Jensen Cosine wake model. Below in \cref{fig:JensenDiagrams} is a diagram displaying the Jensen Cosine wake model from an overhead perspective. This diagram will give context to the variables and parameters discussed in this section.
@@ -596,7 +617,7 @@ Case 3 was selected to provide a larger and more realistic problem. The Amalia w
 	\end{minipage}\hspace{1pc}%
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{demo}
+%		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{demo}
 		\caption{Direction probability wind rose for case 1. This wind rose is composed of a double Gaussian distribution binned into 20 directions.}
 		\label{fig:amalia_wind_rose}
 	\end{minipage} 
@@ -706,6 +727,25 @@ Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The S
 \end{minipage}
 \end{figure}
 %
+\begin{figure}[h!]  
+	\centering
+	\begin{minipage}[t]{18pc}    
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{16turbs_results_alpso_aep}
+		\caption{Box plot comparing the AEP results across each optimization approach for case 1 (16     turbines) with WECA, WECD, and WECH.}
+		\label{fig:aep1}
+	\end{minipage}\hspace{1pc}
+	\begin{minipage}[t]{18pc}    
+		\centering
+		\def\big{\includegraphics[width=\textwidth]{16turbs_results_alpso_fcalls}}
+%		\def\little{\includegraphics[width=0.5\textwidth]{16turbs_results_fcalls_snopt}}
+		\def\stackalignment{l}
+		\topinset{}{\big}{1cm}{1.25cm}
+		
+		\caption{Box plot comparing the number of function calls used by each optimization approach for case 1 (16 turbines) with WECA, WECD, and WECH.}
+		\label{fig:fcalls1-1}
+	\end{minipage}
+\end{figure}
 
 \subsection{Case 2 Results}
 
@@ -733,6 +773,26 @@ It may be noted that the function calls required for each method to solve case 2
 \caption{Box plot comparing the number of function calls used by each optimization approach for case 2 (38 turbines).}
 \label{fig:fcalls2}
 \end{minipage} 
+\end{figure}
+%
+\begin{figure}[ht]
+	\centering
+	\begin{minipage}[t]{18pc}
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{38turbs_results_alpso_aep}
+		\caption{Box plot comparing the AEP results across each optimization approach for case 2 (38 turbines) with WECA, WECD, and ALPSO.}
+		\label{fig:aep2}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{18pc}
+		\centering
+		\def\big{\includegraphics[width=\textwidth]{38turbs_results_alpso_fcalls}}
+%		\def\little{\includegraphics[width=0.5\textwidth]{38turbs_results_alpso_fcalls_snopt}}
+		\def\stackalignment{l}
+		\topinset{}{\big}{1cm}{1.25cm}
+		
+		\caption{Box plot comparing the number of function calls used by each optimization approach for case 2 (38 turbines) with WECA, WECD, and ALPSO.}
+		\label{fig:fcalls2-1}
+	\end{minipage} 
 \end{figure}
 %
 \begin{table}
@@ -779,16 +839,16 @@ Results for case 3 are presented in \cref{fig:aep3,fig:fcalls3,tab:case3}.
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{60turbs_results_aep}
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{60turbs_results_alpso_aep}
 		\caption{Box plot comparing the AEP results across each optimization approach for case 3 (60 turbines).}
 		\label{fig:aep3}
 	\end{minipage}\hspace{1pc}%
 	\begin{minipage}[t]{18pc}
 		\centering
-		\def\big{\includegraphics[width=\textwidth]{60turbs_results_fcalls}}
+		\def\big{\includegraphics[width=\textwidth]{60turbs_results_alpso_fcalls}}
 %		\def\little{\includegraphics[width=0.5\textwidth]{60turbs_results_fcalls_snopt}}
 		\def\stackalignment{l}
-		\topinset{\little}{\big}{1cm}{1.25cm}
+		\topinset{}{\big}{1cm}{1.25cm}
 		
 		\caption{Box plot comparing the number of function calls used by each optimization approach for case 3 (60 turbines).}
 		\label{fig:fcalls3}
