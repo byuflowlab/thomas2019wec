@@ -180,7 +180,7 @@ if __name__ == "__main__":
         relax = False
         output_directory = "./output_files/%s/" % opt_algorithm
     else:
-        raise ValueError('wec_method must be diam, angle, or none')
+        raise ValueError('wec_method must be diam, angle, hybrid, or none')
 
     # create output directory if it does not exist yet
     import distutils.dir_util
@@ -370,7 +370,7 @@ if __name__ == "__main__":
         windFrequencies = windRose[:, 2]
         size = np.size(windDirections)
     elif wind_rose_file is 'amalia':
-        windRose = np.loadtxt(input_directory + 'amalia.txt')
+        windRose = np.loadtxt(input_directory + 'windrose_amalia_directionally_averaged_speeds.txt')
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
@@ -380,6 +380,11 @@ if __name__ == "__main__":
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
+        size = np.size(windDirections)
+    elif wind_rose_file is '1d':
+        windDirections = np.array([270.])
+        windSpeeds = np.array([8.0])
+        windFrequencies = np.array([1.0])
         size = np.size(windDirections)
     else:
         size = 20
@@ -685,7 +690,7 @@ if __name__ == "__main__":
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = expansion_factor
                 elif wec_method == 'angle':
-                    prob['model_params:exp_rate_multiplier'] = expansion_factor
+                    prob['model_params:wec_factor'] = expansion_factor
 
             # run the problem
             print(prob, 'start %s run' % (MODELS[model]))
@@ -817,7 +822,7 @@ if __name__ == "__main__":
         print(prob, 'wind farm power in each direction (kW): %s' % prob['dirPowers'])
         print(prob, 'Initial AEP (kWh): %s' % AEP_init_opt)
         print(prob, 'Final AEP (kWh): %s' % AEP_run_opt)
-        print(prob, 'AEP improvement: %s' % (AEP_run_opt / AEP_init_opt))
+        print(prob, 'AEP percent improvement: %s' % (100.0*((AEP_run_opt / AEP_init_opt) - 1.0)))
 
     # plot_round_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x, boundary_y, boundary_x[1] - boundary_x[0],
 #                      show_start=show_end)

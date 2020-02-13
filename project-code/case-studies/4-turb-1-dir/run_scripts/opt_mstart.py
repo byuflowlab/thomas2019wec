@@ -623,16 +623,17 @@ if __name__ == "__main__":
         prob['model_params:ti_calculation_method'] = ti_calculation_method
         prob['model_params:wake_model_version'] = wake_model_version
         prob['model_params:wec_factor'] = 1.0
-        prob['model_params:calc_k_star'] = calc_k_star_calc
-        prob['model_params:sort'] = sort_turbs
-        prob['model_params:z_ref'] = z_ref
-        prob['model_params:z_0'] = z_0
-        prob['model_params:ky'] = k_calc
-        prob['model_params:kz'] = k_calc
-        prob['model_params:print_ti'] = print_ti
-        prob['model_params:shear_exp'] = shear_exp
-        prob['model_params:I'] = TI
-        prob['model_params:sm_smoothing'] = sm_smoothing
+        prob['model_params:wec_spreading_angle'] = 0.0
+        prob['model_params:calc_k_star'] = np.copy(calc_k_star_calc)
+        prob['model_params:sort'] = np.copy(sort_turbs)
+        prob['model_params:z_ref'] = np.copy(z_ref)
+        prob['model_params:z_0'] = np.copy(z_0)
+        prob['model_params:ky'] = np.copy(k_calc)
+        prob['model_params:kz'] = np.copy(k_calc)
+        prob['model_params:print_ti'] = np.copy(print_ti)
+        prob['model_params:shear_exp'] = np.copy(shear_exp)
+        prob['model_params:I'] = np.copy(TI)
+        prob['model_params:sm_smoothing'] = np.copy(sm_smoothing)
         prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
@@ -693,7 +694,7 @@ if __name__ == "__main__":
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = expansion_factor
                 elif wec_method == 'angle':
-                    prob['model_params:wec_factor'] = expansion_factor
+                    prob['model_params:wec_spreading_angle'] = np.copy(expansion_factor)
 
             # run the problem
             print(prob, 'start %s run' % (MODELS[model]))

@@ -132,7 +132,7 @@ if __name__ == "__main__":
     #opt_alg_number = 0
 
     # select wec method
-    wec_methods = ['none', 'diam', 'angle']
+    wec_methods = ['none', 'diam', 'angle', 'hybrid']
     wec_method = wec_methods[wec_method_number]
 
     # set model
@@ -170,34 +170,31 @@ if __name__ == "__main__":
 
     wake_model_version = 2016
 
+    WECH = 0
     if wec_method == 'diam':
         output_directory = "../output_files/%s_wec_diam/" % opt_algorithm
         relax = True
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
     elif wec_method == 'angle':
         output_directory = "../output_files/%s_wec_angle/" % opt_algorithm
         relax = True
+        expansion_factors = 10 * np.array([50, 40, 30, 20, 10, 0.0, 0.0])
+    elif wec_method == 'hybrid':
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+        output_directory = "../output_files/%s_wec_hybrid/" % opt_algorithm
+        relax = True
+        WECH = 1
     elif wec_method == 'none':
         relax = False
         output_directory = "../output_files/%s/" % opt_algorithm
     else:
-        raise ValueError('wec_method must be diam, angle, or none')
+        raise ValueError('wec_method must be diam, angle, hybrid, or none')
 
     # create output directory if it does not exist yet
     import distutils.dir_util
     distutils.dir_util.mkpath(output_directory)
 
     differentiable = True
-
-    if wec_method == 'diam':
-        # expansion_factors = np.array([12, 1.0, 1.0])
-        # expansion_factors = np.array([12, 6., 1.0, 1.0])
-        # expansion_factors = np.array([30., 28., 26., 24., 22., 20., 18., 16., 14., 12., 10., 8., 6., 4., 2., 1.0, 1.0])
-        expansion_factors = np.array([3.0, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    elif wec_method == 'angle':
-        # expansion_factors = np.array([50., 0.0, 0.0])
-        # expansion_factors = np.array([50., 25., 0.0, 0.0])
-        # expansion_factors = np.array([60, 45., 30., 15., 0.0, 0.0])
-        expansion_factors = np.array([60., 50., 40., 30., 20., 10., 0.0, 0.0])
 
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
@@ -261,6 +258,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 4.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 16.  # m/s
         rated_power = 2000.  # kW
         generator_efficiency = 0.944
 
@@ -289,6 +288,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 3.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 11.4  # m/s
         rated_power = 5000.  # kW
         generator_efficiency = 0.944
 
@@ -375,6 +376,11 @@ if __name__ == "__main__":
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
+        size = np.size(windDirections)
+    elif wind_rose_file is '1d':
+        windDirections = np.array([270.])
+        windSpeeds = np.array([8.0])
+        windFrequencies = np.array([1.0])
         size = np.size(windDirections)
     else:
         size = 1
@@ -566,10 +572,13 @@ if __name__ == "__main__":
     prob['Cp_in'] = np.copy(Cp)
     prob['cp_curve_cp'] = np.copy(cp_curve_cp)
     prob['cp_curve_wind_speed'] = np.copy(cp_curve_wind_speed)
-    cutInSpeeds = np.ones(nTurbines) * cut_in_speed
-    prob['cut_in_speed'] = np.copy(cutInSpeeds)
-    ratedPowers = np.ones(nTurbines) * rated_power
-    prob['rated_power'] = np.copy(ratedPowers)
+
+    # assign values to turbine states
+    prob['cut_in_speed'] = np.ones(nTurbines) * cut_in_speed
+    prob['cut_out_speed'] = np.ones(nTurbines) * cut_out_speed
+    prob['rated_power'] = np.ones(nTurbines) * rated_power
+    prob['rated_wind_speed'] = np.ones(nTurbines) * rated_wind_speed
+    prob['use_power_curve_definition'] = True
 
     # assign boundary values
     # prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
@@ -591,6 +600,7 @@ if __name__ == "__main__":
         prob['model_params:shear_exp'] = np.copy(shear_exp)
         prob['model_params:I'] = np.copy(TI)
         prob['model_params:sm_smoothing'] = np.copy(sm_smoothing)
+        prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
@@ -791,7 +801,7 @@ if __name__ == "__main__":
         print('AEP improvement: %s' % (AEP_run_opt / AEP_init_opt))
         print('Total time to optimize (s): %f' %(total_time))
 
-    plot_square_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x=boundary_x,
-                     boundary_y=boundary_y, min_spacing=minSpacing, show_start=show_end)
+    # plot_square_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x=boundary_x,
+    #                  boundary_y=boundary_y, min_spacing=minSpacing, show_start=show_end)
     # plot_round_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x, boundary_y, boundary_x[1] - boundary_x[0],
 #                      show_start=show_end)

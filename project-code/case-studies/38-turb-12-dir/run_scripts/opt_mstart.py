@@ -140,7 +140,7 @@ if __name__ == "__main__":
     opt_algorithm = opt_algs[opt_alg_number]
 
     # select wec method
-    wec_methods = ['none', 'diam', 'angle']
+    wec_methods = ['none', 'diam', 'angle', 'hybrid']
     wec_method = wec_methods[wec_method_number]
 
     # pop_size = 760
@@ -167,17 +167,25 @@ if __name__ == "__main__":
 
     wake_model_version = 2016
 
+    WECH = 0
     if wec_method == 'diam':
         output_directory = "../output_files/%s_wec_diam/" % opt_algorithm
         relax = True
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
     elif wec_method == 'angle':
         output_directory = "../output_files/%s_wec_angle/" % opt_algorithm
         relax = True
+        expansion_factors = 10 * np.array([50, 40, 30, 20, 10, 0.0, 0.0])
+    elif wec_method == 'hybrid':
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+        output_directory = "../output_files/%s_wec_hybrid/" % opt_algorithm
+        relax = True
+        WECH = 1
     elif wec_method == 'none':
         relax = False
         output_directory = "../output_files/%s/" % opt_algorithm
     else:
-        raise ValueError('wec_method must be diam, angle, or none')
+        raise ValueError('wec_method must be diam, angle, hybrid, or none')
 
     # create output directory if it does not exist yet
     import distutils.dir_util
@@ -185,11 +193,6 @@ if __name__ == "__main__":
 
     differentiable = True
 
-    if wec_method == 'diam':
-        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    elif wec_method == 'angle':
-        # expansion_factors = 10*np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-        expansion_factors = np.array([60., 50., 40., 30., 20., 10., 0.0, 0.0])
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
     # expansion_factors = np.array([20., 10., 5., 2.5, 1.25, 1.0])
@@ -252,6 +255,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 4.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 16.  # m/s
         rated_power = 2000.  # kW
         generator_efficiency = 0.944
 
@@ -280,6 +285,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 3.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 11.4  # m/s
         rated_power = 5000.  # kW
         generator_efficiency = 0.944
 
@@ -367,7 +374,7 @@ if __name__ == "__main__":
         windFrequencies = windRose[:, 2]
         size = np.size(windDirections)
     elif wind_rose_file is 'amalia':
-        windRose = np.loadtxt(input_directory + 'amalia.txt')
+        windRose = np.loadtxt(input_directory + 'windrose_amalia_directionally_averaged_speeds.txt')
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
@@ -598,6 +605,13 @@ if __name__ == "__main__":
     ratedPowers = np.ones(nTurbines) * rated_power
     prob['rated_power'] = ratedPowers
 
+    # assign values to turbine states
+    prob['cut_in_speed'] = np.ones(nTurbines) * cut_in_speed
+    prob['cut_out_speed'] = np.ones(nTurbines) * cut_out_speed
+    prob['rated_power'] = np.ones(nTurbines) * rated_power
+    prob['rated_wind_speed'] = np.ones(nTurbines) * rated_wind_speed
+    prob['use_power_curve_definition'] = True
+
     # assign boundary values
     prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
     prob['boundary_radius'] = boundary_radius
@@ -618,6 +632,7 @@ if __name__ == "__main__":
         prob['model_params:shear_exp'] = np.copy(shear_exp)
         prob['model_params:I'] = np.copy(TI)
         prob['model_params:sm_smoothing'] = np.copy(sm_smoothing)
+        prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
