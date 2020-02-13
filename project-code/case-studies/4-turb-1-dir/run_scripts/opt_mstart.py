@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     # specify which starting layout should be used
     # layout_number = int(sys.argv[1])
-    layout_number = 0
+    layout_number = 100
     # relax_method = int(sys.argv[2])
     wec_method_number = 0
     # model_number = int(sys.argv[3])
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     opt_algorithm = opt_algs[opt_alg_number]
 
     # select wec method
-    wec_methods = ['none', 'diam', 'angle']
+    wec_methods = ['none', 'diam', 'angle', 'hybrid']
     wec_method = wec_methods[wec_method_number]
 
     # pop_size = 760
@@ -159,32 +159,35 @@ if __name__ == "__main__":
     print_ti = False
     sort_turbs = True
 
-    turbine_type = 'NREL5MW'  # can be 'V80' or 'NREL5MW'
+    turbine_type = 'V80'  # can be 'V80' or 'NREL5MW'
 
     wake_model_version = 2016
 
+    WECH = 0
     if wec_method == 'diam':
         output_directory = "./output_files/%s_wec_diam/" % opt_algorithm
         relax = True
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
     elif wec_method == 'angle':
         output_directory = "./output_files/%s_wec_angle/" % opt_algorithm
         relax = True
+        expansion_factors = 10 * np.array([50, 40, 30, 20, 10, 0.0, 0.0])
+    elif wec_method == 'hybrid':
+        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
+        output_directory = "./output_files/%s_wec_hybrid/" % opt_algorithm
+        relax = True
+        WECH = 1
     elif wec_method == 'none':
         relax = False
         output_directory = "./output_files/%s/" % opt_algorithm
     else:
-        raise ValueError('wec_method must be diam, angle, or none')
+        raise ValueError('wec_method must be diam, angle, hybrid, or none')
 
     # create output directory if it does not exist yet
     import distutils.dir_util
     distutils.dir_util.mkpath(output_directory)
 
     differentiable = True
-
-    if wec_method == 'diam':
-        expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-    elif wec_method == 'angle':
-        expansion_factors = 10*np.array([50, 40, 30, 20, 10, 0.0, 0.0])
 
     # for expansion_factor in np.array([5., 4., 3., 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0]):
     # for expansion_factor in np.array([20., 15., 10., 5., 4., 3., 2.5, 1.25, 1.0]):
@@ -225,7 +228,7 @@ if __name__ == "__main__":
 
     nRotorPoints = 1
 
-    wind_rose_file = 'amalia'  # can be one of: 'amalia', 'nantucket', 'directional
+    wind_rose_file = '1d'  # can be one of: 'amalia', 'nantucket', 'directional', '1d', or 'none'
 
     TI = 0.108
     k_calc = 0.3837 * TI + 0.003678
@@ -248,6 +251,8 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 4.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 16.  # m/s
         rated_power = 2000.  # kW
         generator_efficiency = 0.944
 
@@ -276,14 +281,16 @@ if __name__ == "__main__":
 
         # load performance characteristics
         cut_in_speed = 3.  # m/s
+        cut_out_speed = 25.  # m/s
+        rated_wind_speed = 11.4  # m/s
         rated_power = 5000.  # kW
         generator_efficiency = 0.944
 
         filename = input_directory + "NREL5MWCPCT_dict.p"
         # filename = "../input_files/NREL5MWCPCT_smooth_dict.p"
-        import cPickle as pickle
+        import pickle
 
-        data = pickle.load(open(filename, "rb"))
+        data = pickle.load(open(filename, "rb"), encoding='latin1')
         ct_curve = np.zeros([data['wind_speed'].size, 2])
         ct_curve_wind_speed = data['wind_speed']
         ct_curve_ct = data['CT']
@@ -373,6 +380,11 @@ if __name__ == "__main__":
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
+        size = np.size(windDirections)
+    elif wind_rose_file is '1d':
+        windDirections = np.array([270.])
+        windSpeeds = np.array([8.0])
+        windFrequencies = np.array([1.0])
         size = np.size(windDirections)
     else:
         size = 20
@@ -595,6 +607,13 @@ if __name__ == "__main__":
     ratedPowers = np.ones(nTurbines) * rated_power
     prob['rated_power'] = ratedPowers
 
+    # assign values to turbine states
+    prob['cut_in_speed'] = np.ones(nTurbines) * cut_in_speed
+    prob['cut_out_speed'] = np.ones(nTurbines) * cut_out_speed
+    prob['rated_power'] = np.ones(nTurbines) * rated_power
+    prob['rated_wind_speed'] = np.ones(nTurbines) * rated_wind_speed
+    prob['use_power_curve_definition'] = True
+
     # assign boundary values
     # prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
     # prob['boundary_radius'] = boundary_radius
@@ -614,6 +633,7 @@ if __name__ == "__main__":
         prob['model_params:shear_exp'] = shear_exp
         prob['model_params:I'] = TI
         prob['model_params:sm_smoothing'] = sm_smoothing
+        prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
@@ -805,10 +825,10 @@ if __name__ == "__main__":
         print(prob, 'wind farm power in each direction (kW): %s' % prob['dirPowers'])
         print(prob, 'Initial AEP (kWh): %s' % AEP_init_opt)
         print(prob, 'Final AEP (kWh): %s' % AEP_run_opt)
-        print(prob, 'AEP improvement: %s' % (AEP_run_opt / AEP_init_opt))
+        print(prob, 'AEP percent improvement: %s' % (100.0*((AEP_run_opt / AEP_init_opt) - 1.0)))
 
     if show_end:
-        plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x=np.array(
+        plot_square_farm(prob['turbineX'], prob['turbineY'], rotor_diameter, boundary_x=np.array(
             [0 * rotor_diameter, (5. * (np.sqrt(nTurbines) - 1) + 1) * rotor_diameter]),
                          boundary_y=np.array(
                              [0 * rotor_diameter, (5. * (np.sqrt(nTurbines) - 1) + 1) * rotor_diameter]),

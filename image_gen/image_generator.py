@@ -1800,16 +1800,16 @@ if __name__ == "__main__":
 
     filename = ''
 
-    # get_statistics_38_turbs()
+    get_statistics_38_turbs()
 
-    filename = "./images/16turbs_results_alpso"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
+    # filename = "./images/16turbs_results_alpso"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
     #
-    filename = "./images/38turbs_results_alpso"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = "./images/38turbs_results_alpso"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/60turbs_results_alpso"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
+    # filename = "./images/60turbs_results_alpso"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
