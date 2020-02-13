@@ -119,7 +119,7 @@ if __name__ == "__main__":
     # layout_number = int(sys.argv[1])
     layout_number = 100
     # relax_method = int(sys.argv[2])
-    wec_method_number = 0
+    wec_method_number = 3
     # model_number = int(sys.argv[3])
     model = 1
     # opt_alg_number = int(sys.argv[4])
@@ -693,7 +693,7 @@ if __name__ == "__main__":
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = expansion_factor
                 elif wec_method == 'angle':
-                    prob['model_params:exp_rate_multiplier'] = expansion_factor
+                    prob['model_params:wec_factor'] = expansion_factor
 
             # run the problem
             print(prob, 'start %s run' % (MODELS[model]))
