@@ -3,7 +3,7 @@
 #SBATCH --time=1:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
 #SBATCH --mem-per-cpu=1G  # memory per CPU core
-#SBATCH -J "9 turbs snopt diam wec"   # job name
+#SBATCH -J "9 turbs snopt wec hybrid"   # job name
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
@@ -12,7 +12,7 @@
 #SBATCH -C rhel7
 
 echo ${SLURM_ARRAY_TASK_ID}
-wec_method_number=1
+wec_method_number=3
 model_number=1
 op_alg_number=0
 

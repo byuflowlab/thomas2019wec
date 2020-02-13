@@ -3,7 +3,7 @@
 #SBATCH --time=72:00:00   # walltime
 #SBATCH --ntasks=6   # number of processor cores per sub-job(i.e. tasks)
 #SBATCH --mem-per-cpu=2G  # memory per CPU core
-#SBATCH -J "60 turb 36 dir turbs snopt no wec"   # job name
+#SBATCH -J "60 turb 36 dir turbs snopt diam wec"   # job name
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
