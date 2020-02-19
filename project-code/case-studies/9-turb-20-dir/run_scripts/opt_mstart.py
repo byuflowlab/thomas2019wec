@@ -178,7 +178,7 @@ if __name__ == "__main__":
     elif wec_method == 'angle':
         output_directory = "../output_files/%s_wec_angle/" % opt_algorithm
         relax = True
-        expansion_factors = 10 * np.array([50, 40, 30, 20, 10, 0.0, 0.0])
+        expansion_factors = np.array([50, 40, 30, 20, 10, 0.0, 0.0])
     elif wec_method == 'hybrid':
         expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
         output_directory = "../output_files/%s_wec_hybrid/" % opt_algorithm
