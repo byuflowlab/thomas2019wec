@@ -1,6 +1,8 @@
 from __future__ import print_function
 
-from openmdao.api import Problem, pyOptSparseDriver, view_connections, SqliteRecorder
+import openmdao.api as om
+from openmdao.devtools import iprofile
+
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
@@ -178,6 +180,7 @@ if __name__ == "__main__":
         expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
         output_directory = "../output_files/%s_wec_hybrid/" % opt_algorithm
         relax = True
+        WECH = 1
     elif wec_method == 'none':
         relax = False
         output_directory = "../output_files/%s/" % opt_algorithm
@@ -395,7 +398,7 @@ if __name__ == "__main__":
 
     if MODELS[model] == 'BPA':
         # initialize problem
-        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=gauss_wrapper,
@@ -407,7 +410,7 @@ if __name__ == "__main__":
 
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                               minSpacing=minSpacing, differentiable=differentiable,
                                               use_rotor_components=False,
                                               wake_model=floris_wrapper,
@@ -425,9 +428,16 @@ if __name__ == "__main__":
     # prob.model.deriv_options['type'] = 'fd'
     # prob.model.deriv_options['form'] = 'central'
     # prob.model.deriv_options['step_size'] = 1.0e-8
-    # from openmdao.api import DirectSolver
-    # prob.model.linear_solver = DirectSolver()
-    prob.driver = pyOptSparseDriver()
+    # prob.model.linear_solver = om.LinearBlockGS()
+    # prob.model.linear_solver.options['iprint'] = 0
+    # prob.model.linear_solver.options['maxiter'] = 5
+    #
+    # prob.model.nonlinear_solver = om.NonlinearBlockGS()
+    # prob.model.nonlinear_solver.options['iprint'] = 0
+
+    # prob.model.linear_solver = om.DirectSolver()
+
+    prob.driver = om.pyOptSparseDriver()
 
     if opt_algorithm == 'snopt':
         # set up optimizer

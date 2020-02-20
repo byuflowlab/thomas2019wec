@@ -385,6 +385,11 @@ if __name__ == "__main__":
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
         size = np.size(windDirections)
+    elif wind_rose_file is '1d':
+        windDirections = np.array([270.])
+        windSpeeds = np.array([8.0])
+        windFrequencies = np.array([1.0])
+        size = np.size(windDirections)
     else:
         size = 20
         windDirections = np.linspace(0, 270, size)
