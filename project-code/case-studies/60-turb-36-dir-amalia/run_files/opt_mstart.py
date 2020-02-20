@@ -140,7 +140,7 @@ if __name__ == "__main__":
     opt_algorithm = opt_algs[opt_alg_number]
 
     # select wec method
-    wec_methods = ['none', 'diam', 'angle']
+    wec_methods = ['none', 'diam', 'angle', 'hybrid']
     wec_method = wec_methods[wec_method_number]
 
     # pop_size = 760
