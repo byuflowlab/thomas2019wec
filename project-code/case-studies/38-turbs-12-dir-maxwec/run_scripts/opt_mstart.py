@@ -119,16 +119,16 @@ if __name__ == "__main__":
     # set up this run
 
     # specify which starting layout should be used
-    # layout_number = int(sys.argv[1])
-    layout_number = 0
-    # wec_method_number = int(sys.argv[2])
-    wec_method_number = 3
-    # model = int(sys.argv[3])
-    model = 1
-    # opt_alg_number = int(sys.argv[4])
-    opt_alg_number = 0
-    # max_wec = int(sys.argv[5])
-    max_wec = 2
+    layout_number = int(sys.argv[1])
+    # layout_number = 0
+    wec_method_number = int(sys.argv[2])
+    # wec_method_number = 3
+    model = int(sys.argv[3])
+    # model = 1
+    opt_alg_number = int(sys.argv[4])
+    # opt_alg_number = 0
+    max_wec = int(sys.argv[5])
+    # max_wec = 2
 
     run_number = layout_number
 
