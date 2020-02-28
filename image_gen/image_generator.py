@@ -260,6 +260,21 @@ def get_statistics_38_turbs():
 
 def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
+    if nturbs == 9:
+        # 202002
+        data_snopt_no_wec = np.loadtxt(
+            "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snopt_weca = np.loadtxt(
+            "./image_data/opt_results/202002240836/angle_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snopt_wecd = np.loadtxt(
+            "./image_data/opt_results/202002240836/diam_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snopt_wech = np.loadtxt(
+            "./image_data/opt_results/202002240836/hybrid_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+        # data_ps = np.loadtxt(
+        #     "./image_data/opt_results/202002240836/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_ps = np.loadtxt(
+            "./image_data/opt_results/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
     if nturbs == 16:
         data_snopt_no_wec = np.loadtxt(
             "./image_data/opt_results/snopt_no_wec_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
@@ -272,12 +287,24 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     elif nturbs == 38:
                 # load data
+        # data_snopt_no_wec = np.loadtxt(
+        #     "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        # data_snopt_weca = np.loadtxt(
+        #     "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        # data_snopt_wecd = np.loadtxt(
+        #     "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        # data_ps = np.loadtxt(
+        #     "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
+        # 202002
         data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
         data_snopt_weca = np.loadtxt(
-            "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/202002240836/angle_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/202002240836/diam_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_snopt_wech = np.loadtxt(
+            "./image_data/opt_results/202002240836/hybrid_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
         data_ps = np.loadtxt(
             "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
@@ -330,6 +357,23 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     swd_mean_run_improvement = np.average(swd_run_improvement)
     swd_std_improvement = np.std(swd_run_improvement)
 
+    swh_id = data_snopt_wech[:, 0]
+    swh_ef = data_snopt_wech[:, 1]
+    swh_ti_opt = data_snopt_wech[:, 3]
+    swh_orig_aep = data_snopt_wech[0, 5]
+    # swh_run_start_aep = data_snopt_wech[0, 7]
+    swh_run_end_aep = data_snopt_wech[swh_ti_opt == 5, 7]
+    swh_run_time = data_snopt_wech[:, 8]
+    swh_fcalls = data_snopt_wech[:, 9]
+    swh_scalls = data_snopt_wech[:, 10]
+
+    swh_tfcalls = swh_fcalls[swh_ti_opt == 5]
+    swh_tscalls = swh_fcalls[swh_ti_opt == 5]
+
+    swh_run_improvement = swh_run_end_aep / swa_orig_aep - 1.
+    swh_mean_run_improvement = np.average(swh_run_improvement)
+    swh_std_improvement = np.std(swh_run_improvement)
+
     # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
     # run time (s), obj func calls, sens func calls
     snw_id = data_snopt_no_wec[:, 0]
@@ -363,11 +407,11 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
-    labels = list(['SNOPT', 'WECA', 'WECD', 'ALPSO'])
+    labels = list(['SNOPT', 'WEC-A', 'WEC-D', 'WEC-H', 'ALPSO'])
     # labels = list('abcd')
     # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
-    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
+    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, swh_run_end_aep*aep_scale,  ps_run_end_aep*aep_scale])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP (GWh)')
@@ -391,7 +435,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     fig, ax = plt.subplots(1)
 
-    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, ps_run_improvement*100])
+    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, swh_run_improvement*100, ps_run_improvement*100])
     ax.boxplot(data, meanline=True, labels=labels)
 
     ax.set_ylabel('AEP Improvement (%)')
@@ -415,7 +459,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E5
     # data = np.array([snw_fcalls+snw_scalls, swa_fcalls+swa_scalls, ps_fcalls, ga_fcalls])/scale_by
-    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (swh_tfcalls+swh_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
     ax.boxplot(data, meanline=True, labels=labels)
     # ax.hist(snw_fcalls+snw_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
     # ax.hist((swa_fcalls+swa_scalls)[swa_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
@@ -444,7 +488,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E3
 
-    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
+    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (swh_tfcalls + swh_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
 
     bp = ax.boxplot(data, meanline=True, labels=labels)
 
@@ -503,8 +547,12 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     for i in np.arange(0, 200):
         swd_time[i] = np.sum(swd_run_time[swd_id == i])
 
+    swh_time = np.zeros(200)
+    for i in np.arange(0, 200):
+        swh_time[i] = np.sum(swh_run_time[swh_id == i])
+
     # data = list([snw_run_time/60., swa_time/60., ps_run_time/60., ga_run_time/60.])
-    data = list([snw_run_time/60., swa_time/60., swd_time/60., ps_run_time/60.])
+    data = list([snw_run_time/60., swa_time/60., swd_time/60., swh_time/60., ps_run_time/60.])
     ax.boxplot(data, meanline=True, labels=labels)
     # y_formatter = ticker.ScalarFormatter(useOffset=True)
     # ax.yaxis.set_major_formatter(y_formatter)
@@ -1800,7 +1848,7 @@ if __name__ == "__main__":
 
     filename = ''
 
-    get_statistics_38_turbs()
+    # get_statistics_38_turbs()
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
@@ -1810,6 +1858,9 @@ if __name__ == "__main__":
 
     # filename = "./images/60turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
+
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
