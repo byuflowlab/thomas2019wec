@@ -129,6 +129,8 @@ if __name__ == "__main__":
     # opt_alg_number = 0
     max_wec = int(sys.argv[5])
     # max_wec = 2
+    wec_step = float(sys.argv[6])
+    # wec_step = 0.25
 
     run_number = layout_number
 
@@ -170,21 +172,21 @@ if __name__ == "__main__":
 
     WECH = 0
     if wec_method == 'diam':
-        output_directory = "../output_files/%s_wec_diam_max_wec_%i/" % (opt_algorithm, max_wec)
+        output_directory = "../output_files/%s_wec_diam_max_wec_%i_wec_step_%.3f/" % (opt_algorithm, max_wec, wec_step)
         relax = True
         # expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
-        expansion_factors = np.arange(1.0, max_wec+0.1, 0.25)
+        expansion_factors = np.arange(1.0, max_wec+0.1, wec_step)
         expansion_factors = np.append(np.flip(expansion_factors), 1.0)
     elif wec_method == 'angle':
-        output_directory = "../output_files/%s_wec_angle_max_wec_%i/" % (opt_algorithm, max_wec)
+        output_directory = "../output_files/%s_wec_angle_max_wec_%i_wec_step_%.3f/" % (opt_algorithm, max_wec, wec_step)
         relax = True
         # expansion_factors = np.array([50, 40, 30, 20, 10, 0.0, 0.0])
-        expansion_factors = np.arange(0.0, max_wec + 0.1, 5)
+        expansion_factors = np.arange(0.0, max_wec + 0.1, wec_step)
         expansion_factors = np.append(np.flip(expansion_factors), 0.0)
     elif wec_method == 'hybrid':
-        expansion_factors = np.arange(1.0, max_wec + 0.1, 0.25)
+        expansion_factors = np.arange(1.0, max_wec + 0.1, wec_step)
         expansion_factors = np.append(np.flip(expansion_factors), 1.0)
-        output_directory = "../output_files/%s_wec_hybrid_max_wec_%i/" % (opt_algorithm, max_wec)
+        output_directory = "../output_files/%s_wec_hybrid_max_wec_%i_wec_step_%.3f/" % (opt_algorithm, max_wec, wec_step)
         relax = True
         WECH = 1
     elif wec_method == 'none':
