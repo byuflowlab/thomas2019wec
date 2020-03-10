@@ -17,4 +17,4 @@ op_alg_number=0
 maxwec=10
 wecstep=10
 
-python3 opt_mstart.py ${SLURM_ARRAY_TASK_ID} $wec_method_number $model_number $op_alg_number $maxwec
+python3 opt_mstart.py ${SLURM_ARRAY_TASK_ID} $wec_method_number $model_number $op_alg_number $maxwec $wecstep $wecstep
