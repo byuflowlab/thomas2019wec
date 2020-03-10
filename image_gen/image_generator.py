@@ -258,6 +258,315 @@ def get_statistics_38_turbs():
 
     return
 
+def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
+
+    if nturbs == 38:
+
+        # 202003
+        nwa = 8
+        nwd = 9
+        nwh = 9
+
+        nwaarray = np.zeros(nwa)
+        nwdarray = np.zeros(nwd)
+        nwharray = np.zeros(nwh)
+
+        # prepare to store max aep percent improvement values
+        max_aepi = np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()])
+
+        # prepare to store min aep percent improvement values
+        min_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store median aep percent improvement values
+        med_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store median aep percent improvement values
+        mean_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store standard deviation of aep percent improvement values
+        std_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # set results directory
+        rdir = "./image_data/opt_results/202003061434-max-wec-val/"
+
+        # set wec method directory perfixes
+        wadirp = "snopt_wec_angle_max_wec_"
+        wddirp = "snopt_wec_diam_max_wec_"
+        whdirp = "snopt_wec_hybrid_max_wec_"
+
+        approaches = np.array([wadirp,wddirp,whdirp])
+
+        # set base file name
+        bfilename = "_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt"
+
+        # set max wec values for each method
+        wavals = np.array([10,20,30,40,50,60,70,80])
+        wdvals = np.array([2,3,4,5,6,7,8,9,10])
+        whvals = np.array([2,3,4,5,6,7,8,9,10])
+
+        max_wec_ranges = np.array([wavals,wdvals,whvals])
+
+    else:
+        ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
+
+    # load baseline data
+    base_data = np.loadtxt(rdir + wadirp + "10" + "/" + wadirp + "10" + bfilename)
+
+    # store baseline aep value
+    orig_aep = base_data[0, 5]
+
+    # loop through each wec approach
+    for i in np.arange(0,np.size(approaches)):
+        approach = approaches[i]
+        max_wec_range = max_wec_ranges[i]
+        # print(approach)
+        print(max_wec_range)
+        print(np.size(max_wec_range))
+        # loop through each max wec value for current approach
+        for j in np.arange(0, np.size(max_wec_range)):
+            # print(max_wec_range[j])
+            print(j)
+            wec_val = max_wec_range[j]
+
+            # load data set
+            data_file = rdir + approach + str(wec_val) + "/" + approach + str(wec_val) + bfilename
+            try:
+                data_set = np.loadtxt(data_file)
+            except:
+                print("Failed to find data for ", data_file)
+                print("Setting values to None")
+                max_aepi[i][j] = None
+                min_aepi[i][j] = None
+                med_aepi[i][j] = None
+                std_aepi[i][j] = None
+                continue
+
+            # compile data from all intermediate wec values
+            id = data_set[:, 0]
+            ef = data_set[:, 1]
+            ti_opt = data_set[:, 3]
+            run_end_aep = data_set[ti_opt == 5, 7]
+            run_time = data_set[:, 8]
+            fcalls = data_set[:, 9]
+            scalls = data_set[:, 10]
+
+            tfcalls = fcalls[ti_opt == 5]
+            tscalls = fcalls[ti_opt == 5]
+
+            # compute percent improvement from base for current set
+            run_improvement = 100*(run_end_aep / orig_aep - 1.)
+
+            # store max percent improvement from base for current set
+            max_run_improvement = np.max(run_improvement)
+            max_aepi[i][j] = max_run_improvement
+            # if i==2:
+            #     print(max_aepi[i][j])
+
+            # store min percent improvement from base for current set
+            min_run_improvement = np.min(run_improvement)
+            min_aepi[i][j] = min_run_improvement
+
+            # store average percent improvement from base for current set
+            mean_run_improvement = np.average(run_improvement)
+            mean_aepi[i][j] = mean_run_improvement
+
+            # store median percent improvement from base for current set
+            median_run_improvement = np.median(run_improvement)
+            med_aepi[i][j] = median_run_improvement
+
+            # store std percent improvement from base for current set
+            std_improvement = np.std(run_improvement)
+            std_aepi[i][j] = std_improvement
+            # if i==2:
+            #     print(std_aepi[i][j])
+
+        # end loop through wec values
+
+    # end loop through methods
+
+    # load SNOPT data
+    data_snopt_no_wec = np.loadtxt(
+        "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
+    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+    # run time (s), obj func calls, sens func calls
+    snw_id = data_snopt_no_wec[:, 0]
+    snw_ef = np.ones_like(snw_id)
+    snw_orig_aep = data_snopt_no_wec[0, 4]
+    # swa_run_start_aep = data_snopt_relax[0, 7]
+    snw_run_end_aep = data_snopt_no_wec[:, 6]
+    snw_run_time = data_snopt_no_wec[:, 7]
+    snw_fcalls = data_snopt_no_wec[:, 8]
+    snw_scalls = data_snopt_no_wec[:, 9]
+
+    # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
+    snw_run_improvement = 100*(snw_run_end_aep / orig_aep - 1.)
+    snw_mean_run_improvement = np.average(snw_run_improvement)
+    snw_std_improvement = np.std(snw_run_improvement)
+    snw_max_improvement = np.max(snw_run_improvement)
+    snw_min_improvement = np.min(snw_run_improvement)
+
+    # load ALPSO data
+    data_ps = np.loadtxt(
+        "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    ps_id = data_ps[:, 0]
+    ps_ef = np.ones_like(ps_id)
+    ps_orig_aep = data_ps[0, 4]
+    # swa_run_start_aep = data_ps[0, 7]
+    ps_run_end_aep = data_ps[:, 6]
+    ps_run_time = data_ps[:, 7]
+    ps_fcalls = data_ps[:, 8]
+    ps_scalls = data_ps[:, 9]
+
+    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+    ps_run_improvement = 100*(ps_run_end_aep / orig_aep - 1.)
+    ps_mean_run_improvement = np.average(ps_run_improvement)
+    ps_median_run_improvement = np.median(ps_run_improvement)
+    ps_std_improvement = np.std(ps_run_improvement)
+    ps_max_improvement = np.max(ps_run_improvement)
+    ps_min_improvement = np.min(ps_run_improvement)
+
+    # set up plots
+    fig, ax1 = plt.subplots()
+
+    colors = ['tab:red', 'tab:blue']
+    ax1.set_xlabel('Wake Spreading Angle (deg.)', color=colors[0])
+    ax1.set_ylabel("Maximum Improvement (%)")
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
+    ax2 = ax1.twiny()
+    # ax2.set_ylim([0, 10])
+    # plot max percent improvement
+    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+
+
+    ax2.set_xlabel('Diameter Multiplier', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[1])
+
+
+
+    ax1.plot(max_wec_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0])
+    ax2.plot(max_wec_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1])
+    ax2.plot(max_wec_ranges[2], max_aepi[2], 's', label=labels[2], color=colors[1])
+    ax2.plot([2, 10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
+    ax2.plot([2, 10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    print(handles2)
+    fig.legend()
+    fig.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename+'_time.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    # plot min percent improvement
+
+    # set up plots
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('Wake Spreading Angle (deg.)', color=colors[0])
+    ax1.set_ylabel("Minimum Improvement (%)")
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
+    ax2 = ax1.twiny()
+    # ax2.set_ylim([0, 10])
+    # plot max percent improvement
+
+    ax2.set_xlabel('Diameter Multiplier', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[1])
+
+    ax1.plot(max_wec_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0])
+    ax2.plot(max_wec_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1])
+    ax2.plot(max_wec_ranges[2], min_aepi[2], 's', label=labels[2], color=colors[1])
+    ax2.plot([2, 10], [ps_min_improvement, ps_min_improvement], '--k', label=labels[3])
+    ax2.plot([2, 10], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    print(handles2)
+    fig.legend()
+    fig.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename + '_time.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    # plot average percent improvement
+    # set up plots
+    fig, ax1 = plt.subplots()
+
+    ax1.set_xlabel('Wake Spreading Angle (deg.)', color=colors[0])
+    ax1.set_ylabel("Mean Improvement (%)")
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
+    ax2 = ax1.twiny()
+    # ax2.set_ylim([0, 10])
+    # plot max percent improvement
+
+    ax2.set_xlabel('Diameter Multiplier', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[1])
+
+    ax1.plot(max_wec_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0])
+    ax2.plot(max_wec_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1])
+    ax2.plot(max_wec_ranges[2], mean_aepi[2], 's', label=labels[2], color=colors[1])
+    ax2.plot([2, 10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    ax2.plot([2, 10], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+    print(max_aepi[2])
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    fig.legend()
+    fig.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename + '_time.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+
+    # plot median percent improvement
+
+    # plot std percent improvement
+    fig, ax1 = plt.subplots()
+
+
+    ax1.set_xlabel('Wake Spreading Angle (deg.)', color=colors[0])
+    ax1.set_ylabel("Std. of Improvement (%)")
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
+    ax2 = ax1.twiny()
+    # ax2.set_ylim([0, 10])
+    # plot max percent improvement
+
+    ax2.set_xlabel('Diameter Multiplier', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[1])
+
+    ax1.plot(max_wec_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0])
+    ax2.plot(max_wec_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1])
+    ax2.plot(max_wec_ranges[2], std_aepi[2], 's', label=labels[2], color=colors[1])
+    ax2.plot([2, 10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    ax2.plot([2, 10], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    print(handles2)
+    fig.legend()
+    fig.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename + '_time.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    # plot ranges?
+
+    return
+
 def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     if nturbs == 9:
@@ -1860,7 +2169,9 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
+
+    plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
