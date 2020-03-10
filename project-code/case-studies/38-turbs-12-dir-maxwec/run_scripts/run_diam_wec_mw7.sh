@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --time=12:00:00   # walltime
+#SBATCH --time=72:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
 #SBATCH --mem-per-cpu=2G  # memory per CPU core
 #SBATCH -J "38 turbs snopt diam wec mw7"   # job name
@@ -9,7 +9,6 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
 #SBATCH --array=0-199     # job array of size 100
-#SBATCH -C rhel7
 
 echo ${SLURM_ARRAY_TASK_ID}
 wec_method_number=1
