@@ -702,6 +702,8 @@ if __name__ == "__main__":
                 prob['model_params:calc_k_star'] = np.copy(calc_k_star_opt)
                 if wec_method == 'diam':
                     prob['model_params:wec_factor'] = np.copy(expansion_factor)
+                elif wec_method == "hybrid":
+                    prob['model_params:wec_factor'] = np.copy(expansion_factor)
                 elif wec_method == 'angle':
                     prob['model_params:wec_spreading_angle'] = np.copy(expansion_factor)
 
