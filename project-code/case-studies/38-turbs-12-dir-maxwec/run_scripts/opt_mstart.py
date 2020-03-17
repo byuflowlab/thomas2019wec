@@ -224,6 +224,9 @@ if __name__ == "__main__":
 
     final_ti_opt_method = 5
 
+    if opt_algorithm == 'ps':
+        ti_opt_method = ti_calculation_method
+
     sm_smoothing = 700.
 
     if ti_calculation_method == 0:

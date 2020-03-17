@@ -216,6 +216,7 @@ if __name__ == "__main__":
     # 4:TI by Niayifar and Porte Agel 2016 using area overlap ratio,
     # 5:TI by Niayifar and Porte Agel 2016 using area overlap ratio and SM function]
 
+
     final_ti_opt_method = 5
 
     sm_smoothing = 700.
