@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --time=24:00:00   # walltime
+#SBATCH --time=48:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
 #SBATCH --mem-per-cpu=2G  # memory per CPU core
 #SBATCH -J "38 turbs snopt hybrid wec mw10"   # job name

@@ -7,7 +7,7 @@ from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
 from plantenergy import config
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
 from plantenergy.GeneralWindFarmComponents import calculate_distance
 
@@ -147,8 +147,8 @@ if __name__ == "__main__":
     # pop_size = 760
 
     # save and show options
-    show_start = False
-    show_end = False
+    show_start = True
+    show_end = True
     save_start = False
     save_end = False
 
@@ -434,14 +434,19 @@ if __name__ == "__main__":
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
                                               params_IdepVar_args={},
                                               record_function_calls=True))
-    # elif MODELS[model] == 'JENSEN':
-    #     initialize problem
-    # prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-    #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-    #                                       wake_model=jensen_wrapper,
-    #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IdepVar_args={},
-    #                                               record_function_calls=True))
+    elif MODELS[model] == 'JENSEN':
+        # initialize problem
+        wake_model_options = {'variant': 'Cosine',
+                              'use_rotor_components': False,
+                              'differentiable': False,
+                              'verbose': False}
+
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+                                          minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
+                                          wake_model=jensen_wrapper,
+                                          params_IdepVar_func=add_jensen_params_IndepVarComps,
+                                          params_IdepVar_args={},
+                                                  record_function_calls=True))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
     # prob.model.deriv_options['type'] = 'fd'
