@@ -226,6 +226,10 @@ if __name__ == "__main__":
 
     final_ti_opt_method = 5
 
+
+    if opt_algorithm == 'ps':
+        ti_opt_method = ti_calculation_method
+
     sm_smoothing = 700.
 
     if ti_calculation_method == 0:
@@ -703,6 +707,8 @@ if __name__ == "__main__":
                 prob['model_params:ti_calculation_method'] = np.copy(ti_opt_method)
                 prob['model_params:calc_k_star'] = np.copy(calc_k_star_opt)
                 if wec_method == 'diam':
+                    prob['model_params:wec_factor'] = np.copy(expansion_factor)
+                elif wec_method == "hybrid":
                     prob['model_params:wec_factor'] = np.copy(expansion_factor)
                 elif wec_method == 'angle':
                     prob['model_params:wec_spreading_angle'] = np.copy(expansion_factor)
