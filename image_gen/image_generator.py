@@ -769,10 +769,11 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     print(handles2)
-    box = ax2.get_position()
-    ax2.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    fig.legend()
-    fig.tight_layout()
+    # box = ax2.get_position()
+    # ax2.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    # fig.legend()
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename+'_time.pdf', transparent=True)
@@ -804,8 +805,8 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     print(handles2)
-    fig.legend()
-    fig.tight_layout()
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename + '_time.pdf', transparent=True)
@@ -836,8 +837,8 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
     print(max_aepi[2])
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
-    fig.legend()
-    fig.tight_layout()
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename + '_time.pdf', transparent=True)
@@ -872,8 +873,8 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     print(handles2)
-    fig.legend()
-    fig.tight_layout()
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename + '_time.pdf', transparent=True)
@@ -2489,8 +2490,8 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
-    plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
+    plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
+    # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
