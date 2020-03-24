@@ -3,7 +3,7 @@
 #SBATCH --time=24:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
 #SBATCH --mem-per-cpu=2G  # memory per CPU core
-#SBATCH -J "38 turbs snopt hybrid wec mw2 ns 2"   # job name
+#SBATCH -J "38 turbs snopt hybrid wec mw3 ns 9"   # job name
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
@@ -15,7 +15,7 @@ wec_method_number=3
 model_number=1
 op_alg_number=0
 maxwec=3
-nsteps=2
+nsteps=9
 
 python3 opt_mstart.py ${SLURM_ARRAY_TASK_ID} $wec_method_number $model_number $op_alg_number $maxwec $nsteps
 

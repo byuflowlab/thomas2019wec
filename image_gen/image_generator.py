@@ -262,10 +262,15 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
 
     if nturbs == 38:
 
+        # set max wec values for each method
+        wavals = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        wdvals = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0])
+        whvals = np.array([0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0])
+
         # 202003
-        nwa = 10
-        nwd = 10
-        nwh = 10
+        nwa = np.size(wavals)
+        nwd = np.size(wdvals)
+        nwh = np.size(whvals)
 
         nwaarray = np.zeros(nwa)
         nwdarray = np.zeros(nwd)
@@ -292,17 +297,12 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
         # set wec method directory perfixes
         wadirp = "snopt_wec_angle_max_wec_10_wec_step_"
         wddirp = "snopt_wec_diam_max_wec_4_wec_step_"
-        whdirp = "snopt_wec_hybrid_max_wec_2_wec_step_"
+        whdirp = "snopt_wec_hybrid_max_wec_3_wec_step_"
 
         approaches = np.array([wadirp,wddirp,whdirp])
 
         # set base file name
         bfilename = "snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt"
-
-        # set max wec values for each method
-        wavals = np.array([1,2,3,4,5,6,7,8,9,10])
-        wdvals = np.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
-        whvals = np.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
 
         wec_step_ranges = np.array([wavals,wdvals,whvals])
 
@@ -321,11 +321,10 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
         max_wec_range = wec_step_ranges[i]
         # print(approach)
         print(max_wec_range)
-        print(np.size(max_wec_range))
+        print('size of wec range', np.size(max_wec_range))
         # loop through each max wec value for current approach
         for j in np.arange(0, np.size(max_wec_range)):
             # print(max_wec_range[j])
-            print(j)
             wec_val = max_wec_range[j]
 
             # load data set
@@ -340,7 +339,7 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
                 med_aepi[i][j] = None
                 std_aepi[i][j] = None
                 continue
-
+            print("loaded data for %i, %i" %(i,j))
             # compile data from all intermediate wec values
             id = data_set[:, 0]
             ef = data_set[:, 1]
@@ -445,30 +444,30 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
 
 
 
-    ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0])
-    ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1])
-    ax2.plot(wec_step_ranges[2], max_aepi[2], 's', label=labels[2], color=colors[1])
-    ax2.plot([0,1], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
-    ax2.plot([0,1], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
+    ax1.plot(wec_step_ranges[0], max_aepi[0], 'o', label=labels[0], color=colors[0], markerfacecolor="none")
+    ax2.plot(wec_step_ranges[1], max_aepi[1], '^', label=labels[1], color=colors[1], markerfacecolor="none")
+    ax2.plot(wec_step_ranges[2], max_aepi[2], 's', label=labels[2], color=colors[1], markerfacecolor="none")
+    ax2.plot([0,4], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
+    ax2.plot([0,4], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     print(handles2)
     box = ax2.get_position()
     ax2.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    lgd = ax2.legend([handles1,handles2], labels, loc='upper center', bbox_to_anchor=(0.5, -0.1))
+    # lgd = ax2.legend([handles1,handles2], labels, loc='upper center', bbox_to_anchor=(0.5, -0.1))
     fig.legend(loc='upper center', bbox_to_anchor=(1.45, 0.8), shadow=False, ncol=1)
     fig.tight_layout()
 
-    #
-    #
-    #
-    #
-    # 
-    # if save_figs:
-    #     plt.savefig(filename+'_time.pdf', transparent=True)
-    #
-    # if show_figs:
-    #     plt.show()
+
+
+
+
+
+    if save_figs:
+        plt.savefig(filename+'_time.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
     #
     # # plot min percent improvement
     #
@@ -2490,8 +2489,8 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
-    # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
+    # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
+    plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
