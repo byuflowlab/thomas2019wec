@@ -195,8 +195,6 @@ if __name__ == "__main__":
     else:
         raise ValueError('wec_method must be diam, angle, hybrid, or none')
 
-    print(expansion_factors)
-    quit()
     # create output directory if it does not exist yet
     import distutils.dir_util
     distutils.dir_util.mkpath(output_directory)
