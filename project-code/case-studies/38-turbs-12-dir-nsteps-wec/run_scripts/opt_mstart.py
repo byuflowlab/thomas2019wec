@@ -129,7 +129,7 @@ if __name__ == "__main__":
     # opt_alg_number = 0
     max_wec = int(sys.argv[5])
     # max_wec = 2
-    nsteps = float(sys.argv[6])
+    nsteps = int(sys.argv[6])
     # wec_step = 0.25
 
     run_number = layout_number
