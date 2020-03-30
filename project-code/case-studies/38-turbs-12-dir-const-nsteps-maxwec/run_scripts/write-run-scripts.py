@@ -33,12 +33,12 @@ def write_scripts(filename, hours=24, tasks=1, mem="1G", email='jaredthomas68@gm
     f.write("echo ${SLURM_ARRAY_TASK_ID}\n\n")
 
     # assign inputs to opt_mstart.py
-    f.write("model_number = %i\n" %(wake_model_num))
-    f.write("op_alg_number = %i\n" %(opt_alg_num))
+    f.write("model_number=%i\n" %(wake_model_num))
+    f.write("op_alg_number=%i\n" %(opt_alg_num))
 
-    f.write("wec_method_number = %i\n" %(wec_method_num))
-    f.write("maxwec = %i\n" %(maxwec))
-    f.write("nsteps = %i\n\n" %(nsteps))
+    f.write("wec_method_number=%i\n" %(wec_method_num))
+    f.write("maxwec=%i\n" %(maxwec))
+    f.write("nsteps=%i\n\n" %(nsteps))
 
     f.write("python3 opt_mstart.py ${SLURM_ARRAY_TASK_ID} $wec_method_number $model_number $op_alg_number $maxwec $nsteps\n")
 
