@@ -263,7 +263,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     if nturbs == 38:
 
         # set max wec values for each method
-        wavals = np.arange(5, 86, 5)
+        wavals = np.append(np.array([1, 2, 3, 4]), np.arange(5, 86, 5))
         wdvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
         whvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
 
@@ -435,7 +435,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax2.tick_params(axis='x', labelcolor=colors[0])
     ax1.tick_params(axis='x', labelcolor=colors[1])
 
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
     aplt, = ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[0], markerfacecolor="none")

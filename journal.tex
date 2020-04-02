@@ -41,21 +41,10 @@ Brigham Young University, Provo, Utah, USA}
 \end{abstract}
 
 \section{Introduction}
-%The wind farm layout optimization (WFLO) problem 
-%is studied extensively due to its potential to reduce the cost of wind energy significantly. However, the problem 
-%
-%has been determined to be of Non-Deterministic Polynomial Optimization (NPO) complete complexity, meaning that it 
-%
-%is extremely difficult to solve reliably \cite{acero2014}. The difficulty arises primarily from the large number of variables and constraints required for realistic problems and the multi-modal nature of the WFLO problem. This combination of issues is problematic for all optimization methods. The optimization methods used to solve the WFLO problem can be loosely grouped into two primary types: gradient-free methods and gradient-based methods. For the sake of brevity, we will discuss only gradient-based methods in this extended abstract.
-%
-%Gradient-free methods are the most used of the two methods. Gradient-free methods are fairly straight forward to use and can theoretically find global optima regardless of whether or not the problem is multi-modal. However, gradient-free methods have high computational costs when optimization problems have many variables, and so solution quality is compromised in practice by stopping the algorithm early \cite{rethore2014}.
 
 The difficulty of solving the wind farm layout optimization (WFLO) problem is primarily due to the large number of variables and constraints required for realistic problems and the multi-modal nature of the problem's design space. Gradient-free optimization methods are the most common methods used to solve the WFLO problem. However, gradient-free methods have been shown to have reduced performance with high dimensional problems \cite{rios2013-grad-free-comparison}. The WFLO scales quickly to high dimensions as the number of turbines is increased. Gradient-based optimization methods are well suited for high dimensional problems. Gradient-based methods are not widely used for WFLO problems, but are gaining interest due to their relatively low computational cost and their ability to handle many variables and constraints. However, gradient-based methods are highly susceptible to local optima \cite{acero2014}. Despite this weakness, they have been shown to find good solutions to WFLO problems \cite{fleming2015, guirguis2016, gebraad2017-Maximization-Annual}.  
 
-Many techniques have been presented to make the WFLO problem more tractable, including discretization, multi-start, and hybrid approaches. Discretization techniques, used with gradient-free methods, attempt to simplify the problem by reducing the number of possible solutions \cite{mosetti1994, grady2005}. Through discretization, the number of possible turbine locations within a wind farm can be reduced from infinite to something on the order of hundreds of locations. However, discretization disregards any locations that are not pre-selected, and can thus preclude this approach from finding even a local optimum. It is also possible that constraints on variables other than position may render the discretized optimization problem intractable. Multi-start approaches involve running many optimizations of one problem with different starting points \cite{gonzalez2014}. This approach reduces the sensitivity of gradient-based optimization methods to local optima. Hybrid approaches combine gradient-based and gradient-free algorithms iteratively \cite{rethore2014,graf2016, mittal2017}, 
-%The idea is that the gradient-free method can be used until it seems to be converging on a solution, and then the output of the gradient-free algorithm can be used to warm start a gradient-based algorithm that can efficiently converge on the nearest optimum. 
-%
-and, depending on the problem size, can yield result quality comparable to multi-start approaches \cite{rethore2014}. While each of these techniques yield improved results, there is still need for improvement because current methods have a wide spread in the quality of results, are highly dependent on starting locations, and/or artificially limit the design space. These limitations indicate that the optimizations are not converging to the global optimum.
+Many techniques have been presented to make the WFLO problem more tractable, including discretization, multi-start, and hybrid approaches. Discretization techniques, used with gradient-free methods, attempt to simplify the problem by reducing the number of possible solutions \cite{mosetti1994, grady2005}. Through discretization, the number of possible turbine locations within a wind farm can be reduced from infinite to something on the order of hundreds of locations. However, discretization disregards any locations that are not pre-selected, and can thus preclude this approach from finding even a local optimum. It is also possible that constraints on variables other than position may render the discretized optimization problem intractable. Multi-start approaches involve running many optimizations of one problem with different starting points \cite{gonzalez2014}. This approach reduces the sensitivity of gradient-based optimization methods to local optima. Hybrid approaches combine gradient-based and gradient-free algorithms iteratively \cite{rethore2014,graf2016, mittal2017}, and, depending on the problem size, can yield result quality comparable to multi-start approaches \cite{rethore2014}. While each of these techniques yield improved results, there is still need for improvement because current methods have a wide spread in the quality of results, are highly dependent on starting locations, and/or artificially limit the design space. These limitations indicate that the optimizations are not converging to the global optimum.
 
 Current methods seek to avoid local optima by searching the existing design space more broadly. This approach becomes intractable for large optimization problems with many variables and constraints. To address this issue, we propose a process for use with gradient-based optimization algorithms that temporarily reduces the number and magnitude of local optima using an approach related to continuation optimization methods such as the approach given in \cite{mobahi2015}. However, while continuation optimization uses a numerical approximation of the design space, our proposed process takes advantages of the physical properties of the design space directly. We will refer to the new process as Wake Expansion Continuation, or WEC.
 
@@ -71,6 +60,7 @@ The WEC method is comprised of three basic steps:
     \item If necessary, add a factor to the model such that the wake spread can be directly controlled without significantly altering the wake deficit in the center of the wake. (While we assume that it is important to avoid altering the velocity in the wake significantly, this assumption should be the subject of future study.)
     \item Run a series of optimizations such that the wake spread is larger than normal for the first optimization, and then reduces with each subsequent optimization until the wake spread is no longer altered from the original model. The result of each optimization after the first should be started using the optimal layout found in the previous optimization.
 \end{enumerate}
+
 By spreading the wakes, we can effectively fill in the gaps between wakes so that a gradient-based optimization algorithm can bypass local optima and proceed to a better solution. Another way of thinking about this is that by spreading the wakes, more turbines see the influence of each wake, which provides more information to the gradient-based optimization algorithm about the design space through the Jacobian. We have investigated three ways of spreading the wake: (1) multiplying the wake spreading angle (WECA), (2) multiplying the initial wake diameter (WECD), and (3) a sort of hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at an estimated point of far wake onset and allowing the wake to follow an angled line from the edge of the turbine to the expanded far wake diameter (WECH). 
 
 \section{Wake and Wind Farm Models}
@@ -122,12 +112,12 @@ The wake spreading angle used by N.~O.~Jensen was $\beta = 20 \degree$  \cite{je
 %	\label{fig:JensenDiagrams}
 %\end{figure}
 
-\subsection{The FLORIS Wake Model}
-The FLORIS wake model was developed by Gebraad et al. based on the Jensen Cosine wake model \cite{gebraad2014}. It is similar to the Jensen Tophat model in that the velocity deficit is constant within certain regions of the wake; however, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit %(see \cref{fig:FLORISDiagram}) 
-\cite{gebraad2014}.
-
-%\todo{not sure best way to clarify this paragraph}
-The FLORIS wake model contains many parameters that are tuned based on datasets produced by Large-Eddy Simulations (LES) run on the Simulator for Off/Onshore Wind Farm Applications (SOWFA) \cite{fleming2015}. For this comparison study, we used the FLORIS model as presented in \cite{thomas2016-improving-floris} after it had been tuned to the NREL 5-MW wind turbine \cite{jonkman2009}.
+%\subsection{The FLORIS Wake Model}
+%The FLORIS wake model was developed by Gebraad et al. based on the Jensen Cosine wake model \cite{gebraad2014}. It is similar to the Jensen Tophat model in that the velocity deficit is constant within certain regions of the wake; however, the FLORIS model describes turbine wakes as having three separate wake zones, each with a different velocity deficit %(see \cref{fig:FLORISDiagram}) 
+%\cite{gebraad2014}.
+%
+%%\todo{not sure best way to clarify this paragraph}
+%The FLORIS wake model contains many parameters that are tuned based on datasets produced by Large-Eddy Simulations (LES) run on the Simulator for Off/Onshore Wind Farm Applications (SOWFA) \cite{fleming2015}. For this comparison study, we used the FLORIS model as presented in \cite{thomas2016-improving-floris} after it had been tuned to the NREL 5-MW wind turbine \cite{jonkman2009}.
 
 \subsection{The Bastankhah and Port\'e-Agel Wake Model}
 In the Bastankhah and Port\'e-Agel wake model, the two primary characteristics of the wakes, wake deficit and wake spread, are particularly easy to differentiate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah and Port\'e-Agel wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with part of the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}.
@@ -443,101 +433,101 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 The optimization for the Jensen Cosine model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original Jensen Cosine model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the Jensen Cosine model becomes more accurate as the relaxation factor is decreased closer to one. For many wind farm optimizations, we have found the following relaxation factors yield good results: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
 
-\subsection{Applying WEC to the FLORIS Wake Model}
-In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
-
-%\todo{need to get better figure. remember to update caption once new figure inserted.}
-%\begin{figure}[h]
-%    \centering
-%    \includegraphics[width=0.3\linewidth]{FLORISDiagram1}
-%    \caption{Diagram displaying the three wake zones in the FLORIS turbine wake model. A higher quality diagram would have been constructed if there had been sufficient time. The black outer lines represent the outermost wake zone (mixing zone) which expands from the wind turbine as the air travels downstream. The blue lines represent the middle wake zone (far zone) which retains nearly the same width with distance from the turbine. Finally, the green lines represent the innermost wake zone (near wake) which converges to a point some distance from the turbine. The velocity deficit associated with each wake zone increases from the outermost wake zone to the innermost wake zone.}
-%    \label{fig:FLORISDiagram}
-%\end{figure}
-
-\subsubsection{FLORIS WEC Step (1)}
-%\textbf{Identify where the magnitude and spread of the wake are within the FLORISSE equation.}
-
-We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen Cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
-
-\begin{equation}
-    D_{w,i,q} = D_i + 2k_em_{e,q}(x - X_i)
-    \label{eq:FLORISWakeWidth}
-\end{equation}
-
-In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width.
-
-\subsubsection{FLORIS WEC Step (2)}
-%\textbf{Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.}
-
-If we applied the relaxation factor to $k_e$ or $m_{e,q}$ in \cref{eq:FLORISWakeWidth}, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ in \cref{eq:FLORISWakeWidth} to obtain \cref{eq:FLORISWECWakeWidth}.
-
-\begin{equation}
-    D_{w,i,q}' = D_i' + 2k_em_{e,q}(x - X_i)
-    \label{eq:FLORISWECWakeWidth}
-\end{equation}
-
-Where $D_{w,i,q}'$ represents the adjusted wake width from applying WEC and $D_i'$ represents the adjusted initial wake diameter from applying WEC. We applied a relaxation factor to all wake zones within the FLORIS wake model. The resulting equations controlling the wake diameters for various wake zones in the FLORIS model are displayed below in \cref{eq:FLORISWECWakeDiameterPiecewise}. In this equation, $q$ represents the wake zone being used (i.e., $q = 1$ for the innermost wake zone, $q = 2$ for the middle wake zone, and $q = 3$ for the outermost wake zone).
-
+%\subsection{Applying WEC to the FLORIS Wake Model}
+%In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
+%
+%%\todo{need to get better figure. remember to update caption once new figure inserted.}
+%%\begin{figure}[h]
+%%    \centering
+%%    \includegraphics[width=0.3\linewidth]{FLORISDiagram1}
+%%    \caption{Diagram displaying the three wake zones in the FLORIS turbine wake model. A higher quality diagram would have been constructed if there had been sufficient time. The black outer lines represent the outermost wake zone (mixing zone) which expands from the wind turbine as the air travels downstream. The blue lines represent the middle wake zone (far zone) which retains nearly the same width with distance from the turbine. Finally, the green lines represent the innermost wake zone (near wake) which converges to a point some distance from the turbine. The velocity deficit associated with each wake zone increases from the outermost wake zone to the innermost wake zone.}
+%%    \label{fig:FLORISDiagram}
+%%\end{figure}
+%
+%\subsubsection{FLORIS WEC Step (1)}
+%%\textbf{Identify where the magnitude and spread of the wake are within the FLORISSE equation.}
+%
+%We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen Cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
+%
 %\begin{equation}
-%    D_i' = \xi D_i
-%    \label{eq:FLORISWECWakeDiameter}
+%    D_{w,i,q} = D_i + 2k_em_{e,q}(x - X_i)
+%    \label{eq:FLORISWakeWidth}
 %\end{equation}
+%
+%In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width.
+%
+%\subsubsection{FLORIS WEC Step (2)}
+%%\textbf{Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.}
+%
+%If we applied the relaxation factor to $k_e$ or $m_{e,q}$ in \cref{eq:FLORISWakeWidth}, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ in \cref{eq:FLORISWakeWidth} to obtain \cref{eq:FLORISWECWakeWidth}.
+%
+%\begin{equation}
+%    D_{w,i,q}' = D_i' + 2k_em_{e,q}(x - X_i)
+%    \label{eq:FLORISWECWakeWidth}
+%\end{equation}
+%
+%Where $D_{w,i,q}'$ represents the adjusted wake width from applying WEC and $D_i'$ represents the adjusted initial wake diameter from applying WEC. We applied a relaxation factor to all wake zones within the FLORIS wake model. The resulting equations controlling the wake diameters for various wake zones in the FLORIS model are displayed below in \cref{eq:FLORISWECWakeDiameterPiecewise}. In this equation, $q$ represents the wake zone being used (i.e., $q = 1$ for the innermost wake zone, $q = 2$ for the middle wake zone, and $q = 3$ for the outermost wake zone).
+%
+%%\begin{equation}
+%%    D_i' = \xi D_i
+%%    \label{eq:FLORISWECWakeDiameter}
+%%\end{equation}
+%
+%% Initial results from applying the above equations prompted us to adjust our methods. First, we decided to implement a cosine factor to smooth the results, as done by Thomas and Ning in \cite{Thomas2017}. Second, we noticed that the preliminary results from FLORIS indicated that the velocity deficit in the wake's center was not constant for all values of $\xi$. We determined that the cause of this error was the increase in wake width of the innermost wake-zone. By increasing this wake diameter, we were allowing the innermost wake-zone to propagate much farther downwind than it would without a relaxation factor. Thus, turbines near the center of the wake would experience the effects of the innermost wake-zone for high values of $\xi$ but not for lower values of $\xi$. This caused the velocity deficit in the center of the wake to differ with $\xi$.
+%
+%% Originally, we resolved this issue by only applying the WEC relaxation factor to the middle and outermost wake zones. By doing so, we kept the innermost zone from propagating too far downstream and thereby ensured that the velocity deficit at the wake-center would be the same for all $\xi$. After more testing, however, we determined that failing to apply the relaxation factor to the innermost wake zone actually promoted the creation of a local optimum between two upwind turbines, which defeats WEC's purpose in smoothing out local optima. While the velocity deficit in the center of the wake is not preserved as well when applying WEC to the innermost wake zone, FLORIS performs better with WEC as a result of this change.
+%
+%\begin{equation}
+%	D_{w, i, q}' = \xi D_i + 2k_em_{e, q} (x - X_i), q = 1, 2, 3
+%	\label{eq:FLORISWECWakeDiameterPiecewise}
+%\end{equation}
+%
+%When we applied \cref{eq:FLORISWECWakeDiameterPiecewise} to the FLORIS wake model, we tested how well WEC performed by traversing a turbine through the wakes of two fixed upwind wind turbines, similar to what was done with the Jensen Cosine wake model in \cref{fig:smoothing_locations_Jensen,fig:JensenLocalOptSmoothed}. Our results are displayed in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed} below. We expected that the local optimum would be progressively smoothed out as the relaxation factor increased, similar to what is seen in \cref{fig:JensenLocalOptSmoothed}; however, as seen in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed}, WEC enabled the FLORIS model to smooth out the local optimum with only a small increase in the relaxation factor.
+%
+%% Figure describing setup for aep vs crosswind position tests for FLORIS
+%\begin{figure}[ht]
+%	\centering
+%	\begin{minipage}[t]{0.43\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
+%		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:FLORISLocalOptSmoothed}).}
+%		\label{fig:smoothing_locations_FLORIS}
+%	\end{minipage}\hspace{1pc}
+%% Figure displaying results from aep vs crosswind position tests for FLORIS
+%	\begin{minipage}[t]{0.52\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{FLORISWECMultipleTurbinesAEP}
+%		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations_FLORIS}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
+%		\label{fig:FLORISLocalOptSmoothed}
+%	\end{minipage}
+%\end{figure}
+%
+%\subsubsection{FLORIS WEC Step (3)}
+%%\textbf{Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.}
+%
+%The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
+%
+%\section{Test Cases and Optimization}
+%To demonstrate the effectiveness of WEC, we present two wind farm optimization cases. For both cases, we used the Vestas V-80 2MW wind turbine. The cases were chosen to represent a range in the size, complexity, and difficulty of the optimization problem.
+%
+%We created 199 pseudo-random starting wind farm layouts for each case. Each of the starting layouts had all the turbines inside the wind farm boundary constraint and did not have any turbine spacings less than one rotor diameter. These starting locations, along with the planned locations shown in \cref{fig:grid_case,fig:round_case}, served as the 200 starting locations for the optimizations.
+%
+%To set up the optimizations, we used OpenMDAO: a computing platform for systems analysis and multidisciplinary optimization \cite{gray2010_OpenMDAO}. The optimizations were solved using SNOPT, a sparse non-linear optimization algorithm \cite{gill2005}; WEC with SNOPT as the optimization algorithm; 
+%%ALPSO, an augmented Lagrangian particle swarm optimization approach \cite{jansen2011_alpso}; %
+%and NSGA-II, a non-dominated sorting genetic algorithm \cite{deb2002_nsga2}. Both of the optimization algorithms were used as implemented in PyOptSparse \cite{ruben2012_pyopt}, except that a simple tolerance for convergence was added to NSGA-II. The added tolerance in NSGA-II required that the best solution not change more than some specified value for a minimum number of generations. 
+%
+%For each test case, the population size for NSGA-II was set to be ten times the number of design variables ($10\times N_{turbines} \times 2$) and the convergence tolerance was set to be $1\times10^{-4}$. The simulation was considered converged if the objective function value did not change more than the convergence tolerance for 100 or 200 consecutive generations for case 1 and case 2 respectively. Total generations were mostly in the thousands for each optimization run.
+%
+%%\subsection{Case 0: Single Dimension}
+%%\todo{Spencer}
+%%The case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
+%
+%%The preliminary goals of this study were to determine whether WEC (1) spread out the wake for each wake model and (2) maintained the velocity deficit at the wake's center for each wake model. The case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
 
-% Initial results from applying the above equations prompted us to adjust our methods. First, we decided to implement a cosine factor to smooth the results, as done by Thomas and Ning in \cite{Thomas2017}. Second, we noticed that the preliminary results from FLORIS indicated that the velocity deficit in the wake's center was not constant for all values of $\xi$. We determined that the cause of this error was the increase in wake width of the innermost wake-zone. By increasing this wake diameter, we were allowing the innermost wake-zone to propagate much farther downwind than it would without a relaxation factor. Thus, turbines near the center of the wake would experience the effects of the innermost wake-zone for high values of $\xi$ but not for lower values of $\xi$. This caused the velocity deficit in the center of the wake to differ with $\xi$.
-
-% Originally, we resolved this issue by only applying the WEC relaxation factor to the middle and outermost wake zones. By doing so, we kept the innermost zone from propagating too far downstream and thereby ensured that the velocity deficit at the wake-center would be the same for all $\xi$. After more testing, however, we determined that failing to apply the relaxation factor to the innermost wake zone actually promoted the creation of a local optimum between two upwind turbines, which defeats WEC's purpose in smoothing out local optima. While the velocity deficit in the center of the wake is not preserved as well when applying WEC to the innermost wake zone, FLORIS performs better with WEC as a result of this change.
-
-\begin{equation}
-	D_{w, i, q}' = \xi D_i + 2k_em_{e, q} (x - X_i), q = 1, 2, 3
-	\label{eq:FLORISWECWakeDiameterPiecewise}
-\end{equation}
-
-When we applied \cref{eq:FLORISWECWakeDiameterPiecewise} to the FLORIS wake model, we tested how well WEC performed by traversing a turbine through the wakes of two fixed upwind wind turbines, similar to what was done with the Jensen Cosine wake model in \cref{fig:smoothing_locations_Jensen,fig:JensenLocalOptSmoothed}. Our results are displayed in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed} below. We expected that the local optimum would be progressively smoothed out as the relaxation factor increased, similar to what is seen in \cref{fig:JensenLocalOptSmoothed}; however, as seen in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed}, WEC enabled the FLORIS model to smooth out the local optimum with only a small increase in the relaxation factor.
-
-% Figure describing setup for aep vs crosswind position tests for FLORIS
-\begin{figure}[ht]
-	\centering
-	\begin{minipage}[t]{0.43\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:FLORISLocalOptSmoothed}).}
-		\label{fig:smoothing_locations_FLORIS}
-	\end{minipage}\hspace{1pc}
-% Figure displaying results from aep vs crosswind position tests for FLORIS
-	\begin{minipage}[t]{0.52\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{FLORISWECMultipleTurbinesAEP}
-		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations_FLORIS}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
-		\label{fig:FLORISLocalOptSmoothed}
-	\end{minipage}
-\end{figure}
-
-\subsubsection{FLORIS WEC Step (3)}
-%\textbf{Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.}
-
-The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
-
-\section{Test Cases and Optimization}
-To demonstrate the effectiveness of WEC, we present two wind farm optimization cases. For both cases, we used the Vestas V-80 2MW wind turbine. The cases were chosen to represent a range in the size, complexity, and difficulty of the optimization problem.
-
-We created 199 pseudo-random starting wind farm layouts for each case. Each of the starting layouts had all the turbines inside the wind farm boundary constraint and did not have any turbine spacings less than one rotor diameter. These starting locations, along with the planned locations shown in \cref{fig:grid_case,fig:round_case}, served as the 200 starting locations for the optimizations.
-
-To set up the optimizations, we used OpenMDAO: a computing platform for systems analysis and multidisciplinary optimization \cite{gray2010_OpenMDAO}. The optimizations were solved using SNOPT, a sparse non-linear optimization algorithm \cite{gill2005}; WEC with SNOPT as the optimization algorithm; 
-%ALPSO, an augmented Lagrangian particle swarm optimization approach \cite{jansen2011_alpso}; %
-and NSGA-II, a non-dominated sorting genetic algorithm \cite{deb2002_nsga2}. Both of the optimization algorithms were used as implemented in PyOptSparse \cite{ruben2012_pyopt}, except that a simple tolerance for convergence was added to NSGA-II. The added tolerance in NSGA-II required that the best solution not change more than some specified value for a minimum number of generations. 
-
-For each test case, the population size for NSGA-II was set to be ten times the number of design variables ($10\times N_{turbines} \times 2$) and the convergence tolerance was set to be $1\times10^{-4}$. The simulation was considered converged if the objective function value did not change more than the convergence tolerance for 100 or 200 consecutive generations for case 1 and case 2 respectively. Total generations were mostly in the thousands for each optimization run.
-
-%\subsection{Case 0: Single Dimension}
-%\todo{Spencer}
-%The case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
-
-%The preliminary goals of this study were to determine whether WEC (1) spread out the wake for each wake model and (2) maintained the velocity deficit at the wake's center for each wake model. The case 0 tests were designed to place either one or two permanent turbines upwind of a variable downwind turbine. This downwind turbine was traversed in the crosswind direction through the wakes of each upwind turbine. The AEP was recorded as the downwind turbine was traversed through the wakes of the upwind turbines. This process was repeated for multiple relaxation factors, and the resulting AEP curves were plotted.
-
-\subsection{Case 0: Small-Scale Optimization}
-Once the preliminary tests had been completed, case 0 was run to predict whether the intended effects of WEC would be realized in our large-scale optimizations. In these tests, two turbines were given constant coordinates upwind of a variable downwind turbine, which was placed between the wakes of the two upwind turbines. The coordinates of the variable downwind turbine were optimized to maximize AEP.
-
-This test helped us to determine whether WEC was functioning as we expected. Without WEC, the optimization left the downwind turbine in the local optimum between the wakes of the two upwind turbines. However, if WEC was used in the optimization, we would expect the downwind turbine to be relocated outside of the local optimum to a better optimum.
+%\subsection{Case 0: Small-Scale Optimization}
+%Once the preliminary tests had been completed, case 0 was run to predict whether the intended effects of WEC would be realized in our large-scale optimizations. In these tests, two turbines were given constant coordinates upwind of a variable downwind turbine, which was placed between the wakes of the two upwind turbines. The coordinates of the variable downwind turbine were optimized to maximize AEP.
+%
+%This test helped us to determine whether WEC was functioning as we expected. Without WEC, the optimization left the downwind turbine in the local optimum between the wakes of the two upwind turbines. However, if WEC was used in the optimization, we would expect the downwind turbine to be relocated outside of the local optimum to a better optimum.
 
 \subsection{Case 1: Small Grid}
 Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters (see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
@@ -671,36 +661,36 @@ We compared optimized AEP, as well as the number of function calls required, for
 %    \label{fig:WECAEPFigures}
 %\end{figure}
 
-\subsection{Case 0 Results}
-Results for case 0 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
-
-%\todo{refer to notes from Jared in updating these figures.}
-\begin{figure}[H]
-    \centering
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleJensenNonWECGraphContour}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleJensenWECGraphContour}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSENonWECGraphContour}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSEWECGraphContour2}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleBPANonWECGraphContour}
-    }
-    \subfigure[]{
-        \includegraphics[width=0.35\textwidth]{SmallScaleBPAWECGraphContour}
-    }
-    \caption{Small-scale optimization contour plots, with wind to the right. The optimization included two stationary upwind turbines and one downwind turbine with a variable location. Optimizations are shown without WEC (left) and with WEC (right). Each row represents a different turbine wake model: Jensen Cosine (a,b), FLORIS (c,d), and BPA (e, f), respectively.}
-    \label{fig:SmallScaleOptimizations}
-\end{figure}
-
-%\subsection{Case 0.75 Results}
-%Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
+%\subsection{Case 0 Results}
+%Results for case 0 are displayed below. Note that optimizations without WEC fail to escape the local optimum between wakes, whereas optimizations with WEC place the downwind turbine in a more optimal location for each wake model.
+%
+%%\todo{refer to notes from Jared in updating these figures.}
+%\begin{figure}[H]
+%    \centering
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleJensenNonWECGraphContour}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleJensenWECGraphContour}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSENonWECGraphContour}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleFLORISSEWECGraphContour2}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleBPANonWECGraphContour}
+%    }
+%    \subfigure[]{
+%        \includegraphics[width=0.35\textwidth]{SmallScaleBPAWECGraphContour}
+%    }
+%    \caption{Small-scale optimization contour plots, with wind to the right. The optimization included two stationary upwind turbines and one downwind turbine with a variable location. Optimizations are shown without WEC (left) and with WEC (right). Each row represents a different turbine wake model: Jensen Cosine (a,b), FLORIS (c,d), and BPA (e, f), respectively.}
+%    \label{fig:SmallScaleOptimizations}
+%\end{figure}
+%
+%%\subsection{Case 0.75 Results}
+%%Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
 
 \subsection{Case 1 Results}
 Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).

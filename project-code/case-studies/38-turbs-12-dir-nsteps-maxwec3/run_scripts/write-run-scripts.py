@@ -50,31 +50,31 @@ if __name__ == "__main__":
 
     name = "max wec, constant nsteps"
 
-    wecasteps = 6
-    wecdsteps = 6
-    wechsteps = 6
+    maxweca = 3
+    maxwecd = 3
+    maxwech = 3
 
     # wecamaxvals = np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80])
-    wecamaxvals = np.array([1, 2, 3, 4])
-    wecdmaxvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
-    wechmaxvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+    wecasteps = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+    wecdsteps = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+    wechsteps = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
 
-    for i in np.arange(0, wecamaxvals.size):
+    for i in np.arange(0, wecasteps.size):
         wec_method = 'angle'
-        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(wecamaxvals[i], wecasteps)
+        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(wecasteps[i], maxweca)
         print("writing file: ", filename)
-        write_scripts(filename, name=name, wec_method=wec_method, maxwec=wecamaxvals[i], nsteps=wecasteps)
+        write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxweca, nsteps=wecasteps[i])
 
-    # for i in np.arange(0, wecdmaxvals.size):
-    #     wec_method = 'diam'
-    #     filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(wecdmaxvals[i], wecdsteps)
-    #     print("writing file: ", filename)
-    #     write_scripts(filename, name=name, wec_method=wec_method, maxwec=wecdmaxvals[i], nsteps=wecdsteps)
-    #
-    # for i in np.arange(0, wechmaxvals.size):
-    #     wec_method = 'hybrid'
-    #     filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(wechmaxvals[i], wechsteps)
-    #     print("writing file: ", filename)
-    #     write_scripts(filename, name=name, wec_method=wec_method, maxwec=wechmaxvals[i], nsteps=wechsteps)
+    for i in np.arange(0, wecdsteps.size):
+        wec_method = 'diam'
+        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxwecd, wecdsteps[i])
+        print("writing file: ", filename)
+        write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxwecd, nsteps=wecdsteps[i])
+
+    for i in np.arange(0, wechsteps.size):
+        wec_method = 'hybrid'
+        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxwech, wechsteps[i])
+        print("writing file: ", filename)
+        write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxwech, nsteps=wechsteps[i])
 
     print("complete")
