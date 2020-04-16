@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     for i in np.arange(0, wecasteps.size):
         wec_method = 'angle'
-        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(wecasteps[i], maxweca)
+        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxweca, wecasteps[i])
         print("writing file: ", filename)
         write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxweca, nsteps=wecasteps[i])
 

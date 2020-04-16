@@ -428,21 +428,24 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     plt.gcf().clear()
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
-    colors = ['tab:red', 'tab:blue']
-    ax2.set_xlabel('Max WEC Value', color=colors[0])
+    colors = ['tab:red', 'tab:blue', 'tab:cyan', 'k']
+
+    ax2.set_xlabel('Max WEC Value', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[2])
+
+    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
     ax1.set_ylabel("Maximum Improvement (%)")
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[1])
-    ax2.tick_params(axis='x', labelcolor=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[1])
 
-    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
+    labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
 
-    aplt, = ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[0], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], max_aepi[2], 's', label=labels[2], color=colors[0], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
-    splt, = ax2.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt])
+    aplt, = ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax2.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
+    pplt, = ax2.plot([2,10], [ps_max_improvement, ps_max_improvement], '--', label=labels[3], color=colors[3])
+    splt, = ax2.plot([2,10], [snw_max_improvement, snw_max_improvement], ':', label=labels[4], color=colors[3])
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -456,21 +459,21 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
 
-    colors = ['tab:red', 'tab:blue']
-    ax2.set_xlabel('Max WEC Multiplier Value', color=colors[0])
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[1])
+    ax2.set_xlabel('Max WEC Value', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[2])
+
     ax1.set_ylabel("Mean Improvement (%)")
-    ax2.tick_params(axis='x', labelcolor=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[1])
 
-    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
+    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax1.tick_params(axis='x', labelcolor=colors[0])
 
-    aplt, = ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[0], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], mean_aepi[2], 's', label=labels[2], color=colors[0], markerfacecolor="none")
+
+    aplt, = ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax2.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
     pplt, = ax2.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
     splt, = ax2.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt])
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -484,20 +487,363 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
 
-    colors = ['tab:red', 'tab:blue']
-    ax2.set_xlabel('Max WEC Value', color='k')
-    ax1.set_ylabel("Standard Deviation of Improvement (%)")
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[1])
-    ax2.tick_params(axis='x', labelcolor=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[1])
 
-    aplt, = ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[0], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], std_aepi[2], 's', label=labels[2], color=colors[0], markerfacecolor="none")
+    ax1.set_ylabel("Standard Deviation of Improvement (%)")
+    
+    ax2.set_xlabel('Max WEC Value', color=colors[1])
+    ax2.tick_params(axis='x', labelcolor=colors[2])
+
+    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax1.tick_params(axis='x', labelcolor=colors[0])
+
+    aplt, = ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax2.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
     pplt, = ax2.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
     splt, = ax2.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
 
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt])
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename+'_std.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+    #
+    # # plot min percent improvement
+    #
+    # # set up plots
+    # fig, ax1 = plt.subplots()
+    # ax1.set_xlabel('Wake Spreading Angle Step (deg.)', color=colors[0])
+    # ax1.set_ylabel("Minimum Improvement (%)")
+    # ax1.tick_params(axis='x', labelcolor=colors[0])
+    #
+    # ax2 = ax1.twiny()
+    # # ax2.set_ylim([0, 10])
+    # # plot max percent improvement
+    #
+    # ax2.set_xlabel('Diameter Multiplier Step', color=colors[1])
+    # ax2.tick_params(axis='x', labelcolor=colors[1])
+    #
+    # ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0])
+    # ax2.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1])
+    # ax2.plot(wec_step_ranges[2], min_aepi[2], 's', label=labels[2], color=colors[1])
+    # ax2.plot([0,1], [ps_min_improvement, ps_min_improvement], '--k', label=labels[3])
+    # ax2.plot([0,1], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+    #
+    # handles1, labels1 = ax1.get_legend_handles_labels()
+    # handles2, labels2 = ax2.get_legend_handles_labels()
+    # print(handles2)
+    # fig.legend()
+    # fig.tight_layout()
+    #
+    # if save_figs:
+    #     plt.savefig(filename + '_time.pdf', transparent=True)
+    #
+    # if show_figs:
+    #     plt.show()
+    #
+    # # plot average percent improvement
+    # # set up plots
+    # fig, ax1 = plt.subplots()
+    #
+    # ax1.set_xlabel('Wake Spreading Angle Step (deg.)', color=colors[0])
+    # ax1.set_ylabel("Mean Improvement (%)")
+    # ax1.tick_params(axis='x', labelcolor=colors[0])
+    #
+    # ax2 = ax1.twiny()
+    # # ax2.set_ylim([0, 10])
+    # # plot max percent improvement
+    #
+    # ax2.set_xlabel('Diameter Multiplier Step', color=colors[1])
+    # ax2.tick_params(axis='x', labelcolor=colors[1])
+    #
+    # ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0])
+    # ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1])
+    # ax2.plot(wec_step_ranges[2], mean_aepi[2], 's', label=labels[2], color=colors[1])
+    # ax2.plot([0,1], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    # ax2.plot([0,1], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+    # print(max_aepi[2])
+    # handles1, labels1 = ax1.get_legend_handles_labels()
+    # handles2, labels2 = ax2.get_legend_handles_labels()
+    # fig.legend()
+    # fig.tight_layout()
+    #
+    # if save_figs:
+    #     plt.savefig(filename + '_time.pdf', transparent=True)
+    #
+    # if show_figs:
+    #     plt.show()
+    #
+    #
+    # # plot median percent improvement
+    #
+    # # plot std percent improvement
+    # fig, ax1 = plt.subplots()
+    #
+    #
+    # ax1.set_xlabel('Wake Spreading Angle Step (deg.)', color=colors[0])
+    # ax1.set_ylabel("Std. of Improvement (%)")
+    # ax1.tick_params(axis='x', labelcolor=colors[0])
+    #
+    # ax2 = ax1.twiny()
+    # # ax2.set_ylim([0, 10])
+    # # plot max percent improvement
+    #
+    # ax2.set_xlabel('Diameter Multiplier Step', color=colors[1])
+    # ax2.tick_params(axis='x', labelcolor=colors[1])
+    #
+    # ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0])
+    # ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1])
+    # ax2.plot(wec_step_ranges[2], std_aepi[2], 's', label=labels[2], color=colors[1])
+    # ax2.plot([0, 1], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    # ax2.plot([0, 1], [snw_min_improvement, snw_min_improvement], ':k', label=labels[4])
+    #
+    # handles1, labels1 = ax1.get_legend_handles_labels()
+    # handles2, labels2 = ax2.get_legend_handles_labels()
+    # print(handles2)
+    # fig.legend()
+    # fig.tight_layout()
+    #
+    # if save_figs:
+    #     plt.savefig(filename + '_time.pdf', transparent=True)
+    #
+    # if show_figs:
+    #     plt.show()
+    #
+    # # plot ranges?
+
+    return
+
+def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
+
+    if nturbs == 38:
+
+        # set max wec values for each method
+        wavals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+        wdvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+        whvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+        # 202003
+        nwa = np.size(wavals)
+        nwd = np.size(wdvals)
+        nwh = np.size(whvals)
+
+        nwaarray = np.zeros(nwa)
+        nwdarray = np.zeros(nwd)
+        nwharray = np.zeros(nwh)
+
+        # prepare to store max aep percent improvement values
+        max_aepi = np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()])
+
+        # prepare to store min aep percent improvement values
+        min_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store median aep percent improvement values
+        med_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store median aep percent improvement values
+        mean_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # prepare to store standard deviation of aep percent improvement values
+        std_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
+
+        # set results directory
+        rdir = "./image_data/opt_results/202004080902-nsteps-maxwec-3/"
+
+        # set wec method directory prefixes
+        wadirp = "snopt_wec_angle_max_wec_3_nsteps_"
+        wddirp = "snopt_wec_diam_max_wec_3_nsteps_"
+        whdirp = "snopt_wec_hybrid_max_wec_3_nsteps_"
+
+        approaches = np.array([wadirp,wddirp,whdirp])
+
+        # set base file name
+        bfilename = "snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt"
+
+        wec_step_ranges = np.array([wavals,wdvals,whvals])
+
+    else:
+        ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
+
+    # load baseline data
+    base_data = np.loadtxt(rdir + wadirp + "10.000" + "/" + bfilename)
+
+    # store baseline aep value
+    orig_aep = base_data[0, 5]
+
+    # loop through each wec approach
+    for i in np.arange(0,np.size(approaches)):
+        approach = approaches[i]
+        max_wec_range = wec_step_ranges[i]
+        # print(approach)
+        print(max_wec_range)
+        print('size of wec range', np.size(max_wec_range))
+        # loop through each max wec value for current approach
+        for j in np.arange(0, np.size(max_wec_range)):
+            # print(max_wec_range[j])
+            wec_val = max_wec_range[j]
+
+            # load data set
+            data_file = rdir + approach + "%.3f" %(wec_val) + "/" + bfilename
+            try:
+                data_set = np.loadtxt(data_file)
+            except:
+                print("Failed to find data for ", data_file)
+                print("Setting values to None")
+                max_aepi[i][j] = None
+                min_aepi[i][j] = None
+                med_aepi[i][j] = None
+                std_aepi[i][j] = None
+                continue
+            print("loaded data for %i, %i" %(i,j))
+            # compile data from all intermediate wec values
+            id = data_set[:, 0]
+            ef = data_set[:, 1]
+            ti_opt = data_set[:, 3]
+            run_end_aep = data_set[ti_opt == 5, 7]
+            run_time = data_set[:, 8]
+            fcalls = data_set[:, 9]
+            scalls = data_set[:, 10]
+
+            tfcalls = fcalls[ti_opt == 5]
+            tscalls = fcalls[ti_opt == 5]
+
+            # compute percent improvement from base for current set
+            run_improvement = 100*(run_end_aep / orig_aep - 1.)
+
+            # store max percent improvement from base for current set
+            max_run_improvement = np.max(run_improvement)
+            max_aepi[i][j] = max_run_improvement
+            # if i==2:
+            #     print(max_aepi[i][j])
+
+            # store min percent improvement from base for current set
+            min_run_improvement = np.min(run_improvement)
+            min_aepi[i][j] = min_run_improvement
+
+            # store average percent improvement from base for current set
+            mean_run_improvement = np.average(run_improvement)
+            mean_aepi[i][j] = mean_run_improvement
+
+            # store median percent improvement from base for current set
+            median_run_improvement = np.median(run_improvement)
+            med_aepi[i][j] = median_run_improvement
+
+            # store std percent improvement from base for current set
+            std_improvement = np.std(run_improvement)
+            std_aepi[i][j] = std_improvement
+            # if i==2:
+            #     print(std_aepi[i][j])
+
+        # end loop through wec values
+
+    # end loop through methods
+
+    # load SNOPT data
+    data_snopt_no_wec = np.loadtxt(
+        rdir+"snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
+    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+    # run time (s), obj func calls, sens func calls
+    snw_id = data_snopt_no_wec[:, 0]
+    snw_ef = np.ones_like(snw_id)
+    snw_orig_aep = data_snopt_no_wec[0, 4]
+    # swa_run_start_aep = data_snopt_relax[0, 7]
+    snw_run_end_aep = data_snopt_no_wec[:, 6]
+    snw_run_time = data_snopt_no_wec[:, 7]
+    snw_fcalls = data_snopt_no_wec[:, 8]
+    snw_scalls = data_snopt_no_wec[:, 9]
+
+    # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
+    snw_run_improvement = 100*(snw_run_end_aep / orig_aep - 1.)
+    snw_mean_run_improvement = np.average(snw_run_improvement)
+    snw_std_improvement = np.std(snw_run_improvement)
+    snw_max_improvement = np.max(snw_run_improvement)
+    snw_min_improvement = np.min(snw_run_improvement)
+
+    # load ALPSO data
+    data_ps = np.loadtxt(rdir+"ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    ps_id = data_ps[:, 0]
+    ps_ef = np.ones_like(ps_id)
+    ps_orig_aep = data_ps[0, 4]
+    # swa_run_start_aep = data_ps[0, 7]
+    ps_run_end_aep = data_ps[:, 6]
+    ps_run_time = data_ps[:, 7]
+    ps_fcalls = data_ps[:, 8]
+    ps_scalls = data_ps[:, 9]
+
+    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+    ps_run_improvement = 100*(ps_run_end_aep / orig_aep - 1.)
+    ps_mean_run_improvement = np.average(ps_run_improvement)
+    ps_median_run_improvement = np.median(ps_run_improvement)
+    ps_std_improvement = np.std(ps_run_improvement)
+    ps_max_improvement = np.max(ps_run_improvement)
+    ps_min_improvement = np.min(ps_run_improvement)
+
+    # set up plots
+    plt.gcf().clear()
+    fig, ax1 = plt.subplots()
+
+    colors = ['tab:red', 'tab:blue', 'tab:cyan', 'k']
+    ax1.set_xlabel('Number of WEC Steps', color='k')
+    ax1.set_ylabel("Maximum Improvement (%)")
+
+    labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
+    wechms = 6
+
+    ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
+    ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename+'_max.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    # set up plots
+    plt.gcf().clear()
+    fig, ax1 = plt.subplots()
+
+    ax1.set_xlabel('Number of WEC Steps', color='k')
+    ax1.set_ylabel("Mean Improvement (%)")
+
+    ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
+    ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename+'_mean.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    # set up plots
+    plt.gcf().clear()
+    fig, ax1 = plt.subplots()
+
+    ax1.set_xlabel('Number of WEC Steps', color='k')
+    ax1.set_ylabel("Standard Deviation of Improvement (%)")
+
+    ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
+    ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -785,7 +1131,7 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.set_xlabel('Number of WEC Steps', color='k')
     ax1.set_ylabel("Maximum Improvement (%)")
 
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
     ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
@@ -810,7 +1156,7 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.set_xlabel('Number of WEC Steps', color='k')
     ax1.set_ylabel("Mean Improvement (%)")
 
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
     ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
@@ -835,7 +1181,7 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.set_xlabel('Number of WEC Steps', color='k')
     ax1.set_ylabel("Standard Deviation of Improvement (%)")
 
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
     ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
@@ -1135,7 +1481,7 @@ def plot_wec_step_results(filename, save_figs, show_figs, nturbs=38):
     ax2 = ax1.twiny()
     # ax2.set_ylim([0, 10])
     # plot max percent improvement
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
 
     ax2.set_xlabel('Diameter Multiplier Step', color=colors[1])
@@ -1451,7 +1797,7 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
     ax2 = ax1.twiny()
     # ax2.set_ylim([0, 10])
     # plot max percent improvement
-    labels = ["angle", "diam", "hibrid", 'ALPSO', 'SNOPT']
+    labels = ["angle", "diam", "hybrid", 'ALPSO', 'SNOPT']
 
 
     ax2.set_xlabel('Diameter Multiplier', color=colors[1])
@@ -3150,6 +3496,195 @@ def plot_smoothing_visualization(filename, save_figs, show_figs):
 
     return
 
+def plot_wec_methods(filename, save_figs, show_figs):
+
+    def x0_func(d, gamma, ct, alpha_star, beta_star, I):
+        num = d * np.cos(gamma) * (1. + np.sqrt(1 - ct))
+        den = (np.sqrt(2.) * (alpha_star * I + beta_star * (1. - np.sqrt(1 - ct))))
+        x0 = num / den
+        return x0
+
+    def xd_func(x0, d, ky, kz, gamma, ct):
+        root_term = np.sqrt((ky + kz * np.cos(gamma)) ** 2 - 4. * ky * kz * (ct - 1.) * np.cos(gamma))
+        num = ky + kz * np.cos(gamma) - root_term
+        den = 2. * ky * kz * np.sqrt(8.)
+        xd = x0 + d * num / den
+        return xd
+
+    def spread_func(x, x0, xd, d, ky, kz, gamma):
+        sigmay = np.zeros_like(x)
+        sigmaz = np.zeros_like(x)
+        i = 0
+        sigmay0 = d * np.cos(gamma) / np.sqrt(8.)
+        sigmaz0 = d * np.cos(gamma) / np.sqrt(8.)
+
+        sigmayd = ky * (xd - x0) + d * np.cos(gamma) / np.sqrt(8.)
+        sigmazd = kz * (xd - x0) + d / np.sqrt(8.)
+        for xx in x:
+            if x[i] > x0:
+                sigmay[i] = ky * (x[i] - x0) + d * np.cos(gamma) / np.sqrt(8.)
+                sigmaz[i] = kz * (x[i] - x0) + d / np.sqrt(8.)
+            else:
+                sigmay[i] = (x[i] / x0) * (sigmay0 - sigmayd) + sigmayd
+                sigmaz[i] = (x[i] / x0) * (sigmaz0 - sigmazd) + sigmazd
+            i += 1
+        return sigmay, sigmaz
+
+    def spread_func_original_wec(x, x0, xd, d, ky, kz, gamma, wec_factor):
+        sigmay = np.zeros_like(x)
+        sigmaz = np.zeros_like(x)
+        i = 0
+        sigmay0 = d * np.cos(gamma) / np.sqrt(8.)
+        sigmaz0 = d * np.cos(gamma) / np.sqrt(8.)
+
+        sigmayd = ky * (xd - x0) + d * np.cos(gamma) / np.sqrt(8.)
+        sigmazd = kz * (xd - x0) + d / np.sqrt(8.)
+
+        for xx in x:
+            if x[i] > x0:
+                sigmay[i] = ky * (x[i] - x0) + d * np.cos(gamma) / np.sqrt(8.)
+                sigmaz[i] = kz * (x[i] - x0) + d / np.sqrt(8.)
+            else:
+                sigmay[i] = (x[i] / x0) * (sigmay0 - sigmayd) + sigmayd
+                sigmaz[i] = (x[i] / x0) * (sigmaz0 - sigmazd) + sigmazd
+            i += 1
+        return wec_factor * sigmay, wec_factor * sigmaz
+
+    def spread_func_wec_angle_test(x, x0, xd, d, ky, kz, gamma, wec_angle):
+        sigmay = np.zeros_like(x)
+        sigmaz = np.zeros_like(x)
+        i = 0
+        sigmay0_orig = d*np.cos(gamma)/np.sqrt(8.)
+        sigmaz0_orig = d * np.cos(gamma) / np.sqrt(8.)
+
+        sigmayd = ky*(xd-x0)+d*np.cos(gamma)/np.sqrt(8.)
+        sigmazd = kz * (xd - x0) + d / np.sqrt(8.)
+
+        theta_k_near_wake = wec_angle * np.pi / 180.0
+        k_spread = np.tan(theta_k_near_wake)
+        ky_near_wake = (sigmay0_orig - sigmayd) / x0
+
+        if k_spread > ky_near_wake:
+            ky_near_wake = k_spread
+
+        sigmay0_new = ky_near_wake * x0 + sigmayd
+        sigmaz0 = d * np.cos(gamma) / np.sqrt(8.)
+
+        for xx in x:
+            if x[i] > x0:
+                if ky > ky_near_wake:
+                    sigmay[i] = ky * (x[i] - x0) + sigmay0_new
+                else:
+                    sigmay[i] = ky_near_wake * (x[i] - x0) + sigmay0_new
+                sigmaz[i] = kz * (x[i] - x0) + d / np.sqrt(8.)
+            else:
+                sigmay[i] = ky_near_wake * x[i] + sigmazd
+                sigmaz[i] = (x[i] / x0) * (sigmaz0 - sigmazd) + sigmazd
+            i += 1
+        return sigmay, sigmaz
+
+    def spread_func_wech(x, x0, xd, d, ky, kz, gamma, wec_factor):
+        sigmay = np.zeros_like(x)
+        sigmaz = np.zeros_like(x)
+        i = 0
+        sigmay0 = d * np.cos(gamma) / np.sqrt(8.)
+        sigmaz0 = d / np.sqrt(8.)
+
+        sigmay0WEC = wec_factor * d * np.cos(gamma) / np.sqrt(8.)
+        sigmaz0WEC = wec_factor * d / np.sqrt(8.)
+
+        for xx in x:
+            if x[i] > x0:
+                sigmay[i] = wec_factor * (ky * (x[i] - x0) + d * np.cos(gamma) / np.sqrt(8.))
+                sigmaz[i] = wec_factor * (kz * (x[i] - x0) + d / np.sqrt(8.))
+            else:
+                sigmay[i] = ((sigmay0WEC - sigmay0) / (x0)) * x[i] + sigmay0
+                sigmaz[i] = ((sigmaz0WEC - sigmaz0) / (x0)) * x[i] + sigmaz0
+            i += 1
+        return sigmay, sigmaz
+
+    I = 0.1  # ambient turbulence intensity
+    u_inf = 10  # inflow velocity (m/s)
+    ky = 0.3871 * I + 0.003678
+    kz = 0.3871 * I + 0.003678
+
+    d = 80.0  # rotor diameter
+    ct = 0.8  # thrust coefficient
+    gamma = 0  # yaw angle
+
+    beta_star = 0.154
+    alpha_star = 2.32
+
+
+    wec_angle = 6
+    wec_factor_d = 4
+    wec_factor_h = 3
+
+    # end of near wake
+    x0 = x0_func(d, gamma, ct, alpha_star, beta_star, I)
+
+    # discontinuity point
+    xd = xd_func(x0, d, ky, kz, gamma, ct)
+
+    # plot results
+    x = np.arange(0, 7 * d, 10)
+
+    sigmay_original, sigmaz_original = spread_func(x, x0, xd, d, ky, kz, gamma)
+
+    sigmay_a, sigmaz_a = spread_func_wec_angle_test(x, x0, xd, d, ky, kz, gamma, wec_angle)
+
+    sigmay_d, sigmaz_d = spread_func_original_wec(x, x0, xd, d, ky, kz, gamma, wec_factor_d)
+
+    sigmay_h, sigmaz_h = spread_func_wech(x, x0, xd, d, ky, kz, gamma, wec_factor_h)
+
+    # plot
+    fig, ax = plt.subplots(1)
+
+
+    line1 = ax.plot(x / d, sigmay_original / d, 'gray')
+    line2 = ax.plot(x / d, -sigmay_original / d, 'gray')
+    line3 = ax.plot(x / d, np.zeros_like(x), '--', color='gray')
+    ax.text(3, 0.3, 'Original wake',
+             verticalalignment='top', horizontalalignment='left',
+             color='gray', fontsize=15)
+
+    line4 = ax.plot(x / d, sigmay_a / d, 'r')
+    line5 = ax.plot(x / d, -sigmay_a / d, 'r')
+    ax.text(3., 0.72, 'WEC-A',
+             verticalalignment='bottom', horizontalalignment='left',
+             color='r', fontsize=15)
+
+    line6 = ax.plot(x / d, sigmay_d / d, 'b')
+    line7 = ax.plot(x / d, -sigmay_d / d, 'b')
+    ax.text(1, 1.4, 'WEC-D',
+             verticalalignment='bottom', horizontalalignment='left',
+             color='b', fontsize=15)
+
+    line8 = ax.plot(x / d, sigmay_h / d, 'c')
+    line9 = ax.plot(x / d, -sigmay_h / d, 'c')
+    ax.text(1, 0.8, 'WEC-H',
+             verticalalignment='bottom', horizontalalignment='left',
+             color='c', fontsize=15)
+
+    plt.xlabel('Downwind distance ($\Delta x/d$)')
+    plt.ylabel('Crosswind distance ($\Delta y/d$)')
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
 if __name__ == "__main__":
 
     show_figs = True
@@ -3191,7 +3726,13 @@ if __name__ == "__main__":
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    filename = 'maxwec_const_nsteps6'
     plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    filename = 'nsteps_const_maxwec3'
+    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+
+    # filename = './images/wec-methods.pdf'
+    # plot_wec_methods(filename, save_figs, show_figs)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
