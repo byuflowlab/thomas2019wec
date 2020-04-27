@@ -443,9 +443,10 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     aplt, = ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     hplt, = ax2.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_max_improvement, ps_max_improvement], '--', label=labels[3], color=colors[3])
+    # pplt, = ax2.plot([2,10], [ps_max_improvement, ps_max_improvement], '--', label=labels[3], color=colors[3])
     splt, = ax2.plot([2,10], [snw_max_improvement, snw_max_improvement], ':', label=labels[4], color=colors[3])
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -471,9 +472,10 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     aplt, = ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     hplt, = ax2.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    # pplt, = ax2.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
     splt, = ax2.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -499,10 +501,11 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     aplt, = ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     hplt, = ax2.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    # pplt, = ax2.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
     splt, = ax2.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
 
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -796,7 +799,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
+    # ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
@@ -818,7 +821,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    # ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
@@ -840,7 +843,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    # ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
