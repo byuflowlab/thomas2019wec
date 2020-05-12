@@ -128,7 +128,8 @@ if __name__ == "__main__":
     # opt_alg_number = int(sys.argv[4])
     opt_alg_number = 0
     # max_wec = int(sys.argv[5])
-    max_wec = 3
+    max_wec = 6
+
     # nsteps = int(sys.argv[6])
     nsteps = 6
 
