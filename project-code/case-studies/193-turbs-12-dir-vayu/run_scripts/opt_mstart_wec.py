@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # layout_number = int(sys.argv[1])
     layout_number = 0
     # wec_method_number = int(sys.argv[2])
-    wec_method_number = 0
+    wec_method_number = 1
     # model = int(sys.argv[3])
     model = 1
     # opt_alg_number = int(sys.argv[4])
@@ -467,7 +467,7 @@ if __name__ == "__main__":
         # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = 1
+        prob.driver.opt_settings['Verify level'] = 0
         # set optimizer options
         prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
         prob.driver.opt_settings[

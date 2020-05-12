@@ -327,7 +327,7 @@ if __name__ == "__main__":
     # load starting locations
     layout_directory = input_directory
 
-    layout_data = np.loadtxt(layout_directory + "layouts/round_193turbs/nTurbs193_spacing5_layout_%i.txt" % layout_number)
+    layout_data = np.loadtxt(layout_directory + "layouts/round_101turbs/nTurbs101_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory + "layouts/grid_16turbs/nTurbs16_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory+"layouts/nTurbs9_spacing5_layout_%i.txt" % layout_number)
 
@@ -467,7 +467,7 @@ if __name__ == "__main__":
         # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = 0
+        prob.driver.opt_settings['Verify level'] = 1
         # set optimizer options
         prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
         prob.driver.opt_settings[

@@ -126,7 +126,7 @@ if __name__ == "__main__":
     # model = int(sys.argv[3])
     model = 1
     # opt_alg_number = int(sys.argv[4])
-    opt_alg_number = 1
+    opt_alg_number = 2
     # max_wec = int(sys.argv[5])
     max_wec = 3
     # nsteps = int(sys.argv[6])

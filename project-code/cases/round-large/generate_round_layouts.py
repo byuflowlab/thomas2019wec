@@ -102,7 +102,7 @@ def round_farm_random_start(rotor_diameter, center, radius, min_spacing=2., min_
         while not good_point:
 
             # generate random point in containing rectangle
-            # print(np.random.rand(1, 2))
+            # print((np.random.rand(1, 2))
             [[turbineX[i], turbineY[i]]] = np.random.rand(1,2)*2. -1.
 
             turbineX[i] *= radius
@@ -129,7 +129,7 @@ def round_farm_random_start(rotor_diameter, center, radius, min_spacing=2., min_
                     good_point = True
                 # sleep(0.05)
 
-        # print i
+        # print( i
     return turbineX*rotor_diameter, turbineY*rotor_diameter
 
 def generate_round_layouts(nLayouts, rotor_diameter, farm_center=0., farm_radius=4000., base_spacing=5., min_spacing=1.,
@@ -142,16 +142,16 @@ def generate_round_layouts(nLayouts, rotor_diameter, farm_center=0., farm_radius
 
     nTurbines = turbineY.size
 
-    print nTurbines
+    print("Number of turbines: ", nTurbines)
 
     area = np.pi * boundary_radius ** 2
-    print area
+    print("wind farm area (m^2): ", area)
     effective_rows = np.sqrt(38)
-    print effective_rows
+    print( effective_rows)
     effective_row_length = np.sqrt(area)
-    print effective_row_length
+    print( effective_row_length)
     effective_spacing = effective_row_length / (effective_rows - 1.)
-    print effective_spacing / rotor_diameter
+    print("effective spacing: ", effective_spacing / rotor_diameter)
     # plot_round_farm(turbineX, turbineY, rotor_diameter, center, boundary_radius, start_min_spacing, show_start=True)
 
     if save_layouts:
@@ -165,7 +165,7 @@ def generate_round_layouts(nLayouts, rotor_diameter, farm_center=0., farm_radius
 
     if nLayouts > 1:
         for L in np.arange(1, nLayouts):
-            print "Generating Layout %i" %L
+            print("Generating Layout %i" %L)
             turbineX, turbineY = round_farm_random_start(np.copy(rotor_diameter), np.copy(farm_center),
                                                          np.copy(farm_radius), np.copy(base_spacing),
                                                          min_spacing_random=min_spacing)
@@ -182,13 +182,13 @@ if __name__ == "__main__":
 
     rotor_diameter = 126.4
 
-    boundary_radius = 0.5 * (4000 - rotor_diameter)  # 1936.8
+    boundary_radius = 0.5 * (7000 - rotor_diameter)  # 1936.8
     center = np.array([boundary_radius, boundary_radius])
     start_min_spacing = 5.
 
-    nLayouts = 200
+    nLayouts = 1
 
-    show_layouts = False
+    show_layouts = True
     save_layouts = True
 
     # turbineX, turbineY = round_farm(np.copy(rotor_diameter), np.copy(center), np.copy(boundary_radius),

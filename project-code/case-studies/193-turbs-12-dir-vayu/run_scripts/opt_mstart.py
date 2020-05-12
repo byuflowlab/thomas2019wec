@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # layout_number = int(sys.argv[1])
     layout_number = 0
     # wec_method_number = int(sys.argv[2])
-    wec_method_number = 3
+    wec_method_number = 0
     # model = int(sys.argv[3])
     model = 1
     # opt_alg_number = int(sys.argv[4])
@@ -327,7 +327,7 @@ if __name__ == "__main__":
     # load starting locations
     layout_directory = input_directory
 
-    layout_data = np.loadtxt(layout_directory + "layouts/round_38turbs/nTurbs38_spacing5_layout_%i.txt" % layout_number)
+    layout_data = np.loadtxt(layout_directory + "layouts/round_193turbs/nTurbs193_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory + "layouts/grid_16turbs/nTurbs16_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory+"layouts/nTurbs9_spacing5_layout_%i.txt" % layout_number)
 
@@ -542,8 +542,8 @@ if __name__ == "__main__":
         #
         # prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        # prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
+        # prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
 
         # prob.driver.add_objective('obj', scaler=1E0)
     prob.model.add_objective('obj', scaler=1E-3)
