@@ -472,7 +472,11 @@ if __name__ == "__main__":
         # set optimizer options
         prob.driver.opt_settings['Verify level'] = 1
         # set optimizer options
-        prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
+        if wec_method_number > 0:
+            prob.driver.opt_settings['Major optimality tolerance'] = 1e-3
+        else:
+            prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
+
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
