@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 # import cProfile
 import sys
+import mpi4py.MPI
 
 
 def plot_round_farm(turbineX, turbineY, rotor_diameter, boundary_center, boundary_radius, min_spacing=2.,
@@ -89,51 +90,10 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
     if show_start:
         plt.show()
 
-
-if __name__ == "__main__":
-
-    ######################### for MPI functionality #########################
-    from openmdao.utils import mpi as MPI
-
-    # if MPI:  # pragma: no cover
-    #     # if you called this script with 'mpirun', then use the petsc data passing
-    #     from openmdao.utils import PetscImpl as impl
-    #
-    #     print("In MPI, impl = ", impl)
-    #
-    # else:
-    #     # if you didn't use 'mpirun', then use the numpy data passing
-    #     from openmdao.api import BasicImpl as impl
-    #
-    #
-    # def print(*args):
-    #     """ helper function to only print on rank 0 """
-    #     if prob.root.comm.rank == 0:
-    #         print(*args)
-
-
-    # prob = Problem(impl=impl)
-
-    #########################################################################
-
-    # set up this run
-
-    # specify which starting layout should be used
-    layout_number = int(sys.argv[1])
-    # layout_number = 0
-    wec_method_number = int(sys.argv[2])
-    # wec_method_number = 1
-    model = int(sys.argv[3])
-    # model = 1
-    opt_alg_number = int(sys.argv[4])
-    # opt_alg_number = 0
-    max_wec = int(sys.argv[5])
-    # max_wec = 3
-    nsteps = int(sys.argv[6])
-    # nsteps = 6
-
+def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps):
+    OPENMDAO_REQUIRE_MPI = False
     run_number = layout_number
-
+    model = wake_model
     # set model
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
     print(MODELS[model])
@@ -229,7 +189,6 @@ if __name__ == "__main__":
         ti_opt_method = 5
     final_ti_opt_method = 5
 
-
     if opt_algorithm == 'ps':
         ti_opt_method = ti_calculation_method
 
@@ -265,7 +224,7 @@ if __name__ == "__main__":
         rotor_diameter = 80.  # (m)
         hub_height = 70.0
 
-        z_ref = 80.0 #m
+        z_ref = 80.0  # m
         z_0 = 0.0
 
         # load performance characteristics
@@ -295,7 +254,7 @@ if __name__ == "__main__":
         rotor_diameter = 126.4  # (m)
         hub_height = 90.0
 
-        z_ref = 80.0 # m
+        z_ref = 80.0  # m
         z_0 = 0.0
 
         # load performance characteristics
@@ -334,8 +293,8 @@ if __name__ == "__main__":
     # layout_data = np.loadtxt(layout_directory + "layouts/grid_16turbs/nTurbs16_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory+"layouts/nTurbs9_spacing5_layout_%i.txt" % layout_number)
 
-    turbineX = layout_data[:, 0] * rotor_diameter + rotor_diameter/2.
-    turbineY = layout_data[:, 1] * rotor_diameter + rotor_diameter/2.
+    turbineX = layout_data[:, 0] * rotor_diameter + rotor_diameter / 2.
+    turbineY = layout_data[:, 1] * rotor_diameter + rotor_diameter / 2.
 
     turbineX_init = np.copy(turbineX)
     turbineY_init = np.copy(turbineY)
@@ -423,23 +382,23 @@ if __name__ == "__main__":
     if MODELS[model] == 'BPA':
         # initialize problem
         prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-                                              minSpacing=minSpacing, differentiable=differentiable,
-                                              use_rotor_components=False,
-                                              wake_model=gauss_wrapper,
-                                              params_IdepVar_func=add_gauss_params_IndepVarComps,
-                                              params_IdepVar_args={'nRotorPoints': nRotorPoints},
-                                              wake_model_options=wake_model_options,
-                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
-                                              record_function_calls=True))
+                                       minSpacing=minSpacing, differentiable=differentiable,
+                                       use_rotor_components=False,
+                                       wake_model=gauss_wrapper,
+                                       params_IdepVar_func=add_gauss_params_IndepVarComps,
+                                       params_IdepVar_args={'nRotorPoints': nRotorPoints},
+                                       wake_model_options=wake_model_options,
+                                       cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
+                                       record_function_calls=True, runparallel=False))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
         prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-                                              minSpacing=minSpacing, differentiable=differentiable,
-                                              use_rotor_components=False,
-                                              wake_model=floris_wrapper,
-                                              params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IdepVar_args={},
-                                              record_function_calls=True))
+                                       minSpacing=minSpacing, differentiable=differentiable,
+                                       use_rotor_components=False,
+                                       wake_model=floris_wrapper,
+                                       params_IdepVar_func=add_floris_params_IndepVarComps,
+                                       params_IdepVar_args={},
+                                       record_function_calls=True))
     # elif MODELS[model] == 'JENSEN':
     #     initialize problem
     # prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
@@ -472,10 +431,7 @@ if __name__ == "__main__":
         # set optimizer options
         prob.driver.opt_settings['Verify level'] = 1
         # set optimizer options
-        if wec_method_number > 0:
-            prob.driver.opt_settings['Major optimality tolerance'] = 1e-3
-        else:
-            prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
+        prob.driver.opt_settings['Major optimality tolerance'] = 1e-4
 
         prob.driver.opt_settings[
             'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
@@ -484,11 +440,10 @@ if __name__ == "__main__":
             'Summary file'] = output_directory + 'SNOPT_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)#,
-                                   #active_tol=(2. * rotor_diameter) ** 2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)#,
-                                   #active_tol=2. * rotor_diameter)
-
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)  # ,
+        # active_tol=(2. * rotor_diameter) ** 2)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)  # ,
+        # active_tol=2. * rotor_diameter)
 
         prob.driver.options['dynamic_derivs_sparsity'] = True
 
@@ -557,9 +512,9 @@ if __name__ == "__main__":
 
     # select design variables
     prob.model.add_design_var('turbineX', scaler=1E3, lower=np.zeros(nTurbines),
-                           upper=np.ones(nTurbines) * 3. * boundary_radius)
+                              upper=np.ones(nTurbines) * 3. * boundary_radius)
     prob.model.add_design_var('turbineY', scaler=1E3, lower=np.zeros(nTurbines),
-                           upper=np.ones(nTurbines) * 3. * boundary_radius)
+                              upper=np.ones(nTurbines) * 3. * boundary_radius)
 
     # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
     # prob.model.ln_solver.options['mode'] = 'rev'
@@ -593,7 +548,6 @@ if __name__ == "__main__":
     # ]
     #
     # iprofile.setup(methods=methods)
-
 
     print("almost time for setup")
     tic = time.time()
@@ -763,7 +717,8 @@ if __name__ == "__main__":
                 if save_locations:
                     np.savetxt(
                         output_directory + '%s_multistart_locations_%iturbs_%sWindRose_%idirs_%s_run%i_EF%.3f_TItype%i.txt' % (
-                            opt_algorithm, nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor, ti_opt_method),
+                            opt_algorithm, nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor,
+                            ti_opt_method),
                         np.c_[turbineX_init, turbineY_init, prob['turbineX'], prob['turbineY']],
                         header="initial turbineX, initial turbineY, final turbineX, final turbineY")
                 # if save_time:
@@ -865,3 +820,32 @@ if __name__ == "__main__":
 
     plot_round_farm(turbineX_end, turbineY_end, rotor_diameter, [boundary_center_x, boundary_center_y], boundary_radius,
                     show_start=show_end)
+
+    return 0
+
+if __name__ == "__main__":
+
+    rank = mpi4py.MPI.COMM_WORLD.Get_rank()
+    size = mpi4py.MPI.COMM_WORLD.Get_size()
+
+    wake_model = 1
+    opt_alg_number = 0
+    max_wec = 3
+
+    wec_method_numbers = np.array([1, 2, 3])
+    nstepss = np.arange(1, 11)
+    layout_numbers = np.arange(0, 200)
+
+    wmns, nss, lns = np.meshgrid(wec_method_numbers, nstepss, layout_numbers)
+    wmns = wmns.flatten()
+    nss = nss.flatten()
+    lns = lns.flatten()
+
+    ntasks = wec_method_numbers.size*nstepss.size*layout_numbers.size
+
+    for i in np.arange(0, ntasks):
+
+        if i % size != rank: continue
+        print("Task number %d being done by processor %d of %d" % (i, rank, size))
+        print(wmns[i], nss[i], lns[i])
+        run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
