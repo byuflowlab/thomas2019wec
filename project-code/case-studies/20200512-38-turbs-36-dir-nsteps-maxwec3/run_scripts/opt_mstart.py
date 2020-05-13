@@ -825,27 +825,43 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
 if __name__ == "__main__":
 
-    rank = mpi4py.MPI.COMM_WORLD.Get_rank()
-    size = mpi4py.MPI.COMM_WORLD.Get_size()
+    # rank = mpi4py.MPI.COMM_WORLD.Get_rank()
+    # size = mpi4py.MPI.COMM_WORLD.Get_size()
+    #
+    # wake_model = 1
+    # opt_alg_number = 0
+    # max_wec = 3
+    #
+    # wec_method_numbers = np.array([1, 2, 3])
+    # nstepss = np.arange(1, 11)
+    # layout_numbers = np.arange(0, 200)
+    #
+    # wmns, nss, lns = np.meshgrid(wec_method_numbers, nstepss, layout_numbers)
+    # wmns = wmns.flatten()
+    # nss = nss.flatten()
+    # lns = lns.flatten()
+    #
+    # ntasks = wec_method_numbers.size*nstepss.size*layout_numbers.size
+    #
+    # for i in np.arange(0, ntasks):
+    #
+    #     if i % size != rank: continue
+    #     print("Task number %d being done by processor %d of %d" % (i, rank, size))
+    #     print(wmns[i], nss[i], lns[i])
+    #     run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
 
-    wake_model = 1
-    opt_alg_number = 0
-    max_wec = 3
+    # specify which starting layout should be used
+    layout_number = int(sys.argv[1])
+    # layout_number = 0
+    wec_method_number = int(sys.argv[2])
+    # wec_method_number = 3
+    model = int(sys.argv[3])
+    # model = 1
+    opt_alg_number = int(sys.argv[4])
+    # opt_alg_number = 0
+    max_wec = int(sys.argv[5])
+    # max_wec = 2
+    wec_step = float(sys.argv[6])
+    # wec_step = 0.25
 
-    wec_method_numbers = np.array([1, 2, 3])
-    nstepss = np.arange(1, 11)
-    layout_numbers = np.arange(0, 200)
-
-    wmns, nss, lns = np.meshgrid(wec_method_numbers, nstepss, layout_numbers)
-    wmns = wmns.flatten()
-    nss = nss.flatten()
-    lns = lns.flatten()
-
-    ntasks = wec_method_numbers.size*nstepss.size*layout_numbers.size
-
-    for i in np.arange(0, ntasks):
-
-        if i % size != rank: continue
-        print("Task number %d being done by processor %d of %d" % (i, rank, size))
-        print(wmns[i], nss[i], lns[i])
-        run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
+    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, wec_step)
