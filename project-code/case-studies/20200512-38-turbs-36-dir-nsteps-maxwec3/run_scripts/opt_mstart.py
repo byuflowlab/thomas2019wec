@@ -136,16 +136,16 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         relax = True
         # expansion_factors = np.array([3, 2.75, 2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 1.0])
         expansion_factors = np.linspace(1.0, max_wec, nsteps)
-        expansion_factors = np.append(np.flip(expansion_factors), 1.0)
+        expansion_factors = np.flip(expansion_factors)
     elif wec_method == 'angle':
         output_directory = "../output_files/%s_wec_angle_max_wec_%i_nsteps_%.3f/" % (opt_algorithm, max_wec, nsteps)
         relax = True
         # expansion_factors = np.array([50, 40, 30, 20, 10, 0.0, 0.0])
         expansion_factors = np.linspace(0.0, max_wec, nsteps)
-        expansion_factors = np.append(np.flip(expansion_factors), 0.0)
+        expansion_factors = np.flip(expansion_factors)
     elif wec_method == 'hybrid':
         expansion_factors = np.linspace(1.0, max_wec, nsteps)
-        expansion_factors = np.append(np.flip(expansion_factors), 1.0)
+        expansion_factors = np.flip(expansion_factors)
         output_directory = "../output_files/%s_wec_hybrid_max_wec_%i_nsteps_%.3f/" % (opt_algorithm, max_wec, nsteps)
         relax = True
         WECH = 1
@@ -861,7 +861,7 @@ if __name__ == "__main__":
     # opt_alg_number = 0
     max_wec = int(sys.argv[5])
     # max_wec = 2
-    wec_step = float(sys.argv[6])
+    nsteps = int(sys.argv[6])
     # wec_step = 0.25
 
-    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, wec_step)
+    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps)
