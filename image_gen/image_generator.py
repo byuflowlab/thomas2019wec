@@ -653,7 +653,8 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
         std_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
 
         # set results directory
-        rdir = "./image_data/opt_results/202004080902-nsteps-maxwec-3/"
+        # rdir = "./image_data/opt_results/202004080902-nsteps-maxwec-3/"
+        rdir = "./image_data/opt_results/20200512-38-turbs-12-dir-nsteps-maxwec3/"
 
         # set wec method directory prefixes
         wadirp = "snopt_wec_angle_max_wec_3_nsteps_"
@@ -799,7 +800,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    # ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
@@ -821,7 +822,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    # ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
@@ -843,7 +844,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    # ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
+    ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
     ax1.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
@@ -3729,8 +3730,8 @@ if __name__ == "__main__":
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = 'maxwec_const_nsteps6'
-    plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = 'maxwec_const_nsteps6'
+    # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
     filename = 'nsteps_const_maxwec3'
     plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
