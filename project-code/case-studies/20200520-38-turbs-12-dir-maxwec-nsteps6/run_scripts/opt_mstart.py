@@ -871,17 +871,17 @@ if __name__ == "__main__":
     #     run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
 
     # specify which starting layout should be used
-    # layout_number = int(sys.argv[1])
-    layout_number = 0
-    # wec_method_number = int(sys.argv[2])
-    wec_method_number = 0
-    # model = int(sys.argv[3])
-    model = 1
-    # opt_alg_number = int(sys.argv[4])
-    opt_alg_number = 0
-    # max_wec = int(sys.argv[5])
-    max_wec = 1
-    # nsteps = int(sys.argv[6])
-    nsteps = 1
+    layout_number = int(sys.argv[1])
+    #layout_number = 0
+    wec_method_number = int(sys.argv[2])
+    #wec_method_number = 0
+    model = int(sys.argv[3])
+    #model = 1
+    opt_alg_number = int(sys.argv[4])
+    #opt_alg_number = 0
+    max_wec = int(sys.argv[5])
+    #max_wec = 1
+    nsteps = int(sys.argv[6])
+    #nsteps = 1
 
     run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps)
