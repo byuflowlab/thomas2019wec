@@ -55,15 +55,15 @@ if __name__ == "__main__":
     wecdsteps = 6
 
     # wecamaxvals = np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80])
-    maxweca = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40])
-    maxwecd = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
-    maxwech = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+    maxweca = np.array([3])
+    maxwecd = np.array([3])
+    maxwech = np.array([3])
 
-    for i in np.arange(0, maxweca.size):
-        wec_method = 'angle'
-        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxweca[i], wecasteps)
-        print("writing file: ", filename)
-        write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxweca[i], nsteps=wecasteps)
+    # for i in np.arange(0, maxweca.size):
+    #     wec_method = 'angle'
+    #     filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxweca[i], wecasteps)
+    #     print("writing file: ", filename)
+    #     write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxweca[i], nsteps=wecasteps)
 
     for i in np.arange(0, maxwecd.size):
         wec_method = 'diam'
@@ -71,10 +71,10 @@ if __name__ == "__main__":
         print("writing file: ", filename)
         write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxwecd[i], nsteps=wecdsteps)
 
-    for i in np.arange(0, maxwech.size):
-        wec_method = 'hybrid'
-        filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxwech[i], wechsteps)
-        print("writing file: ", filename)
-        write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxwech[i], nsteps=wechsteps)
+    # for i in np.arange(0, maxwech.size):
+    #     wec_method = 'hybrid'
+    #     filename = "run_"+wec_method+"_wec_mw%i_ns%i.sh" %(maxwech[i], wechsteps)
+    #     print("writing file: ", filename)
+    #     write_scripts(filename, name=name, wec_method=wec_method, maxwec=maxwech[i], nsteps=wechsteps)
 
     print("complete")

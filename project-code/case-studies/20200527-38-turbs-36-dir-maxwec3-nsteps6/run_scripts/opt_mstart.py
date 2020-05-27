@@ -342,8 +342,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     # Define flow properties
     if wind_rose_file is 'nantucket':
-        # windRose = np.loadtxt(input_directory + 'nantucket_windrose_ave_speeds.txt')
-        windRose = np.loadtxt(input_directory + 'nantucket_wind_rose_for_LES.txt')
+        windRose = np.loadtxt(input_directory + 'nantucket_windrose_ave_speeds.txt')
+        # windRose = np.loadtxt(input_directory + 'nantucket_wind_rose_for_LES.txt')
         windDirections = windRose[:, 0]
         windSpeeds = windRose[:, 1]
         windFrequencies = windRose[:, 2]
