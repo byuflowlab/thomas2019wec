@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
                                     data[:, 8],data[:,9],data[:,10]], header=header)
             else:
-                np.savetxt(f, np.c_[data], header=header)
+                np.savetxt(f, np.c_[[data]], header=header)
         else:
             if relax:
                 np.savetxt(f, np.c_[data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],data[:,6],data[:,7],
