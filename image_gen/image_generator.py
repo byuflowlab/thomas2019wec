@@ -263,7 +263,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     if nturbs == 38:
 
         # set max wec values for each method
-        wavals = np.append(np.array([1, 2, 3, 4]), np.arange(5, 86, 5))
+        wavals = np.append(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), np.arange(10, 41, 5))
         wdvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
         whvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
 
@@ -292,7 +292,8 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
         std_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
 
         # set results directory
-        rdir = "./image_data/opt_results/202004011312-max-wec-const-nsteps6/"
+        # rdir = "./image_data/opt_results/202004011312-max-wec-const-nsteps6/"
+        rdir = "./image_data/opt_results/20200520-38-turbs-12-dir-nsteps6-maxwec/"
 
         # set wec method directory perfixes
         wadirp = "snopt_wec_angle_max_wec_"
@@ -966,9 +967,9 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     if nturbs == 38:
 
         # set max wec values for each method
-        wavals = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        wdvals = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        whvals = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        wavals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+        wdvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
+        whvals = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10])
 
         # 202003
         nwa = np.size(wavals)
@@ -995,7 +996,8 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
         std_aepi = np.copy(np.array([nwaarray.copy(),nwdarray.copy(),nwharray.copy()]))
 
         # set results directory
-        rdir = "./image_data/opt_results/202003261328-wec-nsteps/"
+        # rdir = "./image_data/opt_results/202003261328-wec-nsteps/"
+        rdir = "./image_data/opt_results/20200512-38-turbs-12-dir-nsteps-maxwec3/"
 
         # set wec method directory perfixes
         wadirp = "snopt_wec_angle_max_wec_10_nsteps_"
@@ -3732,7 +3734,7 @@ if __name__ == "__main__":
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
     # filename = 'maxwec_const_nsteps6'
     # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = 'nsteps_const_maxwec3'
+    # filename = 'nsteps_const_maxwec3'
     plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
