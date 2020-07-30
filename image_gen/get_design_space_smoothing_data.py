@@ -4,7 +4,7 @@ from openmdao.api import Problem, pyOptSparseDriver
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
 import time
 import numpy as np
@@ -16,7 +16,20 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
 
     MODELS = ['FLORIS', 'BPA', 'JENSEN', 'LARSEN']
-    model = 1
+
+    wec_method = "D"
+
+    if wec_method == "D":
+        WECH = False
+        exp_fac_values = np.arange(1.0, 3.1, 0.5)
+    elif wec_method == "H":
+        WECH = True
+        exp_fac_values = np.arange(1.0, 3.1, 0.5)
+    elif wec_method == "A":
+        WECH = False
+        exp_fac_values = np.linspace(1.0, 9.0, 5)
+
+    model = 2
     print(MODELS[model])
     wake_model_version = 2016
 
@@ -92,8 +105,8 @@ if __name__ == "__main__":
     rotor_diameter = 80.0 # (m)
     hub_height = 70.0
 
-    turbineX = np.array([0.0, 3.*rotor_diameter, 7.*rotor_diameter, 10.*rotor_diameter])
-    turbineY = np.array([-1.5*rotor_diameter, 1.5*rotor_diameter, 0.0, 0.0])
+    turbineX = np.array([0.0, 3.*rotor_diameter, 7.*rotor_diameter])
+    turbineY = np.array([-1.0*rotor_diameter, 1.0*rotor_diameter, 0.0])
 
     # initialize input variable arrays
     nTurbs = turbineX.size
@@ -126,7 +139,7 @@ if __name__ == "__main__":
     shear_exp = 0.15
     sm_smoothing = 1000.
 
-    wind_speed = 8.0  # m/s
+    wind_speed = 10.0  # m/s
     windSpeeds = np.ones(size) * wind_speed
 
     normalized_velocity = np.zeros(nTurbs)
@@ -143,23 +156,23 @@ if __name__ == "__main__":
                                               cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = Problem(impl=impl, model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=True, use_rotor_components=False,
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IndepVar_args={}))
+                                              params_IdepVar_args={}))
     elif MODELS[model] == 'JENSEN':
-        # initialize problem
-        prob = Problem(impl=impl, model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
+        wake_model_options = {'variant': 'JensenCosineFortran'}
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
                                               wake_model=jensen_wrapper,
                                               params_IdepVar_func=add_jensen_params_IndepVarComps,
-                                              params_IndepVar_args={}))
+                                              params_IdepVar_args={}, wake_model_options=wake_model_options))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' %(MODELS[model]))
 
     tic = time.time()
-    prob.setup(check=False)
+    prob.setup(check=True)
     toc = time.time()
 
     # print the results
@@ -219,12 +232,12 @@ if __name__ == "__main__":
         prob['model_params:shear_exp'] = np.copy(shear_exp)
         prob['model_params:I'] = np.copy(TI)
         prob['model_params:sm_smoothing'] = np.copy(sm_smoothing)
-        prob['model_params:WECH'] = False
+        prob['model_params:WECH'] = WECH
         prob['model_params:wake_model_version'] = wake_model_version
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
-    exp_fac_values = np.arange(1.0, 4.1, 1.0)
+
     locations = np.arange(-6.*rotor_diameter, 6.*rotor_diameter, 0.5)
     powers0 = np.zeros([exp_fac_values.size, locations.size])
     powers1 = np.zeros([exp_fac_values.size, locations.size])
@@ -234,19 +247,21 @@ if __name__ == "__main__":
 
     for k, i in zip(exp_fac_values, np.arange(0, exp_fac_values.size)):
         print('start %s run_driver' % (MODELS[model]))
-        prob['model_params:wec_factor'] = k
+        if wec_method == "A":
+            prob['model_params:wec_spreading_angle'] = k
+        else:
+            prob['model_params:wec_factor'] = k
         print(k)
         for location, j in zip(locations, np.arange(0, locations.size)):
             # run_driver the problem
             # tic = time.time()
             # cProfile.run_driver('prob.run_driver()')
-            turbineY[2] = turbineY[3] = location
+            turbineY[2] = location
             prob['turbineY'] = turbineY
             prob.run_model()
             powers0[i, j] = prob['wtPower0'][0]
             powers1[i, j] = prob['wtPower0'][1]
             powers2[i, j] = prob['wtPower0'][2]
-            powers3[i, j] = prob['wtPower0'][3]
 
             # powers0[i, j] = prob['wtVelocity0'][0]
             # powers1[i, j] = prob['wtVelocity0'][1]
@@ -287,54 +302,28 @@ if __name__ == "__main__":
     # plt.axis('equal')
     # # plt.show()
 
-    fig, ax = plt.subplots(2,3)
     fig2, ax2 = plt.subplots(1)
 
     for k, i in zip(exp_fac_values, np.arange(0, exp_fac_values.size)):
-        # print(powers[i, :])
-        ax[0,0].plot(locations/rotor_diameter, powers0[i, :], label="std. dev. = %f*sigma" % k)
-        ax[1,0].plot(locations/rotor_diameter, powers1[i, :], label="std. dev. = %f*sigma" % k)
-        ax[0,1].plot(locations/rotor_diameter, powers2[i, :], label="std. dev. = %f*sigma" % k)
-        ax[1,1].plot(locations/rotor_diameter, powers3[i, :], label="std. dev. = %f*sigma" % k)
 
-        ax[0, 2].plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
         # if np.mod(i,2) == 0:
         ax2.plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
-        ax[1, 2].plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
-    np.savetxt('smoothing_bpa.txt', np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
-                                                   aeps[3, :]],#, aeps[8, :], aeps[10, :], aeps[12, :]],
-               header='location/diam, aep')
 
-    ax[0,0].set_xlabel('Cross Stream Location')
-    ax[0,0].set_ylabel('Downs Stream Turbine Power (kW)')
-    ax[0,0].set_title('turbine 0')
-
-    ax[1,0].set_xlabel('Cross Stream Location')
-    ax[1,0].set_ylabel('Downs Stream Turbine Power (kW)')
-    ax[1,0].set_title('turbine 1')
-
-    ax[0,1].set_xlabel('Cross Stream Location')
-    ax[0,1].set_ylabel('Downs Stream Turbine Power (kW)')
-    ax[0,1].set_title('turbine 2')
-
-    ax[1,1].set_xlabel('Cross Stream Location')
-    ax[1,1].set_ylabel('Downs Stream Turbine Power (kW)')
-    ax[1,1].set_title('turbine 3')
-
-    ax[0, 2].set_xlabel('Cross Stream Location')
-    ax[0, 2].set_ylabel('AEP (kWh)')
-    ax[0, 2].set_title('AEP')
+    # save results
+    # np.savetxt('smoothing_bpa_WEC-%s.txt' %wec_method, np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
+    #                                                aeps[3, :], aeps[4, :]],# aeps[5, :]], #, aeps[12, :]],
+    #            header='location/diam, aep')
 
     ax2.set_xlabel('Cross Stream Location')
     ax2.set_ylabel('AEP, kWh')
     # ax2.set_title('AEP')
-
+    plt.legend()
     # plt.legend(loc=1, ncol=1)
     plt.tick_params(right='off', top='off')
     ax2.set_yticklabels([])
 
     plt.tight_layout()
-    plt.savefig('wec-with-ti.pdf', transparent=True)
+    # plt.savefig('wec-with-ti.pdf', transparent=True)
     plt.show()
     #
     # fig1, ax1 = plt.subplots()

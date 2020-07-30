@@ -127,27 +127,142 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
             texts.append(text)
 
     return texts
+
+
+def plot_windrose(direction, values, ticks, minor_ticks=0, tick_angle=-32., unit='', title='', show=True, save=False,
+                  file_name='figure1.pdf', plot_radius=None, bottom=0.):
+    if plot_radius == None:
+        plot_radius = max(ticks)
+
+    direction += 270.
+    for i in range(len(direction)):
+        direction[i] = radians(direction[i]) * -1.
+
+    N = direction.size
+    # bottom = 0.
+    # max_height = max(ws)
+    # N = 36
+
+    width = (2 * np.pi) / N
+
+    direction -= width / 2.
+
+    ax = plt.subplot(111, polar=True)
+
+    tick_labels = list()
+
+    minor_tick_distance = (ticks[1] - ticks[0]) / (minor_ticks + 1.)
+
+    for major_tick_count in range(0, len(ticks)):
+        tick_labels.append('%.1f %s' % (ticks[major_tick_count], unit))
+
+    if minor_ticks > 0 and len(ticks) > 1:
+
+        for major_tick_count in range(0, len(ticks)):
+
+            if major_tick_count < (len(ticks)):
+                for minor_tick_count in range(0, minor_ticks):
+                    circle_radius = ticks[major_tick_count] + (minor_tick_count + 1) * minor_tick_distance
+                    circle = plt.Circle((0.0, 0.0), circle_radius, transform=ax.transData._b,
+                                        facecolor=None, edgecolor='k', fill=False, alpha=0.2,
+                                        linestyle=':')
+                    ax.add_artist(circle)
+    #
+    ticks.append(plot_radius)
+    tick_labels.append('')
+
+    bars = ax.bar(direction, values, width=width, bottom=bottom, alpha=0.5, color='blue', edgecolor=None)
+
+    ax.set_rgrids(ticks, angle=tick_angle)
+    ax.yaxis.grid(linestyle='-', alpha=1.0)
+
+    ax.set_yticklabels(tick_labels)
+
+    plt.title(title, y=1.07)
+
+    ax.set_xticklabels(['', '', 'N', '', '', '', '', ''])
+
+    if save:
+        plt.savefig(file_name, transparent=True)
+    if show:
+        plt.show()
+
+
+def make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=20):
+
+    # load data
+    data_directory = './image_data/'
+    if dirs == 12:
+        data_file = 'nantucket_wind_rose_for_LES.txt'
+    elif dirs == 20:
+        data_file = 'directional_windrose.txt'
+    elif dirs == 36:
+        data_file = 'nantucket_windrose_ave_speeds.txt'
+    elif dirs == 72:
+        data_file = 'windrose_amalia_directionally_averaged_speeds.txt'
+
+    plot_data = np.loadtxt(data_directory + data_file)
+
+    # parse data
+    direction = plot_data[:, 0]
+    speed = plot_data[:, 1]
+    frequency = plot_data[:, 2]
+
+    # set plot params
+    print(np.min(speed))
+    if dirs == 12:
+        spacing = 5
+        minor_ticks = spacing - 1
+    elif dirs == 20:
+        spacing = 5
+        minor_ticks = spacing - 1
+    elif dirs == 36:
+        spacing = 2
+        minor_ticks = spacing - 1
+    elif dirs == 72:
+        spacing = 1
+        minor_ticks = 4
+    ticks = list(np.arange(0, np.ceil(np.max(frequency)*100.0+spacing/2), spacing))
+    print(ticks)
+    plot_windrose(direction=np.copy(direction) - 0.5*360/dirs, values=frequency * 100., ticks=ticks, tick_angle=-45.0, unit='%', show=show_figs,
+                  save=save_figs, file_name="freq"+filename, minor_ticks=minor_ticks)
+
+    fig = plt.gcf()
+    plt.close(fig)
+    if dirs == 12:
+        spacing = 5
+    elif dirs == 20:
+        spacing = 5
+    elif dirs == 36:
+        spacing = 2
+    elif dirs == 72:
+        spacing = 5
+    ticks = list(np.arange(0, np.ceil(np.max(speed)+spacing/2), spacing))
+    print(ticks)
+    plot_windrose(direction=direction - 0.5*360/dirs, values=speed, ticks=ticks, tick_angle=-45.0, unit='m/s', show=show_figs,
+                  save=save_figs, file_name='speed'+filename, minor_ticks=spacing-1)
+
 def get_statistics_38_turbs():
 
     # data_ps_mstart = np.loadtxt("./image_data/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
     # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
     # data_snopt_mstart = np.loadtxt("./image_data/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-    # data_snop_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    # data_snopt_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
     # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all_tolgens1200.txt")
     data_snopt_mstart = np.loadtxt("./image_data/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-    data_snop_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    data_snopt_relax = np.loadtxt("./image_data/snopt_relax_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
-    sr_id = data_snop_relax[:, 0]
-    sr_ef = data_snop_relax[:, 1]
-    sr_orig_aep = data_snop_relax[0, 5]
-    # sr_run_start_aep = data_snop_relax[0, 7]
-    sr_run_end_aep = data_snop_relax[sr_ef==1, 7]
-    sr_run_time = data_snop_relax[:, 8]
-    sr_fcalls = data_snop_relax[:, 9]
-    sr_scalls = data_snop_relax[:, 10]
+    sr_id = data_snopt_relax[:, 0]
+    sr_ef = data_snopt_relax[:, 1]
+    sr_orig_aep = data_snopt_relax[0, 5]
+    # sr_run_start_aep = data_snopt_relax[0, 7]
+    sr_run_end_aep = data_snopt_relax[sr_ef==1, 7]
+    sr_run_time = data_snopt_relax[:, 8]
+    sr_fcalls = data_snopt_relax[:, 9]
+    sr_scalls = data_snopt_relax[:, 10]
 
     sr_run_improvement = sr_run_end_aep / sr_orig_aep - 1.
     sr_mean_run_improvement = np.average(sr_run_improvement)
@@ -158,7 +273,7 @@ def get_statistics_38_turbs():
     sm_id = data_snopt_mstart[:, 0]
     sm_ef = np.ones_like(sm_id)
     sm_orig_aep = data_snopt_mstart[0, 4]
-    # sr_run_start_aep = data_snop_relax[0, 7]
+    # sr_run_start_aep = data_snopt_relax[0, 7]
     sm_run_end_aep = data_snopt_mstart[:, 6]
     sm_run_time = data_snopt_mstart[:, 7]
     sm_fcalls = data_snopt_mstart[:, 8]
@@ -258,6 +373,240 @@ def get_statistics_38_turbs():
 
     return
 
+def get_statistics_case_studies(turbs, dirs=None, fnamstart="", save_figs=False, show_figs=True, lt0=True):
+
+    if turbs == 16:
+        resdir = "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/"
+        data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
+    elif turbs == 38:
+        resdir = "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/"
+        data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+        # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+        data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+        data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+
+        if dirs == 12:
+            resdir = "./image_data/20200602-38-turbs-12-dir-nsteps-maxweca9/"
+            data_ps_mstart = np.loadtxt(
+                resdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+            data_snopt_mstart = np.loadtxt(
+                resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            data_snopt_relax = np.loadtxt(
+                resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
+
+    elif turbs == 60:
+        resdir = "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/"
+        data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+        # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+        data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+
+    # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
+    # aep run opt (kW), run time (s), obj func calls, sens func calls
+    sr_id = data_snopt_relax[:, 0]
+    sr_ef = data_snopt_relax[:, 1]
+    sr_orig_aep = data_snopt_relax[0, 5]
+    sr_run_ti = data_snopt_relax[:, 3]
+    # sr_run_start_aep = data_snopt_relax[0, 7]
+    sr_run_end_aep = data_snopt_relax[sr_run_ti==5, 7]
+    sr_run_time = data_snopt_relax[:, 8]
+    sr_fcalls = data_snopt_relax[:, 9]
+    sr_scalls = data_snopt_relax[:, 10]
+
+    sr_run_improvement = sr_run_end_aep / sr_orig_aep - 1.
+    sr_mean_run_improvement = np.average(sr_run_improvement)
+    sr_std_improvement = np.std(sr_run_improvement)
+
+    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+    # run time (s), obj func calls, sens func calls
+    sm_id = data_snopt_mstart[:, 0]
+    sm_ef = np.ones_like(sm_id)
+    sm_orig_aep = data_snopt_mstart[0, 4]
+    sm_run_ti = data_snopt_mstart[:, 2]
+    # sr_run_start_aep = data_snopt_relax[0, 7]
+    sm_run_end_aep = data_snopt_mstart[sm_run_ti==5, 6]
+    sm_run_time = data_snopt_mstart[:, 7]
+    sm_fcalls = data_snopt_mstart[:, 8]
+    sm_scalls = data_snopt_mstart[:, 9]
+
+    # sm_run_improvement = sm_run_end_aep / sm_orig_aep - 1.
+    sm_run_improvement = sm_run_end_aep / sr_orig_aep - 1.
+    sm_mean_run_improvement = np.average(sm_run_improvement)
+    sm_std_improvement = np.std(sr_run_improvement)
+
+    # sr_tfcalls = np.zeros(200)
+    # sr_tscalls = np.zeros(200)
+    # for i in np.arange(0, 200):
+    #     sr_tfcalls[i] = np.sum(sr_fcalls[sr_id == i])
+    #     sr_tscalls[i] = np.sum(sr_scalls[sr_id == i])
+
+    sr_tfcalls = sr_fcalls[sr_ef == 1]
+    sr_tscalls = sr_fcalls[sr_ef == 1]
+
+    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+    # run time (s), obj func calls, sens func calls
+    ps_id = data_ps_mstart[:, 0]
+    ps_ef = np.ones_like(ps_id)
+    ps_orig_aep = data_ps_mstart[0, 4]
+    ps_run_ti = data_ps_mstart[:, 2]
+    # sr_run_start_aep = data_snopt_relax[0, 7]
+    ps_run_end_aep = data_ps_mstart[ps_run_ti == 4, 6]
+    ps_run_time = data_ps_mstart[:, 7]
+    ps_fcalls = data_ps_mstart[:, 8]
+    ps_scalls = data_ps_mstart[:, 9]
+
+    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+    ps_run_improvement = ps_run_end_aep / sr_orig_aep - 1.
+    ps_mean_run_improvement = np.average(ps_run_improvement)
+    ps_std_improvement = np.std(sr_run_improvement)
+
+    # get variables
+    nTurbines = turbs
+    nvars = 2*nTurbines
+    nCons = int(((nTurbines - 1.) * nTurbines / 2.)) + 1 * nTurbines
+    scale_aep = 1E-6
+
+    # get fcalls: med, ave, std-dev
+    # s
+    s_med_fcalls = np.median(sm_fcalls)
+    s_ave_fcalls = np.average(sm_fcalls)
+    s_std_fcalls = np.std(sm_fcalls)
+    s_low_fcalls = np.min(sm_fcalls)
+    s_high_fcalls = np.max(sm_fcalls)
+
+    # sr
+    sr_med_fcalls = np.median(sr_tfcalls+sr_tscalls)
+    sr_ave_fcalls = np.average(sr_tfcalls+sr_tscalls)
+    sr_std_fcalls = np.std(sr_tfcalls+sr_tscalls)
+    sr_low_fcalls = np.min(sr_tfcalls+sr_tscalls)
+    sr_high_fcalls = np.max(sr_tfcalls+sr_tscalls)
+
+    # get fcalls: med, ave, std-dev
+    # ps
+    ps_med_fcalls = np.median(ps_fcalls)
+    ps_ave_fcalls = np.average(ps_fcalls)
+    ps_std_fcalls = np.std(ps_fcalls)
+    ps_low_fcalls = np.min(ps_fcalls)
+    ps_high_fcalls = np.max(ps_fcalls)
+
+    # get aep: base, med, ave, std-dev, low, high
+    # s
+    s_base_aep = sm_orig_aep*scale_aep
+    s_med_aep = np.median(sm_run_end_aep)*scale_aep
+    s_ave_aep = np.average(sm_run_end_aep)*scale_aep
+    s_std_aep = np.std(sm_run_end_aep)*scale_aep
+    s_low_aep = np.min(sm_run_end_aep)*scale_aep
+    s_high_aep = np.max(sm_run_end_aep)*scale_aep
+    s_best_layout = sm_id[np.argmax(sm_run_end_aep)]
+
+    # sr
+    sr_base_aep = sr_orig_aep*scale_aep
+    sr_med_aep = np.median(sr_run_end_aep)*scale_aep
+    sr_ave_aep = np.average(sr_run_end_aep)*scale_aep
+    sr_std_aep = np.std(sr_run_end_aep)*scale_aep
+    sr_low_aep = np.min(sr_run_end_aep)*scale_aep
+    sr_high_aep = np.max(sr_run_end_aep)*scale_aep
+    sr_best_layout = sr_id[np.argmax(sr_run_end_aep)]
+
+    # get aep: base, med, ave, std-dev, low, high
+    # ps
+    ps_base_aep = ps_orig_aep * scale_aep
+    ps_med_aep = np.median(ps_run_end_aep) * scale_aep
+    ps_ave_aep = np.average(ps_run_end_aep) * scale_aep
+    ps_std_aep = np.std(ps_run_end_aep) * scale_aep
+    ps_low_aep = np.min(ps_run_end_aep) * scale_aep
+    ps_high_aep = np.max(ps_run_end_aep) * scale_aep
+    ps_best_layout = ps_id[np.argmax(ps_run_end_aep)]
+
+    print( "nturbs: ", nTurbines)
+    print( "nvars: ", nvars)
+    print( "ncons: ", nCons)
+
+    print( " ")
+
+    print( "snopt mstart results: ")
+    print( "med fcalls: ", s_med_fcalls)
+    print( "ave fcalls: ", s_ave_fcalls)
+    print( "std fcalls: ", s_std_fcalls)
+    print( "low fcalls: ", s_low_fcalls)
+    print( "high fcalls: ", s_high_fcalls)
+    print( "base aep: ", s_base_aep)
+    print( "med aep: ", s_med_aep)
+    print( "ave aep: ", s_ave_aep)
+    print( "std aep: ", s_std_aep)
+    print( "low aep: ", s_low_aep)
+    print( "high aep: ", s_high_aep)
+    print( "best layout: ", s_best_layout)
+
+    print( " ")
+
+    print( "snopt relax results: ")
+    print( "med fcalls: ", sr_med_fcalls)
+    print( "ave fcalls: ", sr_ave_fcalls)
+    print( "std fcalls: ", sr_std_fcalls)
+    print( "low fcalls: ", sr_low_fcalls)
+    print( "high fcalls: ", sr_high_fcalls)
+    print( "base aep: ", sr_base_aep)
+    print( "med aep: ", sr_med_aep)
+    print( "ave aep: ", sr_ave_aep)
+    print( "std aep: ", sr_std_aep)
+    print( "low aep: ", sr_low_aep)
+    print( "high aep: ", sr_high_aep)
+    print( "best layout: ", sr_best_layout)
+
+    print(" ")
+
+    print("ALPSO mstart results: ")
+    print("med fcalls: ", ps_med_fcalls)
+    print("ave fcalls: ", ps_ave_fcalls)
+    print("std fcalls: ", ps_std_fcalls)
+    print("low fcalls: ", ps_low_fcalls)
+    print("high fcalls: ", ps_high_fcalls)
+    print("base aep: ", ps_base_aep)
+    print("med aep: ", ps_med_aep)
+    print("ave aep: ", ps_ave_aep)
+    print("std aep: ", ps_std_aep)
+    print("low aep: ", ps_low_aep)
+    print("high aep: ", ps_high_aep)
+    print("best layout: ", ps_best_layout)
+
+    print(" ")
+
+    labels = ["SNOPT", "SNOPT+WECD", "ALPSO"]
+    fig, ax = plt.subplots(1)
+
+    if not lt0:
+        sm_run_improvement = sm_run_improvement[sm_run_improvement>=0]
+        sr_run_improvement = sr_run_improvement[sr_run_improvement>=0]
+        ps_run_improvement = ps_run_improvement[ps_run_improvement>=0]
+
+    impdata = list([sm_run_improvement * 100, sr_run_improvement*100, ps_run_improvement*100])
+    ax.boxplot(impdata, meanline=True, labels=labels)
+
+    ax.set_ylabel('AEP Improvement (%)')
+    # ax.set_ylim([0.0, np.max(impdata)+1])
+    # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
+    # tick_spacing = 0.01
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tick_params(top='off', right='off')
+
+    plt.tight_layout()
+    if save_figs:
+        plt.savefig(fnamstart + '_percentaep.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+
+
 def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     if nturbs == 38:
@@ -316,6 +665,9 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     # store baseline aep value
     orig_aep = base_data[0, 5]
 
+    # define maximum AEP
+    max_possible_aep = 189.77548752 * 1E6  # GWh -> kWh
+
     # loop through each wec approach
     for i in np.arange(0,np.size(approaches)):
         approach = approaches[i]
@@ -354,29 +706,29 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
             tscalls = fcalls[ti_opt == 5]
 
             # compute percent improvement from base for current set
-            run_improvement = 100*(run_end_aep / orig_aep - 1.)
+            run_wake_loss = 100*(1.0 - run_end_aep / max_possible_aep)
 
             # store max percent improvement from base for current set
-            max_run_improvement = np.max(run_improvement)
-            max_aepi[i][j] = max_run_improvement
+            max_run_wake_loss = np.max(run_wake_loss)
+            max_aepi[i][j] = max_run_wake_loss
             # if i==2:
             #     print(max_aepi[i][j])
 
             # store min percent improvement from base for current set
-            min_run_improvement = np.min(run_improvement)
-            min_aepi[i][j] = min_run_improvement
+            min_run_wake_loss = np.min(run_wake_loss)
+            min_aepi[i][j] = min_run_wake_loss
 
             # store average percent improvement from base for current set
-            mean_run_improvement = np.average(run_improvement)
-            mean_aepi[i][j] = mean_run_improvement
+            mean_run_wake_loss = np.average(run_wake_loss)
+            mean_aepi[i][j] = mean_run_wake_loss
 
             # store median percent improvement from base for current set
-            median_run_improvement = np.median(run_improvement)
-            med_aepi[i][j] = median_run_improvement
+            median_run_wake_loss = np.median(run_wake_loss)
+            med_aepi[i][j] = median_run_wake_loss
 
             # store std percent improvement from base for current set
-            std_improvement = np.std(run_improvement)
-            std_aepi[i][j] = std_improvement
+            std_run_wake_loss = np.std(run_wake_loss)
+            std_aepi[i][j] = std_run_wake_loss
             # if i==2:
             #     print(std_aepi[i][j])
 
@@ -400,11 +752,11 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     snw_scalls = data_snopt_no_wec[:, 9]
 
     # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
-    snw_run_improvement = 100*(snw_run_end_aep / orig_aep - 1.)
-    snw_mean_run_improvement = np.average(snw_run_improvement)
-    snw_std_improvement = np.std(snw_run_improvement)
-    snw_max_improvement = np.max(snw_run_improvement)
-    snw_min_improvement = np.min(snw_run_improvement)
+    snw_run_wake_loss = 100*(1.0 - snw_run_end_aep / max_possible_aep)
+    snw_mean_wake_loss = np.average(snw_run_wake_loss)
+    snw_std_wake_loss = np.std(snw_run_wake_loss)
+    snw_max_wake_loss = np.max(snw_run_wake_loss)
+    snw_min_wake_loss = np.min(snw_run_wake_loss)
 
     # load ALPSO data
     data_ps = np.loadtxt(rdir+"ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
@@ -418,18 +770,18 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ps_scalls = data_ps[:, 9]
 
     # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
-    ps_run_improvement = 100*(ps_run_end_aep / orig_aep - 1.)
-    ps_mean_run_improvement = np.average(ps_run_improvement)
-    ps_median_run_improvement = np.median(ps_run_improvement)
-    ps_std_improvement = np.std(ps_run_improvement)
-    ps_max_improvement = np.max(ps_run_improvement)
-    ps_min_improvement = np.min(ps_run_improvement)
+    ps_run_wake_loss = 100*(1.0 - ps_run_end_aep / max_possible_aep)
+    ps_mean_wake_loss = np.average(ps_run_wake_loss)
+    ps_median_wake_loss = np.median(ps_run_wake_loss)
+    ps_std_wake_loss = np.std(ps_run_wake_loss)
+    ps_max_wake_loss = np.max(ps_run_wake_loss)
+    ps_min_wake_loss = np.min(ps_run_wake_loss)
 
     # set up plots
     plt.gcf().clear()
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
-    colors = ['tab:red', 'tab:blue', 'tab:cyan', 'k']
+    colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
 
     ax2.set_xlabel('Max WEC Value', color=colors[1])
     ax2.tick_params(axis='x', labelcolor=colors[2])
@@ -437,21 +789,21 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
     ax1.tick_params(axis='x', labelcolor=colors[0])
 
-    ax1.set_ylabel("Maximum Improvement (%)")
+    ax1.set_ylabel("Minimum Wake Loss (%)")
 
     labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
 
-    aplt, = ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    # pplt, = ax2.plot([2,10], [ps_max_improvement, ps_max_improvement], '--', label=labels[3], color=colors[3])
-    splt, = ax2.plot([2,10], [snw_max_improvement, snw_max_improvement], ':', label=labels[4], color=colors[3])
+    aplt, = ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax2.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax2.plot(wec_step_ranges[2], min_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
+    pplt, = ax2.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--', label=labels[3], color=colors[3])
+    splt, = ax2.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[3])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
-        plt.savefig(filename+'_max.pdf', transparent=True)
+        plt.savefig(filename+'_min.pdf', transparent=True)
 
     if show_figs:
         plt.show()
@@ -464,19 +816,18 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax2.set_xlabel('Max WEC Value', color=colors[1])
     ax2.tick_params(axis='x', labelcolor=colors[2])
 
-    ax1.set_ylabel("Mean Improvement (%)")
+    ax1.set_ylabel("Mean Wake Loss (%)")
 
     ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
     ax1.tick_params(axis='x', labelcolor=colors[0])
 
-
     aplt, = ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     hplt, = ax2.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    # pplt, = ax2.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
-    splt, = ax2.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
+    pplt, = ax2.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3])
+    splt, = ax2.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -491,7 +842,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax2 = ax1.twiny()
 
 
-    ax1.set_ylabel("Standard Deviation of Improvement (%)")
+    ax1.set_ylabel("Standard Deviation of Wake Loss (%)")
     
     ax2.set_xlabel('Max WEC Value', color=colors[1])
     ax2.tick_params(axis='x', labelcolor=colors[2])
@@ -502,11 +853,11 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     aplt, = ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     hplt, = ax2.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    # pplt, = ax2.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
-    splt, = ax2.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
+    pplt, = ax2.plot([2,10], [ps_std_wake_loss, ps_std_wake_loss], '--k', label=labels[3])
+    splt, = ax2.plot([2,10], [snw_std_wake_loss, snw_std_wake_loss], ':k', label=labels[4])
 
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, splt], frameon=False)
+    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -655,10 +1006,10 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
         # set results directory
         # rdir = "./image_data/opt_results/202004080902-nsteps-maxwec-3/"
-        rdir = "./image_data/opt_results/20200512-38-turbs-12-dir-nsteps-maxwec3/"
+        rdir = "./image_data/opt_results/20200602-38-turbs-12-dir-nsteps-maxweca9/"
 
         # set wec method directory prefixes
-        wadirp = "snopt_wec_angle_max_wec_3_nsteps_"
+        wadirp = "snopt_wec_angle_max_wec_9_nsteps_"
         wddirp = "snopt_wec_diam_max_wec_3_nsteps_"
         whdirp = "snopt_wec_hybrid_max_wec_3_nsteps_"
 
@@ -677,6 +1028,9 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     # store baseline aep value
     orig_aep = base_data[0, 5]
+
+    # define maximum AEP
+    max_possible_aep = 189.77548752 * 1E6  # GWh
 
     # loop through each wec approach
     for i in np.arange(0,np.size(approaches)):
@@ -716,28 +1070,28 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
             tscalls = fcalls[ti_opt == 5]
 
             # compute percent improvement from base for current set
-            run_improvement = 100*(run_end_aep / orig_aep - 1.)
+            run_wake_loss = 100*(1.0 - run_end_aep / max_possible_aep)
 
             # store max percent improvement from base for current set
-            max_run_improvement = np.max(run_improvement)
+            max_run_improvement = np.max(run_wake_loss)
             max_aepi[i][j] = max_run_improvement
             # if i==2:
             #     print(max_aepi[i][j])
 
             # store min percent improvement from base for current set
-            min_run_improvement = np.min(run_improvement)
+            min_run_improvement = np.min(run_wake_loss)
             min_aepi[i][j] = min_run_improvement
 
             # store average percent improvement from base for current set
-            mean_run_improvement = np.average(run_improvement)
+            mean_run_improvement = np.average(run_wake_loss)
             mean_aepi[i][j] = mean_run_improvement
 
             # store median percent improvement from base for current set
-            median_run_improvement = np.median(run_improvement)
+            median_run_improvement = np.median(run_wake_loss)
             med_aepi[i][j] = median_run_improvement
 
             # store std percent improvement from base for current set
-            std_improvement = np.std(run_improvement)
+            std_improvement = np.std(run_wake_loss)
             std_aepi[i][j] = std_improvement
             # if i==2:
             #     print(std_aepi[i][j])
@@ -762,11 +1116,11 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     snw_scalls = data_snopt_no_wec[:, 9]
 
     # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
-    snw_run_improvement = 100*(snw_run_end_aep / orig_aep - 1.)
-    snw_mean_run_improvement = np.average(snw_run_improvement)
-    snw_std_improvement = np.std(snw_run_improvement)
-    snw_max_improvement = np.max(snw_run_improvement)
-    snw_min_improvement = np.min(snw_run_improvement)
+    snw_run_wake_loss = 100*(1.0 - snw_run_end_aep / max_possible_aep)
+    snw_mean_wake_loss = np.average(snw_run_wake_loss)
+    snw_std_wake_loss = np.std(snw_run_wake_loss)
+    snw_max_wake_loss = np.max(snw_run_wake_loss)
+    snw_min_wake_loss = np.min(snw_run_wake_loss)
 
     # load ALPSO data
     data_ps = np.loadtxt(rdir+"ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
@@ -780,35 +1134,38 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ps_scalls = data_ps[:, 9]
 
     # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
-    ps_run_improvement = 100*(ps_run_end_aep / orig_aep - 1.)
-    ps_mean_run_improvement = np.average(ps_run_improvement)
-    ps_median_run_improvement = np.median(ps_run_improvement)
-    ps_std_improvement = np.std(ps_run_improvement)
-    ps_max_improvement = np.max(ps_run_improvement)
-    ps_min_improvement = np.min(ps_run_improvement)
+    ps_run_wake_loss = 100*(1.0 - ps_run_end_aep / max_possible_aep)
+    ps_mean_wake_loss = np.average(ps_run_wake_loss)
+    ps_median_wake_loss = np.median(ps_run_wake_loss)
+    ps_std_wake_loss = np.std(ps_run_wake_loss)
+    ps_max_wake_loss = np.max(ps_run_wake_loss)
+    ps_min_wake_loss = np.min(ps_run_wake_loss)
 
     # set up plots
     plt.gcf().clear()
     fig, ax1 = plt.subplots()
 
-    colors = ['tab:red', 'tab:blue', 'tab:cyan', 'k']
+    colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
     ax1.set_xlabel('Number of WEC Steps', color='k')
-    ax1.set_ylabel("Maximum Improvement (%)")
+    ax1.set_ylabel("Minimum Wake Loss (%)")
 
     labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
     wechms = 6
 
-    ax1.plot(wec_step_ranges[0], max_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    ax1.plot(wec_step_ranges[1], max_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    ax1.plot(wec_step_ranges[2], max_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_max_improvement, ps_max_improvement], '--k', label=labels[3])
-    ax1.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
+    ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    ax1.plot(wec_step_ranges[2], min_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
+    ax1.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--k', label=labels[3])
+    ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
-        plt.savefig(filename+'_max.pdf', transparent=True)
+        plt.savefig(filename+'_min.pdf', transparent=True)
 
     if show_figs:
         plt.show()
@@ -818,15 +1175,17 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     fig, ax1 = plt.subplots()
 
     ax1.set_xlabel('Number of WEC Steps', color='k')
-    ax1.set_ylabel("Mean Improvement (%)")
+    ax1.set_ylabel("Mean Wake Loss (%)")
 
     ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_mean_run_improvement, ps_mean_run_improvement], '--k', label=labels[3])
-    ax1.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
+    ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3])
+    ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
@@ -840,15 +1199,17 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     fig, ax1 = plt.subplots()
 
     ax1.set_xlabel('Number of WEC Steps', color='k')
-    ax1.set_ylabel("Standard Deviation of Improvement (%)")
+    ax1.set_ylabel("Standard Deviation of Wake Loss (%)")
 
     ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_std_improvement, ps_std_improvement], '--k', label=labels[3])
-    ax1.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
+    ax1.plot([2, 10], [ps_std_wake_loss, ps_std_wake_loss], '--k', label=labels[3])
+    ax1.plot([2, 10], [snw_std_wake_loss, snw_std_wake_loss], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
@@ -1146,6 +1507,8 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2,10], [snw_max_improvement, snw_max_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1)
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
@@ -1171,6 +1534,8 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2,10], [snw_mean_run_improvement, snw_mean_run_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1)
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
@@ -1196,6 +1561,8 @@ def plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2,10], [snw_std_improvement, snw_std_improvement], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1)
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
     plt.tight_layout()
 
     if save_figs:
@@ -1955,13 +2322,13 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     if nturbs == 16:
         data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/snopt_no_wec_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snopt_weca = np.loadtxt(
-            "./image_data/opt_results/snopt_weca_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/snopt_wecd_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
         data_ps = np.loadtxt(
-            "./image_data/opt_results/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
+        tmax_aep = 5191363.5933961 * nturbs # kWh
 
     elif nturbs == 38:
                 # load data
@@ -1974,49 +2341,47 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
         # data_ps = np.loadtxt(
         #     "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
-        # 202002
+        # 202005
         data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        data_snopt_weca = np.loadtxt(
-            "./image_data/opt_results/202002240836/angle_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/202002240836/diam_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        data_snopt_wech = np.loadtxt(
-            "./image_data/opt_results/202002240836/hybrid_wec_snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
         data_ps = np.loadtxt(
-            "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+        tmax_aep = 1630166.61601323 * nturbs # kWh
 
     elif nturbs == 60:
                 # load data
         data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/snopt_no_wec_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
-        data_snopt_weca = np.loadtxt(
-            "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+        # data_snopt_weca = np.loadtxt(
+        #     "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
         data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/snopt_wec_diam_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
         data_ps = np.loadtxt(
-            "./image_data/opt_results/ps_multistart_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+        tmax_aep = 6653047.52233728  * nturbs # kWh
     else:
         ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
-    swa_id = data_snopt_weca[:, 0]
-    swa_ef = data_snopt_weca[:, 1]
-    swa_ti_opt = data_snopt_weca[:, 3]
-    swa_orig_aep = data_snopt_weca[0, 5]
-    # swa_run_start_aep = data_snopt_weca[0, 7]
-    swa_run_end_aep = data_snopt_weca[swa_ti_opt==5, 7]
-    swa_run_time = data_snopt_weca[:, 8]
-    swa_fcalls = data_snopt_weca[:, 9]
-    swa_scalls = data_snopt_weca[:, 10]
-
-    swa_tfcalls = swa_fcalls[swa_ti_opt == 5]
-    swa_tscalls = swa_fcalls[swa_ti_opt == 5]
-
-    swa_run_improvement = swa_run_end_aep / swa_orig_aep - 1.
-    swa_mean_run_improvement = np.average(swa_run_improvement)
-    swa_std_improvement = np.std(swa_run_improvement)
+    # swa_id = data_snopt_weca[:, 0]
+    # swa_ef = data_snopt_weca[:, 1]
+    # swa_ti_opt = data_snopt_weca[:, 3]
+    # swa_orig_aep = data_snopt_weca[0, 5]
+    # # swa_run_start_aep = data_snopt_weca[0, 7]
+    # swa_run_end_aep = data_snopt_weca[swa_ti_opt==5, 7]
+    # swa_run_time = data_snopt_weca[:, 8]
+    # swa_fcalls = data_snopt_weca[:, 9]
+    # swa_scalls = data_snopt_weca[:, 10]
+    #
+    # swa_tfcalls = swa_fcalls[swa_ti_opt == 5]
+    # swa_tscalls = swa_fcalls[swa_ti_opt == 5]
+    #
+    # swa_run_improvement = swa_run_end_aep / swa_orig_aep - 1.
+    # swa_mean_run_improvement = np.average(swa_run_improvement)
+    # swa_std_improvement = np.std(swa_run_improvement)
 
     swd_id = data_snopt_wecd[:, 0]
     swd_ef = data_snopt_wecd[:, 1]
@@ -2025,48 +2390,59 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     # swd_run_start_aep = data_snopt_weca[0, 7]
     swd_run_end_aep = data_snopt_wecd[swd_ti_opt == 5, 7]
     swd_run_time = data_snopt_wecd[:, 8]
+
     swd_fcalls = data_snopt_wecd[:, 9]
     swd_scalls = data_snopt_wecd[:, 10]
 
-    swd_tfcalls = swd_fcalls[swd_ti_opt == 5]
-    swd_tscalls = swd_fcalls[swd_ti_opt == 5]
+    swd_tfcalls = np.zeros_like(swd_run_end_aep)
+    swd_tscalls = np.zeros_like(swd_run_end_aep)
+    for i in np.arange(0, swd_tfcalls.size):
+        swd_tfcalls[i] = np.sum(swd_fcalls[swd_id == i])
+        swd_tscalls[i] = np.sum(swd_scalls[swd_id == i])
 
-    swd_run_improvement = swd_run_end_aep / swa_orig_aep - 1.
-    swd_mean_run_improvement = np.average(swd_run_improvement)
-    swd_std_improvement = np.std(swd_run_improvement)
+    swd_run_wake_loss = 100.0*(1.0 - (swd_run_end_aep / tmax_aep))
+    swd_mean_run_wake_loss = np.average(swd_run_wake_loss)
+    swd_std_wake_loss = np.std(swd_run_wake_loss)
 
-    swh_id = data_snopt_wech[:, 0]
-    swh_ef = data_snopt_wech[:, 1]
-    swh_ti_opt = data_snopt_wech[:, 3]
-    swh_orig_aep = data_snopt_wech[0, 5]
-    # swh_run_start_aep = data_snopt_wech[0, 7]
-    swh_run_end_aep = data_snopt_wech[swh_ti_opt == 5, 7]
-    swh_run_time = data_snopt_wech[:, 8]
-    swh_fcalls = data_snopt_wech[:, 9]
-    swh_scalls = data_snopt_wech[:, 10]
-
-    swh_tfcalls = swh_fcalls[swh_ti_opt == 5]
-    swh_tscalls = swh_fcalls[swh_ti_opt == 5]
-
-    swh_run_improvement = swh_run_end_aep / swa_orig_aep - 1.
-    swh_mean_run_improvement = np.average(swh_run_improvement)
-    swh_std_improvement = np.std(swh_run_improvement)
+    # swh_id = data_snopt_wech[:, 0]
+    # swh_ef = data_snopt_wech[:, 1]
+    # swh_ti_opt = data_snopt_wech[:, 3]
+    # swh_orig_aep = data_snopt_wech[0, 5]
+    # # swh_run_start_aep = data_snopt_wech[0, 7]
+    # swh_run_end_aep = data_snopt_wech[swh_ti_opt == 5, 7]
+    # swh_run_time = data_snopt_wech[:, 8]
+    # swh_fcalls = data_snopt_wech[:, 9]
+    # swh_scalls = data_snopt_wech[:, 10]
+    #
+    # swh_tfcalls = swh_fcalls[swh_ti_opt == 5]
+    # swh_tscalls = swh_fcalls[swh_ti_opt == 5]
+    #
+    # swh_run_improvement = swh_run_end_aep / swa_orig_aep - 1.
+    # swh_mean_run_improvement = np.average(swh_run_improvement)
+    # swh_std_improvement = np.std(swh_run_improvement)
 
     # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
     # run time (s), obj func calls, sens func calls
     snw_id = data_snopt_no_wec[:, 0]
     snw_ef = np.ones_like(snw_id)
+    snw_ti_opt = data_snopt_no_wec[:, 2]
     snw_orig_aep = data_snopt_no_wec[0, 4]
     # swa_run_start_aep = data_snopt_relax[0, 7]
-    snw_run_end_aep = data_snopt_no_wec[:, 6]
+    snw_run_end_aep = data_snopt_no_wec[snw_ti_opt==5, 6]
     snw_run_time = data_snopt_no_wec[:, 7]
     snw_fcalls = data_snopt_no_wec[:, 8]
     snw_scalls = data_snopt_no_wec[:, 9]
 
+    snw_tfcalls = np.zeros_like(snw_run_end_aep)
+    snw_tscalls = np.zeros_like(snw_run_end_aep)
+    for i in np.arange(0, snw_tfcalls.size):
+        snw_tfcalls[i] = np.sum(snw_fcalls[snw_id == i])
+        snw_tscalls[i] = np.sum(snw_scalls[snw_id == i])
+
     # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
-    snw_run_improvement = snw_run_end_aep / swa_orig_aep - 1.
-    snw_mean_run_improvement = np.average(snw_run_improvement)
-    snw_std_improvement = np.std(snw_run_improvement)
+    snw_run_wake_loss = 100.0 * (1.0 - (snw_run_end_aep / tmax_aep))
+    snw_mean_wake_loss = np.average(snw_run_wake_loss)
+    snw_std_wake_loss = np.std(snw_run_wake_loss)
 
     ps_id = data_ps[:, 0]
     ps_ef = np.ones_like(ps_id)
@@ -2078,19 +2454,27 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     ps_scalls = data_ps[:, 9]
 
     # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
-    ps_run_improvement = ps_run_end_aep / swa_orig_aep - 1.
-    ps_mean_run_improvement = np.average(ps_run_improvement)
-    ps_std_improvement = np.std(ps_run_improvement)
+    ps_run_wake_loss = 100.0 * (1.0 - (ps_run_end_aep / tmax_aep))
+    ps_mean_wake_loss = np.average(ps_run_wake_loss)
+    ps_std_wake_loss = np.std(ps_run_wake_loss)
 
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
-    labels = list(['SNOPT', 'WEC-A', 'WEC-D', 'WEC-H', 'ALPSO'])
+    # labels = list(['SNOPT', 'WEC-A', 'WEC-D', 'WEC-H', 'ALPSO'])
+    labels = list(['SNOPT', 'SNOPT+WEC-D', 'ALPSO'])
     # labels = list('abcd')
     # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
-    data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, swh_run_end_aep*aep_scale,  ps_run_end_aep*aep_scale])
-    ax.boxplot(data, meanline=True, labels=labels)
+    # data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, swh_run_end_aep*aep_scale,  ps_run_end_aep*aep_scale])
+    data = list([snw_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
+    bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
+
+    plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
+    plt.setp(bp['whiskers'], color='k')
+    plt.setp(bp['fliers'], markeredgecolor='k')
+    plt.setp(bp['medians'], color='b')
+    plt.setp(bp['caps'], color='k')
 
     ax.set_ylabel('AEP (GWh)')
     # ax.set_ylabel('Count')
@@ -2102,7 +2486,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
 
     plt.tight_layout()
     if save_figs:
@@ -2113,10 +2497,17 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     fig, ax = plt.subplots(1)
 
-    data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, swh_run_improvement*100, ps_run_improvement*100])
-    ax.boxplot(data, meanline=True, labels=labels)
+    # data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, swh_run_improvement*100, ps_run_improvement*100])
+    data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
 
-    ax.set_ylabel('AEP Improvement (%)')
+    plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
+    plt.setp(bp['whiskers'], color='k')
+    plt.setp(bp['fliers'], markeredgecolor='k')
+    plt.setp(bp['medians'], color='b')
+    plt.setp(bp['caps'], color='k')
+
+    ax.set_ylabel('Optimized Wake Loss (%)')
     # ax.set_ylim([-15, 15.0])
     # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
     # tick_spacing = 0.01
@@ -2124,11 +2515,45 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
 
     plt.tight_layout()
     if save_figs:
-        plt.savefig(filename+'_percentaep.pdf', transparent=True)
+        plt.savefig(filename+'_percent_wake_loss.pdf', transparent=True)
+
+    if show_figs:
+        plt.show()
+    #
+    # if nturbs == 38:
+    #     ymax = 30
+    #     ymin = 22
+    # elif nturbs == 60:
+    #     ymax = 14
+    #     ymin = 8
+    fig, ax = plt.subplots(1)
+    data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True, showfliers=False)
+
+    plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
+    plt.setp(bp['whiskers'], color='k')
+    plt.setp(bp['fliers'], markeredgecolor='k')
+    plt.setp(bp['medians'], color='b')
+    plt.setp(bp['caps'], color='k')
+
+    ax.set_ylabel('Optimized Wake Loss (%)')
+    # ax.set_ylim([-15, 15.0])
+    # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
+    # tick_spacing = 0.01
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # plt.tick_params(top='off', right='off')
+    # ax.set_ylim([0, 15])
+
+    plt.tight_layout()
+    if save_figs:
+        plt.savefig(filename + '_percent_wake_loss_zoom.pdf', transparent=True)
 
     if show_figs:
         plt.show()
@@ -2137,12 +2562,19 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E5
     # data = np.array([snw_fcalls+snw_scalls, swa_fcalls+swa_scalls, ps_fcalls, ga_fcalls])/scale_by
-    data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (swh_tfcalls+swh_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
-    ax.boxplot(data, meanline=True, labels=labels)
+    # data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (swh_tfcalls+swh_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+    data = list([(snw_fcalls+snw_scalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+    bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
     # ax.hist(snw_fcalls+snw_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
     # ax.hist((swa_fcalls+swa_scalls)[swa_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
     # ax.hist(ps_fcalls, bins=25, alpha=0.25, color='g', label='ALPSO', range=[0., 5E3])
     # ax.hist(ga_fcalls, bins=25, alpha=0.25, color='y', label='NSGA II', range=[0., 5E3])
+
+    plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
+    plt.setp(bp['whiskers'], color='k')
+    plt.setp(bp['fliers'], markeredgecolor='k')
+    plt.setp(bp['medians'], color='b')
+    plt.setp(bp['caps'], color='k')
 
     ax.set_ylabel('Function Calls ($10^5$)')
     # ax.set_ylabel('Count')
@@ -2154,7 +2586,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
     plt.tight_layout()
     if save_figs:
         plt.savefig(filename+'_fcalls.pdf', transparent=True)
@@ -2166,7 +2598,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     scale_by = 1E3
 
-    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (swh_tfcalls + swh_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
+    # data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (swh_tfcalls + swh_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
+    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
 
     bp = ax.boxplot(data, meanline=True, labels=labels)
 
@@ -2202,7 +2635,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     ax.spines['top'].set_visible(True)
     ax.spines['right'].set_visible(True)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(30)
@@ -2216,29 +2649,34 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
         plt.show()
 
     fig, ax = plt.subplots(1)
-
-    swa_time = np.zeros(200)
-    for i in np.arange(0, 200):
-        swa_time[i] = np.sum(swa_run_time[swa_id==i])
+    #
+    # swa_time = np.zeros(200)
+    # for i in np.arange(0, 200):
+    #     swa_time[i] = np.sum(swa_run_time[swa_id==i])
 
     swd_time = np.zeros(200)
     for i in np.arange(0, 200):
         swd_time[i] = np.sum(swd_run_time[swd_id == i])
-
-    swh_time = np.zeros(200)
-    for i in np.arange(0, 200):
-        swh_time[i] = np.sum(swh_run_time[swh_id == i])
+    #
+    # swh_time = np.zeros(200)
+    # for i in np.arange(0, 200):
+    #     swh_time[i] = np.sum(swh_run_time[swh_id == i])
 
     # data = list([snw_run_time/60., swa_time/60., ps_run_time/60., ga_run_time/60.])
-    data = list([snw_run_time/60., swa_time/60., swd_time/60., swh_time/60., ps_run_time/60.])
-    ax.boxplot(data, meanline=True, labels=labels)
+    # data = list([snw_run_time/60., swa_time/60., swd_time/60., swh_time/60., ps_run_time/60.])
+    data = list([snw_run_time/60., swd_time/60., ps_run_time/60.])
+    bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
     # y_formatter = ticker.ScalarFormatter(useOffset=True)
     # ax.yaxis.set_major_formatter(y_formatter)
     # ax.hist(snw_run_time/60, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 80], log=True)
     # ax.hist(swa_time/60, bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 80], log=True)
     # ax.hist(ps_run_time/60, bins=25, alpha=0.25, color='g', label='ALPSO', range=[0., 80], log=True)
     # ax.hist(ga_run_time/60, bins=25, alpha=0.25, color='y', label='NSGA II', range=[0., 80], log=True)
-
+    plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
+    plt.setp(bp['whiskers'], color='k')
+    plt.setp(bp['fliers'], markeredgecolor='k')
+    plt.setp(bp['medians'], color='b')
+    plt.setp(bp['caps'], color='k')
     ax.set_ylabel('Run Time (m)')
     # ax.set_ylabel('Count')
     # ax.set_xlim([1, 10])
@@ -2249,7 +2687,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
 
     plt.tight_layout()
 
@@ -3336,7 +3774,7 @@ def plot_any_farm(filename, save_figs, show_figs, nturbs=60):
 
 
 
-def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
+def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, turbs=16):
     # font = {'size': 13}
     # plt.rc('font', **font)
     #
@@ -3346,75 +3784,118 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     # define turbine dimensions
     rotor_diameter = 80.
 
-    # set domain
-    xmax = 5500.
-    xmin = -500.0
-    ymax = 6000.
-    ymin = -500.0
-
-    # define wind farm area
-    boundary_center_x = 2500.
-    boundary_center_y = 2500.
-    boundary_radius = 2000.
-
     # load data
-    data_directory = './image_data/layouts/60_turbs/'
+
+    data_directory = './image_data/layouts/%i_turbs/' % (turbs)
     if layout == 'start':
-        data_file = 'nTurbs60_spacing5_layout_0.txt'
+        data_file = 'nTurbs%i_spacing5_layout_0_start.txt' % (turbs)
         plot_data = np.loadtxt(data_directory + data_file)
 
         # parse data
-        turbineX = (plot_data[:, 0])*rotor_diameter - boundary_radius + rotor_diameter/2. + boundary_center_x
-        turbineY = (plot_data[:, 1])*rotor_diameter - boundary_radius + rotor_diameter/2. + boundary_center_y
+        turbineX = (plot_data[:, 0])*rotor_diameter
+        turbineY = (plot_data[:, 1])*rotor_diameter
+
     elif layout == 'finish':
-        data_file = 'snopt_multistart_locations_60turbs_nantucketWindRose_36dirs_BPA_run0_EF0.000_TItype5.txt'
+
+        data_file = 'nTurbs%i_finish.txt' % (turbs)
         plot_data = np.loadtxt(data_directory + data_file)
 
         # parse data
-        turbineX = (plot_data[:, 2])- boundary_radius  + boundary_center_x
-        turbineY = (plot_data[:, 3])- boundary_radius  + boundary_center_x
+        turbineX = (plot_data[:, 2])
+        turbineY = (plot_data[:, 3])
+
     else:
         raise ValueError('incorrect layout specified')
-
-    print( np.average(turbineX))
-
-    print( turbineX, turbineY)
-
-    nTurbines = turbineX.size
 
     # create figure and axes
     fig, ax = plt.subplots()
 
+    if turbs == 16:
+        bmin = 0.0
+        bmax = 16.0
+        # plt.plot([bmin, bmin, bmax, bmax, bmin], [bmin, bmax, bmax, bmin, bmin], '-b')
+
+        bmin += 0.5
+        bmax -= 0.5
+        plt.plot([bmin, bmin, bmax, bmax, bmin], [bmin, bmax, bmax, bmin, bmin], '--b')
+
+    elif turbs == 38:
+
+        # define wind farm area
+        boundary_center_x = 80.0*2000./126.4 - 40.0
+        boundary_center_y = 80.0*2000./126.4 - 40.0
+        boundary_radius = 80.0*(2000.0)/126.4
+
+        # boundary_circle = plt.Circle((boundary_center_x/rotor_diameter, boundary_center_y/rotor_diameter),
+        #                              boundary_radius/rotor_diameter, facecolor='none', edgecolor='b', linestyle='-')
+        constraint_circle = plt.Circle((boundary_center_x / rotor_diameter, boundary_center_y / rotor_diameter),
+                                     boundary_radius / rotor_diameter - 0.5, facecolor='none', edgecolor='b', linestyle='--')
+
+        # ax.add_patch(boundary_circle)
+        ax.add_patch(constraint_circle)
+
+    elif turbs == 60.0:
+
+        from plantenergy.GeneralWindFarmComponents import calculate_boundary
+        from shapely.geometry import LineString
+
+        boundaryVertices, boundaryNormals = calculate_boundary(plot_data)
+        boundaryVertices = np.concatenate([boundaryVertices, [boundaryVertices[0]]])
+        constraint = LineString(boundaryVertices)
+        boundary = constraint.parallel_offset(0.5, 'right', join_style=2)
+
+        def plot_line(ax, ob, color='r', style="-"):
+            parts = hasattr(ob, 'geoms') and ob or [ob]
+            for part in parts:
+                x, y = part.xy
+                ax.plot(x, y, style, color=color, solid_capstyle='round', zorder=1)
+
+        plot_line(ax, constraint, color='b', style="--")
+        # plot_line(ax, boundary, color='b')
+
+        # plt.plot(boundaryVertices[:, 0], boundaryVertices[:, 1], 'r', linestyle=(10, (5, 1)))
+        # plt.plot([boundaryVertices[0,0], boundaryVertices[-1, 0]], [boundaryVertices[0, 1], boundaryVertices[-1, 1]], 'r--')
+
+    nTurbines = turbineX.size
+
     # create and add domain boundary
-    les_domain = plt.Rectangle([0., 0.], 5000., 5000., facecolor='none', edgecolor='b', linestyle=':', label='Domain')
-    ax.add_patch(les_domain)
+    # les_domain = plt.Rectangle([0., 0.], 5000., 5000., facecolor='none', edgecolor='b', linestyle=':', label='Domain')
+    # ax.add_patch(les_domain)
 
     # create and add wind farm boundary
-    
-    boundary_circle = plt.Circle((boundary_center_x, boundary_center_y),
-                                 boundary_radius, facecolor='none', edgecolor='r', linestyle='--')
-    ax.add_patch(boundary_circle)
 
     # create and add wind turbines
-    for x, y in zip(turbineX, turbineY):
-        circle_start = plt.Circle((x, y), rotor_diameter/2., facecolor='none', edgecolor='k', linestyle='-', label='Start')
+    for x, y in zip(turbineX/rotor_diameter, turbineY/rotor_diameter):
+        circle_start = plt.Circle((x, y), 1/2., facecolor='none', edgecolor='k', linestyle='-', label='Start')
         ax.add_artist(circle_start)
 
     if turb_nums:
         for i in np.arange(nTurbines):
-            ax.annotate(i, (turbineX[i]+rotor_diameter/2., turbineY[i]+rotor_diameter/2.))
+            ax.annotate(i, (turbineX[i]/rotor_diameter+1.0/2., turbineY[i]/rotor_diameter+1.0/2.))
 
     # pretty the plot
     ax.spines['top'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
-    plt.axis('equal')
-    ax.legend([boundary_circle, les_domain], ['LES Domain','Farm Boundary'],
-              ncol=2, frameon=False, loc=2)
-    ax.set_xlabel('Turbine X Position (m)')
-    ax.set_ylabel('Turbine Y Position (m)')
-    ax.set_xlim([xmin, xmax])
-    ax.set_ylim([ymin, ymax])
+    ax.set_xticks([])
+    ax.set_yticks([])
+    # ax.yaxis.set_ticks_position('left')
+    # ax.xaxis.set_ticks_position('bottom')
+
+    # if turbs == 60.0:
+    plt.axis("equal")
+    #     plt.xticks([min(turbineX) / rotor_diameter, max(turbineX) / rotor_diameter])
+    #     plt.yticks([min(turbineY) / rotor_diameter, max(turbineY) / rotor_diameter])
+    # elif turbs == 38:
+    #     plt.axis('square')
+    #     plt.xticks([(boundary_center_x - boundary_radius)/rotor_diameter, (boundary_center_x + boundary_radius)/rotor_diameter])
+    #     plt.yticks([(boundary_center_x - boundary_radius)/rotor_diameter, (boundary_center_x + boundary_radius)/rotor_diameter])
+
+    # ax.set_xlabel('Turbine X Position ($x/D_r$)')
+    # ax.set_ylabel('Turbine Y Position ($y/D_r$)')
+    # ax.set_xlim([xmin, xmax])
+    # ax.set_ylim([ymin, ymax])
 
     plt.tight_layout()
 
@@ -3423,41 +3904,72 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False):
     if show_figs:
         plt.show()
 
-def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs):
-
+def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="BPA"):
+    from mpltools import color
     # load data
-    data = np.loadtxt("./image_data/smoothing_by_angle_crosswake.txt")
+    if wake_model == "BPA":
+        data = np.loadtxt("./image_data/smoothing_bpa_WEC-%s.txt" %wec_method)
+        if wec_method == "A":
+            wec_values = np.array([1, 3.0, 5.0, 7.0, 9.0])
+            xt = [-1.6, -1.45, -2.]
+            yt = [31.5, 25.25, 23]
+
+        elif wec_method == "D":
+            wec_values = np.array([1, 1.5, 2.0, 2.5, 3.0])
+            xt = [-1.6, -1.5, -2.75]
+            yt = [31.5, 24.5, 22.25]
+
+        elif wec_method == "H":
+            wec_values = np.array([1, 1.5, 2.0, 2.5, 3.0])
+            xt = [-1.6, -1.35, -2.25]
+            yt = [31.5, 25, 22.5]
+
+    else:
+        ValueError("Invalid model selection")
 
     location = data[:, 0]
 
     fig, ax = plt.subplots(1)
 
-    colors = ['b', 'r', 'r', 'c', 'y', 'm', 'c', 'c']
+    # Change color cycle specifically for `ax2`
+    # color.cycle_cmap(len(wec_values), cmap='Blues, ax=ax)
+    colors = plt.cm.winter(np.linspace(0.2, 0.8, 3))
+    # colors = ['k', 'b', 'r', 'c', 'g']
 
-    for i, j in zip(np.array([1, 2, 3, 4, 5, 6, 7, 8]), np.arange(0, 6)):
-        ax.plot(location, data[:, i]/1E6, label="$\\xi = %i$", color=colors[j])
-    xi = 1
-    plt.text(-1., data[location==0, 1]/1E6+0.25, "No WEC", color=colors[0])
-    xi = 4
-    plt.text(-1.75, data[location==0, 4]/1E6+0.25, "Moderate WEC", color=colors[1])
-    # xi = 5
-    # plt.text(-1, data[location==0, xi]/1E6+0.5, "$\\xi = %i$" % xi, color=colors[2])
-    xi = 7
-    plt.text(-1, data[location==0, 6]/1E6-.25, "High WEC", color=colors[2])
+
+    plot_vals = np.arange(1, len(wec_values)+1, 2)
+    print(wec_values)
+    print(plot_vals)
+    for i in np.arange(0, len(plot_vals)):
+        print(wec_values[plot_vals[i]-1])
+        ax.plot(location, data[:, plot_vals[i]]/1E6, color=colors[i])
+        if wec_method == "A":
+            text_label = r"$\theta_\xi$ = %.1f" % wec_values[plot_vals[i] - 1]
+        else:
+            text_label = r"$\xi$ = %.1f" %wec_values[plot_vals[i]-1]
+        plt.text(xt[i], yt[i], text_label, color=colors[i])
+    # xi = 1
+    # plt.text(-1., data[location==0, 1]/1E6+0.25, "No WEC", color=colors[0])
+    # xi = 4
+    # plt.text(-1.75, data[location==0, 4]/1E6+0.25, "Moderate WEC", color=colors[1])
+    # # xi = 5
+    # # plt.text(-1, data[location==0, xi]/1E6+0.5, "$\\xi = %i$" % xi, color=colors[2])
+    # xi = 7
+    # plt.text(-1, data[location==0, 6]/1E6-.25, "High WEC", color=colors[2])
 
     ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($Y/D_r$)")
     ax.set_ylabel('Annual Energy Production (GWh)')
-    # ax.set_xlim([10, 20])
-    ax.set_ylim([10, 20])
-    plt.yticks([10, 20])
-    plt.xticks([-6, 0, 6])
+    ax.set_ylim([20, 35])
+    ax.set_xlim([-4, 4])
+    plt.yticks([20, 35])
+    plt.xticks([-4, 0, 4])
     # ax.legend(ncol=2, loc=2, frameon=False, )  # show plot
     # tick_spacing = 1
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
     #
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
 
     #
     plt.tight_layout()
@@ -3633,7 +4145,7 @@ def plot_wec_methods(filename, save_figs, show_figs):
     xd = xd_func(x0, d, ky, kz, gamma, ct)
 
     # plot results
-    x = np.arange(0, 7 * d, 10)
+    x = np.arange(0, 8 * d, 10)
 
     sigmay_original, sigmaz_original = spread_func(x, x0, xd, d, ky, kz, gamma)
 
@@ -3681,7 +4193,152 @@ def plot_wec_methods(filename, save_figs, show_figs):
     ax.yaxis.set_ticks_position('left')
     ax.xaxis.set_ticks_position('bottom')
 
+    plt.xticks([0,4, 8])
+    plt.yticks([-2,0,2])
+
     plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
+def plot_ct_curve(filename, save_figs, show_figs):
+
+    data = np.loadtxt("../project-code/input_files/mfg_ct_vestas_v80_niayifar2016.txt", delimiter=",")
+
+    fig, ax = plt.subplots(1)
+
+    plt.plot(data[:,0], data[:,1], 'ob', mfc="none")
+
+
+    plt.xticks([5, 10, 15, 20])
+    plt.yticks([0.2, 0.4, 0.6, 0.8])
+
+    plt.xlabel('Wind Speed (m/s)')
+    plt.ylabel('Thrust Coefficient')
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
+def plot_cp_curve(filename, save_figs, show_figs):
+    air_density = 1.225
+    rotor_diameter = 80.0
+    Ar = 0.25 * np.pi * rotor_diameter ** 2
+    data = np.loadtxt("../project-code/input_files/niayifar_vestas_v80_power_curve_observed.txt", delimiter=",")
+    data[:,1] *= (1E6) / (0.5 * air_density * data[:, 0] ** 3 * Ar)
+    fig, ax = plt.subplots(1)
+
+    plt.plot(data[:,0], data[:,1], 'ob', mfc="none")
+
+    plt.xlabel('Wind Speed (m/s)')
+    plt.ylabel('Power Coefficient')
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    plt.xticks([5, 10, 15, 20])
+    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5])
+
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+
+    plt.tight_layout()
+
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
+
+def plot_simple_design_space(filename, save_figs, show_figs):
+    from matplotlib.patches import Ellipse, Rectangle
+
+    turbine_y = -np.array([0.0, 3.0, 7.0])
+    turbine_x = np.array([-1.0, 1.0, 0.0])
+    diameter = 1.0
+
+    fig, ax = plt.subplots(1, figsize=(5, 6))
+
+    # show downstream turbine movement
+    steps = 5
+    alphas = np.linspace(0.9, 0.5, steps)
+    locs = np.linspace(min(turbine_x)-3.0, turbine_x[2], steps)
+    for i in np.arange(0, steps-1):
+        blade1 = Ellipse((locs[i]+diameter/4, turbine_y[2]), diameter / 2, diameter/12, facecolor='%f' %(alphas[i]), edgecolor='none', fill=True,
+                            alpha=1.0, linestyle='-', visible=True)
+        blade2 = Ellipse((locs[i]-diameter/4, turbine_y[2]), diameter / 2, diameter / 12, facecolor='%f' %(alphas[i]), edgecolor='none', fill=True,
+                         alpha=1.0, linestyle='-', visible=True)
+        hub = Rectangle((locs[i] - diameter / 16, turbine_y[2]-diameter/8), diameter / 8, diameter / 4, facecolor='%f' %(alphas[i]),
+                         edgecolor='none', fill=True, alpha=1.0, linestyle='-', visible=True, joinstyle='round')
+        clip1 = Rectangle((locs[i] +1/16.0 , turbine_y[2] - diameter / 8), diameter, diameter / 4,
+                          facecolor='none',
+                          edgecolor='none', fill=True, alpha=alphas[i], linestyle='-', visible=True, joinstyle='round')
+        clip2 = Rectangle((locs[i] - diameter * 17 / 16, turbine_y[2] - diameter / 8), diameter, diameter / 4,
+                        facecolor='none',
+                        edgecolor='none', fill=True, alpha=alphas[i], linestyle='-', visible=False, joinstyle='round')
+        ax.add_artist(blade1)
+        ax.add_artist(blade2)
+        ax.add_artist(hub)
+        ax.add_artist(clip1)
+        ax.add_artist(clip2)
+        blade1.set_clip_path(clip1)
+        blade2.set_clip_path(clip2)
+
+    # plot turbine locations
+    for i in np.arange(0, 3):
+        blade1 = Ellipse((turbine_x[i]+diameter/4, turbine_y[i]), diameter / 2, diameter / 12, facecolor='b', edgecolor='none', fill=True,
+                         alpha=1.0, linestyle='-', visible=True)
+        blade2 = Ellipse((turbine_x[i] - diameter / 4, turbine_y[i]), diameter / 2, diameter / 12, facecolor='b',
+                         edgecolor='none', fill=True,
+                         alpha=1.0, linestyle='-', visible=True)
+        hub = Rectangle((turbine_x[i]-diameter/16, turbine_y[i] - diameter / 8), diameter / 8, diameter / 4,
+                        facecolor='b',
+                        edgecolor='none', fill=True, alpha=1.0, linestyle='-', visible=True, joinstyle='round')
+        ax.add_artist(blade1)
+        ax.add_artist(blade2)
+        ax.add_artist(hub)
+    # add arrow to indicate movement
+    plt.arrow(turbine_x[2]+.75, turbine_y[2], 1.0, 0.0, width=0.05, color='k', fc='k', ec='k')
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(True)
+    plt.xlabel("$y/D_r$")
+
+    plt.xticks([-4.0, -2.0, 0.0, 2.0, 4.0])
+    plt.yticks([])
+
+    plt.axis("equal")
+    plt.ylim([-10.0, 5.0])
+    plt.xlim([-5.0, 5.0])
+
+    ax.yaxis.set_ticks_position('none')
+    ax.xaxis.set_ticks_position('bottom')
+    #
+    plt.tight_layout()
+
 
     if save_figs:
         plt.savefig(filename, transparent=True)
@@ -3716,10 +4373,11 @@ if __name__ == "__main__":
     filename = ''
 
     # get_statistics_38_turbs()
+    # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16)
-    #
+
     # filename = "./images/38turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
@@ -3734,8 +4392,8 @@ if __name__ == "__main__":
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
     # filename = 'maxwec_const_nsteps6'
     # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    # filename = 'nsteps_const_maxwec3'
-    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = 'nsteps_const_maxwec'
+    # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
     # plot_wec_methods(filename, save_figs, show_figs)
@@ -3746,8 +4404,14 @@ if __name__ == "__main__":
     # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
     # plot_round_farm_finish_pres(filename, save_figs, show_figs)
 
-    # filename = "round_farm_38Turbines_5DSpacing_start.pdf"
-    # plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=True)
+    # filename = "60_turb_start.pdf"
+    # filename = "38_turb_start.pdf"
+    # filename = "16_turb_start.pdf"
+    # plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, turbs=16)
+
+    # dirs = 12
+    # filename = "windrose_%i_dir.pdf" %dirs
+    # make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
 
     # filename = "round_farm_38Turbines_5DSpacing_finish.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='finish',turb_nums=True)
@@ -3794,5 +4458,15 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    # filename = "./images/smoothing_angle_crosswake.pdf"
-    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs)
+    filename = "./images/smoothing_bpa_wec_a.pdf"
+    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="A")
+
+    # filename = "./images/ct_curve_v80.pdf"
+    # plot_ct_curve(filename, save_figs, show_figs)
+
+    # filename = "./images/cp_curve_v80.pdf"
+    # plot_cp_curve(filename, save_figs, show_figs)
+
+    # filename = "./images/3turb-design-space.pdf"
+    # plot_simple_design_space(filename, save_figs, show_figs)
+

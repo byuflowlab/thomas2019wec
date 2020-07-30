@@ -514,7 +514,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     print(np.max(vel_out))
     ax.plot_surface(xx, yy, vel_out, vmin=np.nanmin(vel_out)-10, vmax=np.nanmax(vel_out)+10, cmap="hot", rstride=1, cstride=1, linewidth=0, antialiased=False)
     # ax.set_zlim(0, nTurbines*2E3)
-    # plt.savefig('multimodal.pdf', transparent=True)
+    plt.savefig('multimodal.pdf', transparent=True)
 
     plt.show()
 
