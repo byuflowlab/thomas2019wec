@@ -188,14 +188,59 @@ While the Niayifar and Port\'e-Agel wind farm model calculates $k^*$ based on lo
 
 The Gaussian shape of the Bastankhah and Port\'e-Agel wake model is well suited for gradient-based optimization because it is smooth, continuous, and has no flat regions. However, in the near wake, the model can either be flat, which can cause premature convergence, or be undefined, which can cause optimizations to fail. To resolve this issue, we used a simple solution for optimization purposes only: a linear interpolation of the velocity deficit, from the rotor hub to the length of the wake potential core, that maintains the Gaussian shape of the wake all the way to the rotor location. Because no turbines will be placed in this region of the wake in the final optimized layout, the accuracy of the model in the near wake is second in importance to wake shape and continuity. For more details on the version of the Bastankhah and Port\'e-Agel wake model used in this study, please see \cite{thomas2019-les-validation}.
 
-\subsection{Power Model}
-We combined the wake deficits using a linear combination method as discussed in \cite{niayifar2016}. To save computation time, the inflow wind speed at each turbine was approximated using a single sample at the wind turbine hub location. Individual turbine inflow wind velocities, $U_i$, were solved consecutively from upstream to downstream. The power output of each turbine was then calculated based on \cref{eq:power}
+
+\subsection{Turbine Model}
+We based our turbines on the Vestas V-80 2MW wind turbine for all studies in this paper. The values of $C_P$ and $C_T$ were based on a linear interpolation of the power and thrust coefficient curves presented in \cite{niayifar2016} and shown in \cref{fig:cp,fig:ct}. The other turbine specifications are provide in \cref{tab:v80}.
+%
+\begin{figure}[ht]
+	\centering
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{cp_curve_v80}
+		\caption{$C_P$ curve for the Vestas V80 2MW wind turbine \cite{niayifar2016} }
+		\label{fig:cp}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{ct_curve_v80.pdf}
+		\caption{$C_T$ curve for the Vestas V80 2MW wind turbine \cite{niayifar2016}}
+		\label{fig:ct}
+	\end{minipage} 
+\end{figure}
+%
+\begin{table}
+	\caption{Turbine Specifications}
+	\label{tab:v80}
+	\centering
+	\begin{tabular}{l l}
+		\br
+		Rotor Diameter & 80.0 m\\
+		Hub Height & 70.0 m \\
+		Cut-in Speed & 4.0 m/s\\
+		Cut-out Speed & 25.0 m/s \\
+		Rated Speed & 16.0 m/s \\
+		Rated Power & 2.0 MW \\
+		Generator Efficiency & 0.944 \\
+		\br
+	\end{tabular}
+\end{table}
+
+\subsection{Other Models}
+We combined the wake deficits using a linear combination method as discussed in \cite{niayifar2016} with the Bastankhah and Port\'e-Agel wake model, and a sum of squares method with the Jensen wake model as discussed in \cite{katic1986}. We used a reference height of 80 m for all wind speed measurements and adjusted to different heights with a power law and a wind shear coefficient of 0.31 as shown in \cref{eq:shear}. 
+%
+\begin{equation} \label{eq:shear}
+u = u_r\bigg[\frac{z}{z_r}\bigg]^\psi
+\end{equation}
+%
+In \Cref{eq:shear}, $u_r$ is the reference wind speed, $z$ is the height of interest, $z_r$ is the height at which $u_r$ was measured, and $\psi$ is the shear exponent.
+
+To save computation time, the inflow wind speed at each turbine was approximated using a single sample at the wind turbine hub location. Individual turbine inflow wind velocities, $U_i$, were solved consecutively from upstream to downstream for each wind state (direction and speed combination). The power output of each turbine was then calculated based on \cref{eq:power}
 %
 \begin{equation}\label{eq:power}
 P_i = \frac{1}{2}\rho A_{r,i}C_P U_i^3
 \end{equation}
 %
-where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i$, and $C_P$ is the power coefficient. The values of $C_P$ and $C_T$ were determined based on the calculated inflow velocity of each turbine and the power curve and thrust coefficient curve presented in \cite{niayifar2016}.
+where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i$, and $C_P$ is the power coefficient. 
 
 \section{Applying WEC to the  Wake Models}
 
@@ -215,7 +260,7 @@ Because the original Bastankhah and Port\'{e}-Agel model is not defined for the 
 x_d = x_0 + \frac{d\Bigg[k_y+k_z\cos{\gamma} - \sqrt{[k_y+k_z\cos{\gamma}]^2-4k_y k_z[C_T-1]\cos{\gamma}}\Bigg]}{2k_y k_z\sqrt{8}}
 \end{equation}
 %
-We then find the standard deviation of the wake at the point $x_d$ as shown in \cref{eq:sigmayd}
+We find the standard deviation of the wake at the point $x_d$ as shown in \cref{eq:sigmayd}
 %
 \begin{equation}\label{eq:sigmayd}
 \sigma_{yd} = k_y (x_d - x_0) + \frac{D_r \cos{\gamma}}{\sqrt{8}}
@@ -261,21 +306,21 @@ The same process can also be applied to obtain $\sigma_{z_{\xi}}$. Now that we h
 \label{eq:bpa_angle}
 \end{equation}
 %
-Results using this method are forthcoming, but a preliminary investigation of the design space yields the cross-section shown in \cref{fig:wec_angle_cross_section}. In \cref{fig:wec_angle_cross_section} the impact of $\xi_k$ is much more pronounced for the turbine that is further upstream. 
+Results using this method are forthcoming, but a preliminary investigation of the design space yields the cross-section shown in \cref{fig:smoothing_bpa_wec_a}. In \cref{fig:smoothing_bpa_wec_a} the impact of $\theta_\xi$ is much more pronounced for the turbine that is further upstream. 
 
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.43\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-		\caption{Simple design space used to demonstrate the effects of the wake spreading angle relaxation factor, $\xi_k$, on the wind farm layout design space (see \cref{fig:wec_angle_cross_section}).}
-		\label{fig:smoothing_locations_angle}
+		\includegraphics[width=\textwidth, trim={-0.5cm -0.5cm -0.5cm 3.25cm}, clip]{final_images/layouts/3turb-design-space}
+		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the wake spreading angle relaxation factor, $\theta_\xi$, on the wind farm layout design space (see \cref{fig:smoothing_locations_wec_a}). Wind is from the top.}
+		\label{fig:smoothing_locations_wec_a}
 	\end{minipage}\hspace{1pc}%
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{wec-with-no-ti-angle.pdf}
-		\caption{The impact of changing the wake spread angle, $\theta_\xi$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_angle}). }
-		\label{fig:wec_angle_cross_section}
+		\includegraphics[width=\textwidth]{smoothing_bpa_wec_a}
+		\caption{The impact of changing the wake spread angle, $\theta_\xi$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_wec_a}). }
+		\label{fig:smoothing_bpa_wec_a}
 	\end{minipage} 
 \end{figure}
 
@@ -295,15 +340,15 @@ The addition of $\xi$ allows manipulation of the shape of the design space. By i
 	\centering
 	\begin{minipage}[t]{0.43\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_visualization}).}
-		\label{fig:smoothing_locations}
+		\includegraphics[width=\textwidth, trim={-0.5cm -0.5cm -0.5cm 3.25cm}, clip]{final_images/layouts/3turb-design-space}
+		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the wake relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_bpa_wec_d}). Wind is from the top.}
+		\label{fig:smoothing_locations_wec_d}
 	\end{minipage}\hspace{1pc}%
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{smoothing_visualization}
-		\caption{The impact of the relaxation factor, $\xi$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations}). }
-		\label{fig:smoothing_visualization}
+		\includegraphics[width=\textwidth]{smoothing_bpa_wec_d}
+		\caption{The impact of the relaxation factor, $\xi$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_wec_d}). }
+		\label{fig:smoothing_bpa_wec_d}
 	\end{minipage} 
 \end{figure}
 %
@@ -340,6 +385,22 @@ Where $\sigma_{yo}$ is the unchanged wake spread at the onset of the far wake, $
 
 Not that the $\sigma_{y_{WEC}}$ term is only applied to the spread terms and the original model values are used in calculating the magnitude of the center-line wake deficit.
 
+\begin{figure}[ht]
+	\centering
+	\begin{minipage}[t]{0.43\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={-0.5cm -0.5cm -0.5cm 3.25cm}, clip]{final_images/layouts/3turb-design-space}
+		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the wake spreading angle relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_bpa_wec_h}). Wind is from the top.}
+		\label{fig:smoothing_locations_wec_h}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{0.52\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{smoothing_bpa_wec_h}
+		\caption{The impact of changing the wake spread angle, $\theta_\xi$, on a simple wind farm layout design space with three turbines and one wind direction. One turbine was moved across the wakes of two upstream turbines (see \cref{fig:smoothing_locations_wec_h}). }
+		\label{fig:smoothing_bpa_wec_h}
+	\end{minipage} 
+\end{figure}
+
 \subsubsection{Bastankhah and Port\'e-Agel WEC Step (3)}
 To gain the benefits of WEC without losing the accuracy of the wake model, the optimization must be run multiple times, in a continuation approach, with values of $\xi$ decreasing to unity. The results from optimizing with each value of $\xi$ can then be used to warm start the next optimization. In this way, the gradient-based optimization can intelligently explore the design space and then refine the model to find a final, more accurate, result. The iterative optimizations are generally fairly fast due to starting from the previous optimized solution, so WEC does not necessarily take as long to run as an equal number of independent optimizations. 
 
@@ -347,24 +408,72 @@ To gain the benefits of WEC without losing the accuracy of the wake model, the o
 
 \subsection{Comparing the WEC methods as applied to the Bastankhah and Port\'e-Agel wake model}
 
-Once WEC-A, WEC-D, and WEC-H were all implemented in the Bastankhah and Port\'{e}-Agel model, we compared the performance of each method by varying both the number of intermediate optimization, or steps, to run and the maximum amount of wake expansion to use. TO collect sufficient data we use 200 different starting points for a wind farm problem with 38 turbines and 12 wind directions. When the maximum spread value was varied, the number of steps was held at six. When the number of steps was varied, the maximum spread was held at $\xi=3$, $\xi=3$, and $\theta_\xi$ for WEC-A, WEC-D, and WEC-H respectively. The maximum optimized AEP, the mean AEP, and the standard deviation of AEP were then compared.  The maximum AEP results are shown in \cref{fig:aepmax-wm,fig:aepmax-ws}, the mean AEP results are shown in \cref{fig:aepmean-wm,fig:aepmean-ws}, and the standard deviation of the AEP results are shown in \cref{fig:aepstd-wm,fig:aepstd-ws}.
+Once WEC-A, WEC-D, and WEC-H were implemented in the Bastankhah and Port\'{e}-Agel model, we compared the performance of each method by varying both the number of intermediate optimizations, or steps, to run and the maximum amount of wake expansion to use. We used 200 different starting layouts for a wind farm problem with 38 turbines and 12 wind directions with a constant wind speed of 8 m/s in all directions as shown in \cref{fig:method_study_layout,fig:nantucket12dirs}. 
 
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}[t]{18pc}
+		\centering
+		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 2.0cm, 0cm}, clip]{final_images/layouts/38_turb_start.pdf}
+		\caption{Baseline layout for the WEC method comparison study. Turbine circles are to scale. The solid blue and dashed red lines represent the wind farm boundary and boundary constraint respectively.}
+		\label{fig:method_study_layout}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{18pc}
+		\centering
+		\includegraphics[width=\textwidth, trim={2.0cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_12_dir.pdf}
+		\caption{Directional probability wind rose for the WEC method comparison study. This is the Nantucket wind rose binned into 12 directions \cite{wrcc2017}. For the WEC method study, we used a constant wind speed of 8 m/s.}
+		\label{fig:nantucket12dirs}
+	\end{minipage} 
+\end{figure}
+
+
+When the maximum spread value was varied, the number of steps was held at six. When the number of steps was varied, the maximum spread was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. All 200 starting layouts were tested with each parameter set while optimizing for AEP as shown in \cref{eq:obj_wec_methods}. 
+%
+\begin{equation}
+\label{eq:obj_wec_methods}
+\begin{aligned} [b]
+\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i,)~~i=1...38\\
+\textrm{subject to} \quad & S_{i,j} \geq 2\*D_{r}~~i,j=1...38~~i \neq j\\
+& [x_c-x_i]^2+[y_c-y_i]^2 \leq R_{b}^2~~i=1...38
+\end{aligned}
+\end{equation}
+%
+In \cref{eq:obj_wec_methods}, $(x_i,y_i)$ is the position of each turbine $i$, $S_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, $(x_c,y_c)$ is the location of the center of the wind farm, and $R_b$ is the radius of the wind farm boundary. This case has a total of 76 variables and 741 constraints.
+
+When the optimizations for all starting layouts and parameter combinations were complete, we compared the minimum, mean, and standard deviation of wake loss (energy lost due to wake effects) across all the optimizations. Wake loss percentage was calculated as shown in \cref{eq:wake_loss}.
+
+\begin{equation} \label{eq:wake_loss}
+	L = 100 \bigg( 1 - \frac{AEP_o}{AEP_t} \bigg)
+\end{equation}
+
+ In \cref{eq:wake_loss}, $AEP_o$ represents the optimized AEP from a given starting layout and $AEP_t$ is the theoretical maximum AEP calculated as shown in \cref{eq:aept}. 
+ 
+ \begin{equation} \label{eq:aept}
+ 	AEP_t = (24)(365)\sum_{i=1}^{n} p_i P  
+ \end{equation}
+ 
+ In \cref{eq:aept}, $n$ is the number of wind directions, or states, $p_i$ is the probability of wind coming from a given direction, and $P$ is the wind turbine power of a single un-waked wind turbine as calculated using \cref{eq:power}. The minimum wake loss results are shown in \cref{fig:aepmin-wm,fig:aepmin-ws}.
+%
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_max}
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_min}
 		\caption{The maximum optimization results of varying the maximum WEC expansion parameter while hold the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepmax-wm}
+		\label{fig:aepmin-wm}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{nsteps_const_maxwec3_max}
+		\includegraphics[width=\textwidth]{nsteps_const_maxwec_min}
 		\caption{The maximum optimization results of varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepmax-ws}
+		\label{fig:aepmin-ws}
 	\end{minipage}
 \end{figure}
+%
+From \cref{fig:aepmin-wm}, we can see that the minimum wake loss is achieved when the maximum WEC angle is $9^\circ$ for WEC-A and when the maximum WEC value is 3 for WEC-D and WEC-H. It also appears that while WECC generally out performs SNOPT alone, lower WEC values tend to perform better. Looking at \cref{fig:aepmin-ws}, we can see that WEC step numbers greater than or equal to 3 perform equally well for WEC-D and WEC-H, but there does not appear to be a clear relation between minimum wake loss and number of steps for WEC-A.
+
+The mean wake loss results are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC-D performs best with a WEC value of 3 and using 5 or more steps, while WEC-A has its lowest average wake loss for a maximum WEC angle of $6^\circ$, and WEC-H minimizes wake loss most with lower WEC values. On average, wake loss minimized using WEC-A or WEC-H does not appear to be impacted by changing the number of steps.
 
 \begin{figure}[ht]
 	\centering
@@ -377,32 +486,34 @@ Once WEC-A, WEC-D, and WEC-H were all implemented in the Bastankhah and Port\'{e
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{nsteps_const_maxwec3_mean}
+		\includegraphics[width=\textwidth]{nsteps_const_maxwec_mean}
 		\caption{The mean optimization results of varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepmean-ws}
 	\end{minipage}
 \end{figure}
+
+The standard deviation of wake loss across all runs is shown in \cref{fig:aepstd-wm,fig:aepstd-ws}. The lowest standard deviations occur when the WEC angle is $5^\circ$ for WEC-A, the WEC value is 3 for WEC-D, and when the WEC value is 2 for WEC-H. There is no clear relation between number of steps and the standard deviation for WEC-A and WEC-H, but it appears best to use at least 4 or 5 steps with WEC-D to achieve a small standard deviation (meaning more consistent results).
 
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_std}
-		\caption{The standard deviation for optimization results varying the maximum WEC expansion parameter while hold the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
+		\caption{The standard deviation for optimization results varying the maximum WEC expansion parameter while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepstd-wm}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{nsteps_const_maxwec3_std}
+		\includegraphics[width=\textwidth]{nsteps_const_maxwec_std}
 		\caption{The standard deviation of optimization results of varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepstd-ws}
 	\end{minipage}
 \end{figure}
 
- After considering the data presented in \cref{fig:aepmax-wm,fig:aepmax-ws,fig:aepmean-wm,fig:aepmean-ws,fig:aepstd-wm,fig:aepstd-ws}, we determined that the WEC-D method is the best method to use as it results to highest optimized AEP, the highest mean optimized AEP, and the lowest standard deviation. We also found that six WEC steps was sufficient and that a max WEC spread parameter of three resulted in the highest optimized AEP.
+ After considering the data presented in \cref{fig:aepmin-wm,fig:aepmin-ws,fig:aepmean-wm,fig:aepmean-ws,fig:aepstd-wm,fig:aepstd-ws}, we determined that the WEC-D method is the best method to use as it resulted in the lowest minimum wake loss, the lowest mean wake loss, and the lowest standard deviation. We decided to use WEC-D with 6 steps and a maximum WEC spread parameter of three for the remaining studies.
  
- Based on the above results, we used WEC-D with six steps and a maximum spread value of three for the rest of the studies in this paper. We also chose to apply only the WEC-D method to other wake models.
+ The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}.
  
 \subsection{Applying WEC to the Jensen Cosine Wake Model}
 In this section we apply WEC, step by step as presented in \cref{sec:dsrop}, to the Jensen Cosine wake model. Below in \cref{fig:JensenDiagrams} is a diagram displaying the Jensen Cosine wake model from an overhead perspective. This diagram will give context to the variables and parameters discussed in this section.
@@ -417,7 +528,7 @@ In this section we apply WEC, step by step as presented in \cref{sec:dsrop}, to 
 
 %Just as the Bastankah and Port\'e-Agel model could be adjusted with a relaxation factor ($\xi$) \cite{Thomas2018}, so may the Jensen Cosine model. In the BPA wake model, the relaxation factor was applied to the terms describing the turbine's wake width, thereby expanding the wake's width without affecting the rate of wake spread. In a similar manner, the relaxation factor was applied to the radius of the wake width in the Jensen Cosine model (\cref{eq:JensenWECWakeWidth}).
 
-\subsubsection{Jensen Cosine WEC Step (1)}
+\subsubsection{Jensen Cosine WEC Step (1)} \todo{complete this code and results then update this section}
 %Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen Cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without impacting the velocity deficit in the center of the wake.
@@ -495,8 +606,8 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 	\centering
 	\begin{minipage}[t]{0.43\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:JensenLocalOptSmoothed}).}
+		\includegraphics[width=\textwidth, trim={-0.5cm -0.5cm -0.5cm 3.25cm}, clip]{final_images/layouts/3turb-design-space}
+		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the wake spreading angle relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:JensenLocalOptSmoothed}). Wind is from the top.}
 		\label{fig:smoothing_locations_Jensen}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
@@ -616,13 +727,13 @@ Case 1 was carefully selected to provide a meaningful problem that would be trac
 \centering
 \begin{minipage}[t]{18pc}
 \centering
-\includegraphics[width=1.\textwidth, trim={3cm, 0cm, 3cm, 0cm}, clip]{final_images/grid_farm_16Turbines_5DSpacing_start.pdf}
+\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/16_turb_start.pdf}
 \caption{Baseline wind farm layout for case 1. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 \label{fig:grid_case}
 \end{minipage}\hspace{1pc}%
 \begin{minipage}[t]{18pc}
 \centering
-\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/directional_windrose.pdf}
+\includegraphics[width=\textwidth, trim={2.0cm 0cm 2.0cm 0cm}, clip]{final_images/windroses/freqwindrose_20_dir.pdf}
 \caption{Direction probability wind rose for case 1. This wind rose is composed of a double Gaussian distribution binned into 20 directions.}
 \label{fig:directional}
 \end{minipage} 
@@ -644,23 +755,37 @@ For case 1, the optimization problem was formulated as shown in \cref{eqn:opt1}
 Where $(x_i,y_i)$ is the position of each turbine $i$, $S_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, and $x_{max/min}$ and $y_{max/min}$ represent the boundaries of the wind farm. This case has a total of 32 variables and 120 constraints.
 
 \subsection{Case 2: Round Farm}
+
+  Case 2 was created to be significantly more challenging than the first case. We defined a wind farm with 38 wind turbines and a circular boundary as shown in \cref{fig:round_case}. 
+%
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}[t]{18pc}
+		\centering
+		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/38_turb_start.pdf}
+		\caption{Baseline wind farm layout for case 2. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
+		\label{fig:round_case}
+	\end{minipage}\hspace{1pc}%
+\end{figure}
+%
+The size of the boundary allowed for at least a five-diameter spacing between turbines. We used the Nantucket wind rose binned into 36 directions with the wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_36dir,fig:freqwindrose_36dir}.
+%
 \begin{figure}[h!]
 \centering
 \begin{minipage}[t]{18pc}
 \centering
-\includegraphics[width=\textwidth, trim={3cm, 0cm, 3cm, 0cm}, clip]{final_images/round_farm_38Turbines_5DSpacing_start.pdf}
-\caption{Baseline wind farm layout for case 2. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
-\label{fig:round_case}
-\end{minipage}\hspace{1pc}%
+\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_36_dir.pdf}
+\caption{Directional probability wind rose for case 2. This is the Nantucket wind rose binned into 36 directions \cite{wrcc2017}.}
+\label{fig:freqwindrose_36dir}
+\end{minipage} \hspace{1pc}%
 \begin{minipage}[t]{18pc}
-\centering
-\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/nantucket_windrose.pdf}
-\caption{Directional probability wind rose for case 2. This is the Nantucket wind rose binned into 12 directions \cite{wrcc2017}.}
-\label{fig:nantucket}
-\end{minipage} 
+	\centering
+	\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/speedwindrose_36_dir.pdf}
+	\caption{Average speed wind rose for case 2. This is the Nantucket wind rose binned into 36 directions \cite{wrcc2017}}
+	\label{fig:speedwindrose_36dir}
+\end{minipage}
 \end{figure}
 
-  Case 2 was created to be significantly more challenging than the first case. We defined a wind farm with 38 wind turbines and a circular boundary (see \cref{fig:round_case}). The size of the boundary allowed for at least a five-diameter spacing between turbines. We used a simplified version of the Nantucket wind rose binned into 12 directions with a constant wind speed of 10 m/s in all directions (see \cref{fig:nantucket}).
 
 
 The optimization problem for case 2 was formulated as
@@ -677,24 +802,33 @@ The optimization problem for case 2 was formulated as
 where $(x_c,y_c)$ is the location of the center of the wind farm, and $R_b$ is the radius of the wind farm boundary. This case has a total of 76 variables and 741 constraints.
 
 \subsection{Case 3: Princess Amalia Wind Farm}
-Case 3 was selected to provide a larger and more realistic problem. The Amalia wind farm has 60 wind turbines and a convex polygonal boundary. We used wind data binned into 36 wind directions with wind speed for each direction determined as the average of all samples in that sector.
+Case 3 was selected to provide a larger and more realistic problem. The Amalia wind farm has 60 wind turbines and a convex polygonal boundary. We used wind data binned into 72 wind directions with wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_72di.fig:freqwindrose_72dir}
 \begin{figure}[h!]
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=1.\textwidth, trim={0cm, 0cm, 0cm, 0cm}, clip]{amalia_farm_60Turbines_5DSpacing_start.pdf}
-		\caption{Baseline wind farm layout for case 1. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
+		\includegraphics[width=1.\textwidth, trim={1.0cm, 0cm, 1.0cm, 0cm}, clip]{final_images/layouts/60_turb_start.pdf}
+		\caption{Baseline wind farm layout for case 3. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 		\label{fig:amalia_base_layout}
 	\end{minipage}\hspace{1pc}%
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-%		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{demo}
-		\caption{Direction probability wind rose for case 1. This wind rose is composed of a double Gaussian distribution binned into 20 directions.}
-		\label{fig:amalia_wind_rose}
-	\end{minipage} 
+		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_72_dir.pdf}
+		\caption{Direction probability wind rose for case 3. The wind rose is comprised of data from \cite{noordzeewind2006} Measurements were taken from July 1, 2005, to June 30, 2006.}
+		\label{fig:freqwindrose_72dir}
+	\end{minipage} \hspace{1pc}%
+	\begin{minipage}[t]{18pc}
+		\centering
+		\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/speedwindrose_72_dir.pdf}
+		\caption{Average speed wind rose for case 3. The wind rose is comprised of data from \cite{noordzeewind2006} Measurements were taken from July 1, 2005, to June 30, 2006.}
+		\label{fig:speedwindrose_72dir}
+	\end{minipage}
 \end{figure}
 %
-\todo{add speed wind rose and other 60 turbine figs. correct font}
 For case 3, the optimization problem was formulated as shown in \cref{eqn:opt3}
 %
 \begin{equation}
@@ -774,7 +908,7 @@ We compared optimized AEP, as well as the number of function calls required, for
 %%Results for large-scale optimizations for all wake models? Don't have the FLORISSE results since I haven't had time to fix the tapenade gradient code, although I could run the model with the finite-difference gradient code.
 
 \subsection{Case 1 Results}
-Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).
+Results for case 1 are presented in \cref{fig:16-wake-loss,fig:16-fcalls,tab:case1}. The SNOPT results had the lowest mean AEP (167.39 GWh) and the highest standard deviation (2.74 GWh). The results using WEC with SNOPT had a mean AEP and standard deviation of 174.13 GWh and 2.26 GWh respectively. The results using NSGA-II had the highest mean AEP (175.98 GWh) and lowest standard deviation (0.65 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 174.23 GWh, 177.25 GWh, and 177.69 GWh respectively (see \cref{tab:case1}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT and WEC had several low outliers (see \cref{fig:aep1}).
 
  The median number of function calls required by SNOPT, SNOPT with WEC, and NSGA-II were 246, 1,026, and 368,003 respectively. The high values for function calls required by SNOPT, SNOPT with WEC, and NSGA-II were 10,461, 11,216, and 1,342,723 respectively. However, the function call distributions for both SNOPT and SNOPT with WEC are highly skewed, with more runs grouped at the low end of the distributions. The function call distribution for NSGA-II is more normally distributed, but is still slightly skewed (see \cref{fig:fcalls1}).
 
@@ -782,88 +916,51 @@ Results for case 1 are presented in \cref{fig:aep1,fig:fcalls1,tab:case1}. The S
 \centering
 \begin{minipage}[t]{18pc}    
 \centering
-\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{16turbs_results_aep}
-\caption{Box plot comparing the AEP results across each optimization approach for case 1 (16     turbines).}
-\label{fig:aep1}
-\end{minipage}\hspace{1pc}
-\begin{minipage}[t]{18pc}    
+\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/16turbs_results_alpso_percent_wake_loss.pdf}
+\caption{Box plot comparing the wake loss results across each optimization approach for case 1 (16 turbines)}
+\label{fig:16-wake-loss}
+\end{minipage}\hspace{1pc} 
 \centering
-\def\big{\includegraphics[width=\textwidth]{16turbs_results_fcalls}}
-\def\little{\includegraphics[width=0.5\textwidth]{16turbs_results_fcalls_snopt}}
-\def\stackalignment{l}
-\topinset{\little}{\big}{1cm}{1.25cm}
-
-\caption{Box plot comparing the number of function calls used by each optimization approach for case 1 (16 turbines).}
-\label{fig:fcalls1}
-\end{minipage}
-\end{figure}
-%
-\begin{figure}[h!]  
+\begin{minipage}[t]{18pc}    
 	\centering
-	\begin{minipage}[t]{18pc}    
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{16turbs_results_alpso_aep}
-		\caption{Box plot comparing the AEP results across each optimization approach for case 1 (16     turbines) with WECA, WECD, and WECH.}
-		\label{fig:aep1}
-	\end{minipage}\hspace{1pc}
-	\begin{minipage}[t]{18pc}    
-		\centering
-		\def\big{\includegraphics[width=\textwidth]{16turbs_results_alpso_fcalls}}
-%		\def\little{\includegraphics[width=0.5\textwidth]{16turbs_results_fcalls_snopt}}
-		\def\stackalignment{l}
-		\topinset{}{\big}{1cm}{1.25cm}
-		
-		\caption{Box plot comparing the number of function calls used by each optimization approach for case 1 (16 turbines) with WECA, WECD, and WECH.}
-		\label{fig:fcalls1-1}
-	\end{minipage}
+	\includegraphics[width=\textwidth]{final_images/results/16turbs_results_alpso_fcalls.pdf}
+	\caption{Box plot comparing the number of function calls used by each optimization approach for case 1 (16 turbines)}
+	\label{fig:16-fcalls}
+\end{minipage}
 \end{figure}
 
 \subsection{Case 2 Results}
 
-Results for case 2 are presented in \cref{fig:aep2,fig:fcalls2,tab:case2}. The NSGA-II results had the lowest mean AEP for case 2 (331.98 GWh) and the second highest standard deviation (3.74 GWh). The results using WEC with SNOPT had the highest mean AEP and lowest standard deviation, 379.94 GWh and 2.24 GWh respectively. The results using SNOPT by itself had the second highest mean AEP (364.93 GWh), but highest standard deviation (5.88 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 380.71 GWh, 384.55 GWh, and 342.56 GWh respectively (see \cref{tab:case2}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT alone had several low outliers (see \cref{fig:aep1}).
+Results for case 2 are presented in \cref{fig:38-wake-loss,fig:38-wake-loss-no-outliers,fig:38-fcalls,tab:case2}. The NSGA-II results had the lowest mean AEP for case 2 (331.98 GWh) and the second highest standard deviation (3.74 GWh). The results using WEC with SNOPT had the highest mean AEP and lowest standard deviation, 379.94 GWh and 2.24 GWh respectively. The results using SNOPT by itself had the second highest mean AEP (364.93 GWh), but highest standard deviation (5.88 GWh) of the optimization methods tested. The maximum AEP values for SNOPT, SNOPT with WEC, and NSGA-II were 380.71 GWh, 384.55 GWh, and 342.56 GWh respectively (see \cref{tab:case2}). The AEP results for all cases were fairly normally distributed, but the results with SNOPT alone had several low outliers (see \cref{fig:aep1}).
 
  The median number of function calls required by SNOPT, SNOPT with WEC, and NSGA-II were 242.5, 1,482, and 551,003 respectively. The high values for function calls required by SNOPT, SNOPT with WEC, and NSGA-II were 893, 6,748, and 1,368,003 respectively. However, the function call distributions for SNOPT with WEC was again highly skewed, with more runs grouped at the low end of the distribution with quite a few outliers at the higher end. The function call distributions for NSGA-II and SNOPT and are more normally distributed, but are also slightly skewed (see \cref{fig:fcalls1}).
 
 It may be noted that the function calls required for each method to solve case 2 are comparable to the function calls required for case 1. This is likely due to a combination of design variable and constraint scaling difference, the objective being scaled down more for case 2 ($1\times10^{-5}$) than for case 1 ($1\times10^{-3}$), and the SNOPT objective tolerance being loosened from case 1 ($1\times10^{-5}$) to case 2 ($1\times10^{-4}$) because the higher tolerance is difficult to reach for larger problems.
 
-\begin{figure}[ht]
-\centering
-\begin{minipage}[t]{18pc}
-\centering
-\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{38turbs_results_aep}
-\caption{Box plot comparing the AEP results across each optimization approach for case 2 (38 turbines).}
-\label{fig:aep2}
-\end{minipage}\hspace{1pc}%
-\begin{minipage}[t]{18pc}
-\centering
-\def\big{\includegraphics[width=\textwidth]{38turbs_results_fcalls}}
-\def\little{\includegraphics[width=0.5\textwidth]{38turbs_results_fcalls_snopt}}
-\def\stackalignment{l}
-\topinset{\little}{\big}{1cm}{1.25cm}
-  
-\caption{Box plot comparing the number of function calls used by each optimization approach for case 2 (38 turbines).}
-\label{fig:fcalls2}
-\end{minipage} 
-\end{figure}
-%
-\begin{figure}[ht]
+\begin{figure}[h!]  
 	\centering
-	\begin{minipage}[t]{18pc}
+	\begin{minipage}[t]{18pc}    
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{38turbs_results_alpso_aep}
-		\caption{Box plot comparing the AEP results across each optimization approach for case 2 (38 turbines) with WECA, WECD, and ALPSO.}
-		\label{fig:aep2}
-	\end{minipage}\hspace{1pc}%
-	\begin{minipage}[t]{18pc}
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_alpso_percent_wake_loss.pdf}
+		\caption{Box plot comparing the wake loss results across each optimization approach for case 2 (38 turbines)}
+		\label{fig:38-wake-loss}
+	\end{minipage}\hspace{1pc}
+	\begin{minipage}[t]{18pc}    
 		\centering
-		\def\big{\includegraphics[width=\textwidth]{38turbs_results_alpso_fcalls}}
-%		\def\little{\includegraphics[width=0.5\textwidth]{38turbs_results_alpso_fcalls_snopt}}
-		\def\stackalignment{l}
-		\topinset{}{\big}{1cm}{1.25cm}
-		
-		\caption{Box plot comparing the number of function calls used by each optimization approach for case 2 (38 turbines) with WECA, WECD, and ALPSO.}
-		\label{fig:fcalls2-1}
-	\end{minipage} 
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_alpso_percent_wake_loss_zoom.pdf}
+		\caption{Box plot comparing the wake loss results across each optimization approach for case 2 (38 turbines) with outliers removed}
+		\label{fig:38-wake-loss-no-outliers}
+	\end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}[t]{18pc}
+\centering
+\includegraphics[width=\textwidth]{final_images/results/38turbs_results_alpso_fcalls}  
+\caption{Box plot comparing the number of function calls used by each optimization approach for case 2 (38 turbines)}
+\label{fig:38-fcalls}
+\end{minipage} 
 \end{figure}
 %
 \begin{table}
@@ -904,27 +1001,36 @@ It may be noted that the function calls required for each method to solve case 2
 
 \subsection{Case 3 Results}
 
-Results for case 3 are presented in \cref{fig:aep3,fig:fcalls3,tab:case3}. 
+Results for case 3 are presented in \cref{fig:60-wake-loss,fig:60-wake-loss-no-outliers,fig:60-fcalls,tab:case3}. 
+
+
+\begin{figure}[h!]  
+	\centering
+	\begin{minipage}[t]{18pc}    
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/60turbs_results_alpso_percent_wake_loss.pdf}
+		\caption{Box plot comparing the wake loss results across each optimization approach for case 3 (60 turbines)}
+		\label{fig:60-wake-loss}
+	\end{minipage}\hspace{1pc}
+	\begin{minipage}[t]{18pc}    
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/60turbs_results_alpso_percent_wake_loss_zoom.pdf}
+		\caption{Box plot comparing the wake loss results across each optimization approach for case 3 (60 turbines) with outliers removed}
+		\label{fig:60-wake-loss-no-outliers}
+	\end{minipage}
+\end{figure}
+
 
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{60turbs_results_alpso_aep}
-		\caption{Box plot comparing the AEP results across each optimization approach for case 3 (60 turbines).}
-		\label{fig:aep3}
-	\end{minipage}\hspace{1pc}%
-	\begin{minipage}[t]{18pc}
-		\centering
-		\def\big{\includegraphics[width=\textwidth]{60turbs_results_alpso_fcalls}}
-%		\def\little{\includegraphics[width=0.5\textwidth]{60turbs_results_fcalls_snopt}}
-		\def\stackalignment{l}
-		\topinset{}{\big}{1cm}{1.25cm}
-		
-		\caption{Box plot comparing the number of function calls used by each optimization approach for case 3 (60 turbines).}
-		\label{fig:fcalls3}
+		\includegraphics[width=\textwidth]{final_images/results/60turbs_results_alpso_fcalls}  
+		\caption{Box plot comparing the number of function calls used by each optimization approach for case 3 (60 turbines)}
+		\label{fig:60-fcalls}
 	\end{minipage} 
 \end{figure}
+
 %
 
 \begin{table}
@@ -971,7 +1077,7 @@ This work was supported by the National Science Foundation under Grant No. 15393
 
 \section*{References}
 \bibliographystyle{iopart-num}
-\bibliography{references/all_refs}
+\bibliography{./references/all_refs}
 
 \end{document}
 
