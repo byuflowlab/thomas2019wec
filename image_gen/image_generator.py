@@ -4272,7 +4272,7 @@ def plot_cp_curve(filename, save_figs, show_figs):
 
 
 def plot_simple_design_space(filename, save_figs, show_figs):
-    from matplotlib.patches import Ellipse, Rectangle
+    from matplotlib.patches import Ellipse, Rectangle, Polygon
 
     turbine_y = -np.array([0.0, 3.0, 7.0])
     turbine_x = np.array([-1.0, 1.0, 0.0])
@@ -4305,21 +4305,32 @@ def plot_simple_design_space(filename, save_figs, show_figs):
         blade1.set_clip_path(clip1)
         blade2.set_clip_path(clip2)
 
+    tc = 'k'
     # plot turbine locations
     for i in np.arange(0, 3):
-        blade1 = Ellipse((turbine_x[i]+diameter/4, turbine_y[i]), diameter / 2, diameter / 12, facecolor='b', edgecolor='none', fill=True,
+
+        # plt.plot([turbine_x[i]-0.5, turbine_x[i]-1.5], [turbine_y[i], turbine_y[i]-9.0], ':k', alpha=0.25)
+        # plt.plot([turbine_x[i]+0.5, turbine_x[i]+1.5], [turbine_y[i], turbine_y[i]-9.0], ':k', alpha=0.25)
+        wake = Polygon(np.array([[turbine_x[i]-0.5, turbine_y[i]],
+                                 [turbine_x[i]-1.5, turbine_y[i]-9.0],
+                                 [turbine_x[i]+1.5, turbine_y[i]-9.0],
+                                 [turbine_x[i]+0.5, turbine_y[i]]]), color='b', alpha=0.05, closed=True)
+        ax.add_artist(wake)
+
+        blade1 = Ellipse((turbine_x[i]+diameter/4, turbine_y[i]), diameter / 2, diameter / 12, facecolor=tc, edgecolor='none', fill=True,
                          alpha=1.0, linestyle='-', visible=True)
-        blade2 = Ellipse((turbine_x[i] - diameter / 4, turbine_y[i]), diameter / 2, diameter / 12, facecolor='b',
+        blade2 = Ellipse((turbine_x[i] - diameter / 4, turbine_y[i]), diameter / 2, diameter / 12, facecolor=tc,
                          edgecolor='none', fill=True,
                          alpha=1.0, linestyle='-', visible=True)
         hub = Rectangle((turbine_x[i]-diameter/16, turbine_y[i] - diameter / 8), diameter / 8, diameter / 4,
-                        facecolor='b',
+                        facecolor=tc,
                         edgecolor='none', fill=True, alpha=1.0, linestyle='-', visible=True, joinstyle='round')
         ax.add_artist(blade1)
         ax.add_artist(blade2)
         ax.add_artist(hub)
+
     # add arrow to indicate movement
-    plt.arrow(turbine_x[2]+.75, turbine_y[2], 1.0, 0.0, width=0.05, color='k', fc='k', ec='k')
+    plt.arrow(turbine_x[2]+.75, turbine_y[2], 1.5, 0.0, width=0.05, color='k', fc='k', ec='k')
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -4327,7 +4338,7 @@ def plot_simple_design_space(filename, save_figs, show_figs):
     ax.spines['bottom'].set_visible(True)
     plt.xlabel("$y/D_r$")
 
-    plt.xticks([-4.0, -2.0, 0.0, 2.0, 4.0])
+    plt.xticks([-4.0, 0.0, 4.0])
     plt.yticks([])
 
     plt.axis("equal")
@@ -4336,6 +4347,165 @@ def plot_simple_design_space(filename, save_figs, show_figs):
 
     ax.yaxis.set_ticks_position('none')
     ax.xaxis.set_ticks_position('bottom')
+    #
+    plt.tight_layout()
+
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
+
+def plot_jensen_diagram(filename, save_figs, show_figs):
+    from matplotlib.patches import Ellipse, Rectangle, Polygon, Circle
+
+    # define variables
+    r0 = 0.5
+    dx = 4.0
+    dy = -1.0
+    beta = 20.0*np.pi/180.0
+    z = r0/np.tan(beta)
+    theta = np.arctan(dy/(dx+z))
+    n = np.pi/beta
+    r = (dx+z)*np.tan(beta)
+
+    # define colors
+    constructionline_color = 'k'
+    wakeline_color = 'b'
+    turbine_color = 'k'
+
+    # initialize the figure
+    fig, ax = plt.subplots(1, figsize=(9,7))
+
+    # plot centerline
+    ax.plot([-z, dx+1.0], [0.0, 0.0], '-.', color=constructionline_color, alpha=0.5)
+
+    # plot lines from fulcrum to blade tips
+    ax.plot([-z, 0.0], [0.0, 0.5], '--', color=constructionline_color, alpha=0.5)
+    ax.plot([-z, 0.0], [0.0, -0.5], '--', color=constructionline_color, alpha=0.5)
+
+    # plot wake
+    wake = Polygon(np.array([[0.0, 0.5],
+                             [dx+1.0, (dx+z+1.0)*np.tan(beta)],
+                             [dx+1.0, -(dx+z+1.0)*np.tan(beta)],
+                             [0.0, -0.5]]), color='b', alpha=0.05, closed=True)
+    ax.add_artist(wake)
+
+    # plot position and position lines
+    ax.plot([-z, dx], [0.0, dy], ':', color=constructionline_color, alpha=0.5)
+    ax.plot([dx, dx], [r, -r], ':', color=constructionline_color, alpha=0.5)
+    location = Circle((dx, dy), 0.05, color=turbine_color)
+    ax.add_artist(location)
+
+
+    # plot turbine
+    blade1 = Ellipse((0.0, 0.25), 0.1, 0.5, 0.0, visible=True, fill=True, ec="none", fc=turbine_color)
+    blade2 = Ellipse((0.0, -0.25), 0.1, 0.5, 0.0, visible=True, fill=True, ec="none", fc=turbine_color)
+    hub = Ellipse((0.0,0.0), 0.2, 0.1, visible=True, fill=True, ec="none", fc=turbine_color)
+    nacelle = Rectangle((0.0,-0.05), 0.1, 0.1, visible=True, fill=True, ec="none", fc=turbine_color, joinstyle='round')
+    ax.add_artist(blade1)
+    ax.add_artist(blade2)
+    ax.add_artist(hub)
+    ax.add_artist(nacelle)
+
+    # annotate
+    def annotate_dim(ax, xyfrom, xyto, text=None, text_buffer=0.05):
+
+        if text is None:
+            text = str(np.sqrt((xyfrom[0] - xyto[0]) ** 2 + (xyfrom[1] - xyto[1]) ** 2))
+
+        ax.annotate("", xyfrom, xyto, arrowprops=dict(arrowstyle='<->'))
+        ax.text((xyto[0] + xyfrom[0]) / 2, (xyto[1] + xyfrom[1]) / 2 + text_buffer, text, fontsize=16)
+
+    def annotate_dim2(ax, xyfrom, xyto, text=None, text_buffer=0.05, line_buffer=0.05, dir_type='x', cap_length=0.1,
+                      cap_buffer=0.05, cap_on=[True, True], arc_radius=0.25, angle_text_buffer =4):
+
+        if text is None:
+            text = str(np.sqrt((xyfrom[0] - xyto[0]) ** 2 + (xyfrom[1] - xyto[1]) ** 2))
+
+
+        if dir_type == 'x':
+            x = np.array([xyfrom[0], xyto[0]])
+            y = np.array([xyfrom[1], xyto[1]])
+            y[:] = np.max(y)
+
+            # dimension line
+            ax.annotate("", [x[0],y[0]+line_buffer+cap_length/2], [x[1],y[1]+line_buffer+cap_length/2], arrowprops=dict(arrowstyle='<|-|>', color='k'))
+
+            # extension lines
+            if cap_on[0]:
+                ax.plot([xyfrom[0], xyfrom[0]], [xyfrom[1]+cap_buffer, xyto[1] + line_buffer+cap_length], 'k', linewidth=1.0)
+            if cap_on[1]:
+                ax.plot([xyto[0], xyto[0]], [xyto[1]+cap_buffer, xyto[1] + line_buffer+cap_length], 'k', linewidth=1.0)
+
+            # text
+            ax.text((x[0] + x[1]) / 2, (y[0] + y[1]) / 2 + text_buffer + line_buffer + cap_length/2, text, fontsize=16)
+
+        if dir_type == 'y':
+            x = np.array([xyfrom[0], xyto[0]])
+            y = np.array([xyfrom[1], xyto[1]])
+            x[:] = np.max(x)
+
+            # dimension line
+            ax.annotate("", [x[0] + line_buffer + cap_length / 2, y[0]], [x[1]+ line_buffer + cap_length / 2, y[1] ],
+                        arrowprops=dict(arrowstyle='<|-|>', color='k'))
+
+            # extension caps
+            if cap_on[0]:
+                ax.plot([xyfrom[0] + cap_buffer, xyfrom[0] + line_buffer + cap_length ], [xyfrom[1] , xyfrom[1] ], 'k',
+                    linewidth=1.0)
+            if cap_on[1]:
+                ax.plot([xyto[0] + cap_buffer, xyto[0]+ line_buffer + cap_length], [xyto[1] , xyto[1] ], 'k', linewidth=1.0)
+
+            # text
+            ax.text((x[0] + x[1]) / 2 + text_buffer + line_buffer + cap_length / 2, (y[0] + y[1]) / 2 , text,
+                    fontsize=16)
+
+        if dir_type == 'angle':
+            from matplotlib.patches import Arc
+
+            # parse input
+            center_point = xyfrom
+            arc_start = xyto[0]
+            arc_end = xyto[1]
+
+            # draw arc
+            arc = Arc(center_point, arc_radius, arc_radius, angle=0.0, theta1=arc_start, theta2=arc_end)
+            ax.add_artist(arc)
+
+            # add text
+            text_angle = np.pi*(arc_start - angle_text_buffer + (arc_end - arc_start)/2.0)/180.0
+            xt = (arc_radius + text_buffer -0.9)*np.cos(text_angle) + center_point[0]
+            yt = (arc_radius + text_buffer -0.9)*np.sin(text_angle) + center_point[1]
+            ax.text(xt, yt, text, fontsize=16)
+
+
+    # add dimensions
+    annotate_dim2(ax, [-z, 0.0], [0.0, 0.5], "z")
+    annotate_dim2(ax, [0.0, 0.5], [dx, 0.5], "$\Delta x$", cap_on=[True, False])
+    annotate_dim2(ax, [dx, 0.0], [dx, r], "r", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.05)
+    annotate_dim2(ax, [dx, 0.0], [dx, dy], r"$\Delta y$", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.1)
+    annotate_dim2(ax, [-z, 0.0], [theta*180.0/np.pi, 0.0], r"$\theta$", dir_type='angle', arc_radius=2.0, text_buffer=0.0)
+    annotate_dim2(ax, [-z, 0.0], [0.0, beta*180.0/np.pi], r"$\beta$", dir_type='angle', arc_radius=1.5, text_buffer=0.2)
+
+    plt.xticks([])
+    plt.yticks([])
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)\
+
+    plt.axis("equal")
+    plt.ylim([-r-1.5, r+1.5])
+    plt.xlim([-z-1.0, dx+1])
+
+    ax.yaxis.set_ticks_position('none')
+    ax.xaxis.set_ticks_position('none')
     #
     plt.tight_layout()
 
@@ -4458,8 +4628,8 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    filename = "./images/smoothing_bpa_wec_a.pdf"
-    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="A")
+    # filename = "./images/smoothing_bpa_wec_a.pdf"
+    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="A")
 
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
@@ -4470,3 +4640,5 @@ if __name__ == "__main__":
     # filename = "./images/3turb-design-space.pdf"
     # plot_simple_design_space(filename, save_figs, show_figs)
 
+    filename = "./images/jensen_diagram.pdf"
+    plot_jensen_diagram(filename, save_figs, show_figs)
