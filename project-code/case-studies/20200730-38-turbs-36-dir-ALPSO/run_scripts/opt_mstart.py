@@ -488,7 +488,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
         prob.driver.opt_settings['maxOuterIter'] = 10000
 
-        prob.driver.opt_settings['SwarmSize'] = 100
+        prob.driver.opt_settings['SwarmSize'] = 50
 
         prob.driver.opt_settings['xinit'] = 1  # Initial Position Flag (0 - no position, 1 - position given)
 

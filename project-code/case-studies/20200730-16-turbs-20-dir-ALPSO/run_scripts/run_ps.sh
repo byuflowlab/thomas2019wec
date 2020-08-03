@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --time=12:00:00   # walltime
+#SBATCH --time=05:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
-#SBATCH --mem-per-cpu=1G  # memory per CPU core
+#SBATCH --mem-per-cpu=500M  # memory per CPU core
 #SBATCH -J '16 turbs. alg: ps. wec method: none.# job name'
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
-#SBATCH --array=0-1     # job array of size 200
+#SBATCH --array=0-3     # job array of size 200
 
 echo ${SLURM_ARRAY_TASK_ID}
 
