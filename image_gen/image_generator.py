@@ -2303,66 +2303,87 @@ def plot_max_wec_results(filename, save_figs, show_figs, nturbs=38):
 
     return
 
-def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
+def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True):
 
-    if nturbs == 9:
-        # 202002
-        data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snopt_weca = np.loadtxt(
-            "./image_data/opt_results/202002240836/angle_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/202002240836/diam_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snopt_wech = np.loadtxt(
-            "./image_data/opt_results/202002240836/hybrid_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
-        # data_ps = np.loadtxt(
-        #     "./image_data/opt_results/202002240836/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        data_ps = np.loadtxt(
-            "./image_data/opt_results/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+    if model is "BPA":
+        if nturbs == 9:
+            # 202002
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/202002240836/no_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_snopt_weca = np.loadtxt(
+                "./image_data/opt_results/202002240836/angle_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/202002240836/diam_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_snopt_wech = np.loadtxt(
+                "./image_data/opt_results/202002240836/hybrid_wec_snopt_multistart_rundata_9turbs_directionalWindRose_20dirs_BPA_all.txt")
+            # data_ps = np.loadtxt(
+            #     "./image_data/opt_results/202002240836/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            data_ps = np.loadtxt(
+                "./image_data/opt_results/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
 
-    if nturbs == 16:
-        data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-        data_ps = np.loadtxt(
-            "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+        if nturbs == 16:
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_ps = np.loadtxt(
+                "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
 
-        tmax_aep = 5191363.5933961 * nturbs # kWh
+            tmax_aep = 5191363.5933961 * nturbs # kWh
 
-    elif nturbs == 38:
-                # load data
-        # data_snopt_no_wec = np.loadtxt(
-        #     "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        # data_snopt_weca = np.loadtxt(
-        #     "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        # data_snopt_wecd = np.loadtxt(
-        #     "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-        # data_ps = np.loadtxt(
-        #     "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        elif nturbs == 38:
+                    # load data
+            # data_snopt_no_wec = np.loadtxt(
+            #     "./image_data/opt_results/snopt_no_wec_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            # data_snopt_weca = np.loadtxt(
+            #     "./image_data/opt_results/snopt_weca_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            # data_snopt_wecd = np.loadtxt(
+            #     "./image_data/opt_results/snopt_wecd_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            # data_ps = np.loadtxt(
+            #     "./image_data/opt_results/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
-        # 202005
-        data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-        data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-        data_ps = np.loadtxt(
-            "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-        tmax_aep = 1630166.61601323 * nturbs # kWh
+            # 202005
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+            data_ps = np.loadtxt(
+                "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+            tmax_aep = 1630166.61601323 * nturbs # kWh
 
-    elif nturbs == 60:
-                # load data
-        data_snopt_no_wec = np.loadtxt(
-            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-        # data_snopt_weca = np.loadtxt(
-        #     "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
-        data_snopt_wecd = np.loadtxt(
-            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-        data_ps = np.loadtxt(
-            "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-        tmax_aep = 6653047.52233728  * nturbs # kWh
-    else:
-        ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
+        elif nturbs == 60:
+                    # load data
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+            # data_snopt_weca = np.loadtxt(
+            #     "./image_data/opt_results/snopt_wec_angle_rundata_60turbs_amaliaWindRose_36dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+            data_ps = np.loadtxt(
+                "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+            tmax_aep = 6653047.52233728  * nturbs # kWh
+        else:
+            ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
+    elif model is "JENSEN":
+        if nturbs == 16:
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/20200805-jensen-16-turbs-20-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/20200805-jensen-16-turbs-20-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            # data_ps = np.loadtxt(
+            #     "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
+            tmax_aep = 5904352.21200323 * nturbs  # kWh
+
+        elif nturbs == 38:
+            # 202005
+            data_snopt_no_wec = np.loadtxt(
+                "./image_data/opt_results/20200805-jensen-38-turbs-12-dir-maxwecd3-nsteps6/snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            data_snopt_wecd = np.loadtxt(
+                "./image_data/opt_results/20200805-jensen-38-turbs-12-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+            # data_ps = np.loadtxt(
+            #     "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+            tmax_aep = 5679986.82794711 * nturbs  # kWh
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
@@ -2388,7 +2409,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     swd_ti_opt = data_snopt_wecd[:, 3]
     swd_orig_aep = data_snopt_wecd[0, 5]
     # swd_run_start_aep = data_snopt_weca[0, 7]
-    swd_run_end_aep = data_snopt_wecd[swd_ti_opt == 5, 7]
+    if model is "BPA":
+        swd_run_end_aep = data_snopt_wecd[swd_ti_opt == 5, 7]
+    else:
+        swd_run_end_aep = data_snopt_wecd[swd_ef == 1, 7]
     swd_run_time = data_snopt_wecd[:, 8]
 
     swd_fcalls = data_snopt_wecd[:, 9]
@@ -2428,7 +2452,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     snw_ti_opt = data_snopt_no_wec[:, 2]
     snw_orig_aep = data_snopt_no_wec[0, 4]
     # swa_run_start_aep = data_snopt_relax[0, 7]
-    snw_run_end_aep = data_snopt_no_wec[snw_ti_opt==5, 6]
+    if model is "BPA":
+        snw_run_end_aep = data_snopt_no_wec[snw_ti_opt==5, 6]
+    else:
+        snw_run_end_aep = data_snopt_no_wec[:, 6]
     snw_run_time = data_snopt_no_wec[:, 7]
     snw_fcalls = data_snopt_no_wec[:, 8]
     snw_scalls = data_snopt_no_wec[:, 9]
@@ -2444,30 +2471,38 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     snw_mean_wake_loss = np.average(snw_run_wake_loss)
     snw_std_wake_loss = np.std(snw_run_wake_loss)
 
-    ps_id = data_ps[:, 0]
-    ps_ef = np.ones_like(ps_id)
-    ps_orig_aep = data_ps[0, 4]
-    # swa_run_start_aep = data_ps[0, 7]
-    ps_run_end_aep = data_ps[:, 6]
-    ps_run_time = data_ps[:, 7]
-    ps_fcalls = data_ps[:, 8]
-    ps_scalls = data_ps[:, 9]
+    if ps:
+        ps_id = data_ps[:, 0]
+        ps_ef = np.ones_like(ps_id)
+        ps_orig_aep = data_ps[0, 4]
+        # swa_run_start_aep = data_ps[0, 7]
+        ps_run_end_aep = data_ps[:, 6]
+        ps_run_time = data_ps[:, 7]
+        ps_fcalls = data_ps[:, 8]
+        ps_scalls = data_ps[:, 9]
 
-    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
-    ps_run_wake_loss = 100.0 * (1.0 - (ps_run_end_aep / tmax_aep))
-    ps_mean_wake_loss = np.average(ps_run_wake_loss)
-    ps_std_wake_loss = np.std(ps_run_wake_loss)
+        # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+        ps_run_wake_loss = 100.0 * (1.0 - (ps_run_end_aep / tmax_aep))
+        ps_mean_wake_loss = np.average(ps_run_wake_loss)
+        ps_std_wake_loss = np.std(ps_run_wake_loss)
 
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
     # labels = list(['SNOPT', 'WEC-A', 'WEC-D', 'WEC-H', 'ALPSO'])
-    labels = list(['SNOPT', 'SNOPT+WEC-D', 'ALPSO'])
+    if ps:
+        labels = list(['SNOPT', 'SNOPT+WEC-D', 'ALPSO'])
+    else:
+        labels = list(['SNOPT', 'SNOPT+WEC-D'])
+
     # labels = list('abcd')
     # data = list([snw_run_improvement, swa_run_improvement, ps_run_improvement, ga_run_improvement])
     aep_scale = 1E-6
     # data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, swh_run_end_aep*aep_scale,  ps_run_end_aep*aep_scale])
-    data = list([snw_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
+    if ps:
+        data = list([snw_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
+    else:
+        data = list([snw_run_end_aep * aep_scale, swd_run_end_aep * aep_scale])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
 
     plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
@@ -2498,7 +2533,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     fig, ax = plt.subplots(1)
 
     # data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, swh_run_improvement*100, ps_run_improvement*100])
-    data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    if ps:
+        data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    else:
+        data = list([snw_run_wake_loss, swd_run_wake_loss])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
 
     plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
@@ -2531,7 +2569,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     #     ymax = 14
     #     ymin = 8
     fig, ax = plt.subplots(1)
-    data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    if ps:
+        data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+    else:
+        data = list([snw_run_wake_loss, swd_run_wake_loss])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True, showfliers=False)
 
     plt.setp(bp['boxes'], edgecolor='k', facecolor='none')
@@ -2560,10 +2601,13 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     fig, ax = plt.subplots(1)
 
-    scale_by = 1E5
+    scale_by = 1E4
     # data = np.array([snw_fcalls+snw_scalls, swa_fcalls+swa_scalls, ps_fcalls, ga_fcalls])/scale_by
     # data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (swh_tfcalls+swh_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
-    data = list([(snw_fcalls+snw_scalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+    if ps:
+        data = list([(snw_fcalls+snw_scalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+    else:
+        data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
     # ax.hist(snw_fcalls+snw_scalls, bins=25, alpha=0.25, color='r', label='SNOPT', range=[0., 5E3])
     # ax.hist((swa_fcalls+swa_scalls)[swa_ef==1.], bins=25, alpha=0.25, color='b', label='SNOPT Relax', range=[0., 5E3])
@@ -2576,7 +2620,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     plt.setp(bp['medians'], color='b')
     plt.setp(bp['caps'], color='k')
 
-    ax.set_ylabel('Function Calls ($10^5$)')
+    if model is "BPA":
+        ax.set_ylabel('Function Calls ($10^5$)')
+    else:
+        ax.set_ylabel('Function Calls ($10^4$)')
     # ax.set_ylabel('Count')
     # ax.set_xlim([1, 10])
     # ax.set_ylim([-10, 100])
@@ -2599,8 +2646,10 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
     scale_by = 1E3
 
     # data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (swh_tfcalls + swh_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
-    data = list([(snw_fcalls + snw_scalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
-
+    if ps:
+        data = list([(snw_fcalls + snw_scalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
+    else:
+        data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by])
     bp = ax.boxplot(data, meanline=True, labels=labels)
 
     ## change outline color, fill color and linewidth of the boxes
@@ -2664,7 +2713,11 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16):
 
     # data = list([snw_run_time/60., swa_time/60., ps_run_time/60., ga_run_time/60.])
     # data = list([snw_run_time/60., swa_time/60., swd_time/60., swh_time/60., ps_run_time/60.])
-    data = list([snw_run_time/60., swd_time/60., ps_run_time/60.])
+    if ps:
+        data = list([snw_run_time/60., swd_time/60., ps_run_time/60.])
+    else:
+        data = list([snw_run_time / 60., swd_time / 60.])
+
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
     # y_formatter = ticker.ScalarFormatter(useOffset=True)
     # ax.yaxis.set_major_formatter(y_formatter)
@@ -4568,6 +4621,9 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
+    filename = "./images/38turbs_results_jensen"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=38, model="JENSEN", ps=False)
+
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
@@ -4639,8 +4695,8 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    filename = "./images/smoothing_jensen_wec_d.pdf"
-    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
+    # filename = "./images/smoothing_jensen_wec_d.pdf"
+    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
