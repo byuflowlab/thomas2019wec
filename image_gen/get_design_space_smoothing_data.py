@@ -93,7 +93,8 @@ if __name__ == "__main__":
                           'ct_curve_ct': ct_curve_ct,
                           'ct_curve_wind_speed': ct_curve_wind_speed,
                           'interp_type': 1,
-                          'differentiable': True}
+                          'differentiable': True,
+                          'variant': "CosineFortran"}
 
     ######################### for MPI functionality #########################
 
@@ -158,21 +159,22 @@ if __name__ == "__main__":
         # initialize problem
         prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=True, use_rotor_components=False,
-                                              wake_model=floris_wrapper,
+                                              wake_model=floris_wrapper, wake_model_options=wake_model_options,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IdepVar_args={}))
+                                              params_IdepVar_args={},
+                                              cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
     elif MODELS[model] == 'JENSEN':
-        wake_model_options = {'variant': 'JensenCosineFortran'}
+        # wake_model_options = {'variant': 'JensenCosineFortran'}
         prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-                                              wake_model=jensen_wrapper,
+                                              wake_model=jensen_wrapper, cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
                                               params_IdepVar_func=add_jensen_params_IndepVarComps,
                                               params_IdepVar_args={}, wake_model_options=wake_model_options))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' %(MODELS[model]))
 
     tic = time.time()
-    prob.setup(check=True)
+    prob.setup(check=False)
     toc = time.time()
 
     # print the results
@@ -237,6 +239,8 @@ if __name__ == "__main__":
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
 
+    if MODELS[model] is 'JENSEN':
+        prob['model_params:alpha'] = 0.1
 
     locations = np.arange(-6.*rotor_diameter, 6.*rotor_diameter, 0.5)
     powers0 = np.zeros([exp_fac_values.size, locations.size])
@@ -310,9 +314,15 @@ if __name__ == "__main__":
         ax2.plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
 
     # save results
-    # np.savetxt('smoothing_bpa_WEC-%s.txt' %wec_method, np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
-    #                                                aeps[3, :], aeps[4, :]],# aeps[5, :]], #, aeps[12, :]],
-    #            header='location/diam, aep')
+    if MODELS[model] is "BPA":
+        np.savetxt('smoothing_bpa_WEC-%s.txt' %wec_method, np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
+                                                       aeps[3, :], aeps[4, :]],# aeps[5, :]], #, aeps[12, :]],
+                   header='location/diam, aep')
+    elif MODELS[model] is "JENSEN":
+        np.savetxt('smoothing_jensen_WEC-%s.txt' % wec_method,
+                   np.c_[locations / rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
+                         aeps[3, :], aeps[4, :]],  # aeps[5, :]], #, aeps[12, :]],
+                   header='location/diam, aep')
 
     ax2.set_xlabel('Cross Stream Location')
     ax2.set_ylabel('AEP, kWh')

@@ -3923,7 +3923,12 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
             wec_values = np.array([1, 1.5, 2.0, 2.5, 3.0])
             xt = [-1.6, -1.35, -2.25]
             yt = [31.5, 25, 22.5]
-
+    elif wake_model == "JENSEN":
+        data = np.loadtxt("./image_data/smoothing_jensen_WEC-%s.txt" % wec_method)
+        if wec_method == "D":
+            wec_values = np.array([1, 1.5, 2.0, 2.5, 3.0])
+            xt = [-1.6, -1.35, -2.25]
+            yt = [31.5, 29.5, 28]
     else:
         ValueError("Invalid model selection")
 
@@ -3959,10 +3964,16 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
 
     ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($Y/D_r$)")
     ax.set_ylabel('Annual Energy Production (GWh)')
-    ax.set_ylim([20, 35])
-    ax.set_xlim([-4, 4])
-    plt.yticks([20, 35])
-    plt.xticks([-4, 0, 4])
+    if wake_model is "BPA":
+        ax.set_ylim([20, 35])
+        ax.set_xlim([-4, 4])
+        plt.yticks([20, 35])
+        plt.xticks([-4, 0, 4])
+    elif wake_model is "JENSEN":
+        ax.set_ylim([25, 35])
+        ax.set_xlim([-4, 4])
+        plt.yticks([25, 35])
+        plt.xticks([-4, 0, 4])
     # ax.legend(ncol=2, loc=2, frameon=False, )  # show plot
     # tick_spacing = 1
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
@@ -4628,8 +4639,8 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    # filename = "./images/smoothing_bpa_wec_a.pdf"
-    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="A")
+    filename = "./images/smoothing_jensen_wec_d.pdf"
+    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
@@ -4640,5 +4651,5 @@ if __name__ == "__main__":
     # filename = "./images/3turb-design-space.pdf"
     # plot_simple_design_space(filename, save_figs, show_figs)
 
-    filename = "./images/jensen_diagram.pdf"
-    plot_jensen_diagram(filename, save_figs, show_figs)
+    # filename = "./images/jensen_diagram.pdf"
+    # plot_jensen_diagram(filename, save_figs, show_figs)

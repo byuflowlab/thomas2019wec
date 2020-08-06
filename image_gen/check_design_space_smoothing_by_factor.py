@@ -4,7 +4,7 @@ from openmdao.api import Problem, pyOptSparseDriver
 from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
 import time
 import numpy as np
@@ -80,7 +80,8 @@ if __name__ == "__main__":
                           'ct_curve_ct': ct_curve_ct,
                           'ct_curve_wind_speed': ct_curve_wind_speed,
                           'interp_type': 1,
-                          'differentiable': True}
+                          'differentiable': True,
+                          'variant': "CosineFortran"}
 
     ######################### for MPI functionality #########################
 
@@ -143,18 +144,18 @@ if __name__ == "__main__":
                                               cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = Problem(impl=impl, model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=True, use_rotor_components=False,
                                               wake_model=floris_wrapper,
                                               params_IdepVar_func=add_floris_params_IndepVarComps,
-                                              params_IndepVar_args={}))
+                                              params_IdepVar_args={}))
     elif MODELS[model] == 'JENSEN':
         # initialize problem
-        prob = Problem(impl=impl, model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
+        prob = Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=0,
                                               minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-                                              wake_model=jensen_wrapper,
-                                              params_IdepVar_func=add_jensen_params_IndepVarComps,
-                                              params_IndepVar_args={}))
+                                              wake_model=jensen_wrapper, wake_model_options=wake_model_options,
+                                              params_IdepVar_func=add_jensen_params_IndepVarComps, cp_points=cp_curve_cp.size,
+                                              params_IdepVar_args={}))
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' %(MODELS[model]))
 
@@ -223,8 +224,12 @@ if __name__ == "__main__":
         prob['model_params:wake_model_version'] = wake_model_version
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
+    if MODELS[model] is 'JENSEN':
+        prob['model_params:alpha'] = 0.1
+        exp_fac_values = np.arange(1.0, 5.1, 1.0)
+    else:
+        exp_fac_values = np.arange(1.0, 4.1, 1.0)
 
-    exp_fac_values = np.arange(1.0, 4.1, 1.0)
     locations = np.arange(-6.*rotor_diameter, 6.*rotor_diameter, 0.5)
     powers0 = np.zeros([exp_fac_values.size, locations.size])
     powers1 = np.zeros([exp_fac_values.size, locations.size])
@@ -301,8 +306,13 @@ if __name__ == "__main__":
         # if np.mod(i,2) == 0:
         ax2.plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
         ax[1, 2].plot(locations/rotor_diameter, aeps[i, :], label="std. dev. = %.2f*sigma" % k)
-    np.savetxt('smoothing_bpa.txt', np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
+    if MODELS[model] is "BPA":
+        np.savetxt('smoothing_bpa.txt', np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
                                                    aeps[3, :]],#, aeps[8, :], aeps[10, :], aeps[12, :]],
+               header='location/diam, aep')
+    elif MODELS[model] is "JENSEN":
+        np.savetxt('smoothing_jensen.txt', np.c_[locations/rotor_diameter, aeps[0, :], aeps[1, :], aeps[2, :],
+                                                   aeps[3, :], aeps[4, :]],#, aeps[8, :], aeps[10, :], aeps[12, :]],
                header='location/diam, aep')
 
     ax[0,0].set_xlabel('Cross Stream Location')

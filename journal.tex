@@ -85,7 +85,7 @@ The Jensen Cosine wake model is used to calculate the velocity deficit of the wi
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
-    \frac{ \bar{u}}{\bar{u}_\infty} = 1 - 2a \bigg(\frac{f_\theta r_0}{r_0 + \alpha x} \bigg)^2
+    \frac{ \bar{u}}{\bar{u}_\infty} = 1 - 2a \bigg(\frac{r_0}{r_0 + \alpha x} \bigg)^2 f_\theta 
     \label{eq:JensenVelocityDeficit}
 \end{equation}
 %
@@ -595,7 +595,7 @@ Through a series of substitutions, this new fulcrum distance, \cref{eq:WECFulcru
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
-\frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \Bigg[ \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg) \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2
+\frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - 2a \Bigg[  \bigg(\frac{r_0}{r_0 + \alpha x} \bigg) \Bigg]^2 \frac{1}{2} \Bigg(1 + cos\Bigg[\frac{\pi}{\beta} tan^{-1}\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{tan(\beta)}} \Bigg) \Bigg] \Bigg)
 \label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
@@ -613,7 +613,7 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{JensenWECMultipleTurbinesAEP}
+		\includegraphics[width=\textwidth]{smoothing_jensen_wec_d}
 		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations_Jensen}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
 		\label{fig:JensenLocalOptSmoothed}
 	\end{minipage}
