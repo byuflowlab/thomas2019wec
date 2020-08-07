@@ -2327,8 +2327,11 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             data_snopt_wecd = np.loadtxt(
                 "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
             data_ps = np.loadtxt(
-                "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-
+                # "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+                "./image_data/opt_results/20200804-16-turbs-20-dir-ALPSO/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            data_ps_wec = np.loadtxt(
+                "./image_data/opt_results/20200804-16-turbs-20-dir-ALPSO/ps_wec_diam_max_wec_3_nsteps_6.000/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+            ps_wec =True
             tmax_aep = 5191363.5933961 * nturbs # kWh
 
         elif nturbs == 38:
@@ -2486,12 +2489,36 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
         ps_mean_wake_loss = np.average(ps_run_wake_loss)
         ps_std_wake_loss = np.std(ps_run_wake_loss)
 
+        if ps_wec:
+            ps_wec_id = data_ps_wec[:, 0]
+            ps_wec_ef = data_ps_wec[:, 1]
+            ps_wec_ti_opt = data_ps_wec[:, 3]
+            ps_wec_orig_aep = data_ps_wec[0, 5]
+            # ps_wec_run_start_aep = data_ps_wec[0, 7
+            ps_wec_run_end_aep = data_ps_wec[ps_wec_ti_opt == 4, 7]
+            ps_wec_run_time = data_ps_wec[:, 8]
+
+            ps_wec_fcalls = data_ps_wec[:, 9]
+            ps_wec_scalls = data_ps_wec[:, 10]
+
+            ps_wec_run_wake_loss = 100.0 * (1.0 - (ps_wec_run_end_aep / tmax_aep))
+            ps_wec_mean_wake_loss = np.average(ps_wec_run_wake_loss)
+            ps_wec_std_wake_loss = np.std(ps_wec_run_wake_loss)
+
+            ps_wec_tfcalls = np.zeros_like(ps_wec_run_end_aep)
+            ps_wec_tscalls = np.zeros_like(ps_wec_run_end_aep)
+            for i in np.arange(0, ps_wec_tfcalls.size):
+                ps_wec_tfcalls[i] = np.sum(ps_wec_fcalls[ps_wec_id == i])
+                ps_wec_tscalls[i] = np.sum(ps_wec_scalls[ps_wec_id == i])
+
     fig, ax = plt.subplots(1)
 
     # labels = list(['SNOPT', 'SNOPT Relax', 'ALPSO', 'NSGA II'])
     # labels = list(['SNOPT', 'WEC-A', 'WEC-D', 'WEC-H', 'ALPSO'])
     if ps:
         labels = list(['SNOPT', 'SNOPT+WEC-D', 'ALPSO'])
+        if ps_wec:
+            labels = list(['SNOPT', 'SNOPT+WEC-D', 'ALPSO', 'ALPSO+WEC-D'])
     else:
         labels = list(['SNOPT', 'SNOPT+WEC-D'])
 
@@ -2501,6 +2528,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # data = list([snw_run_end_aep*aep_scale, swa_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, swh_run_end_aep*aep_scale,  ps_run_end_aep*aep_scale])
     if ps:
         data = list([snw_run_end_aep*aep_scale, swd_run_end_aep*aep_scale, ps_run_end_aep*aep_scale])
+        if ps_wec:
+            data = list([snw_run_end_aep * aep_scale, swd_run_end_aep * aep_scale, ps_run_end_aep * aep_scale, ps_wec_run_end_aep * aep_scale])
     else:
         data = list([snw_run_end_aep * aep_scale, swd_run_end_aep * aep_scale])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
@@ -2535,6 +2564,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # data = list([snw_run_improvement*100, swa_run_improvement*100, swd_run_improvement*100, swh_run_improvement*100, ps_run_improvement*100])
     if ps:
         data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+        if ps_wec:
+            data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss, ps_wec_run_wake_loss])
     else:
         data = list([snw_run_wake_loss, swd_run_wake_loss])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
@@ -2571,6 +2602,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     fig, ax = plt.subplots(1)
     if ps:
         data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss])
+        if ps_wec:
+            data = list([snw_run_wake_loss, swd_run_wake_loss, ps_run_wake_loss, ps_wec_run_wake_loss])
     else:
         data = list([snw_run_wake_loss, swd_run_wake_loss])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True, showfliers=False)
@@ -2606,6 +2639,9 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # data = list([(snw_fcalls+snw_scalls)/scale_by, (swa_tfcalls+swa_tscalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (swh_tfcalls+swh_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
     if ps:
         data = list([(snw_fcalls+snw_scalls)/scale_by, (swd_tfcalls+swd_tscalls)/scale_by, (ps_fcalls+ps_scalls)/scale_by])
+        if ps_wec:
+            data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by,
+                         (ps_fcalls + ps_scalls) / scale_by, (ps_wec_fcalls + ps_wec_scalls) / scale_by])
     else:
         data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by])
     bp = ax.boxplot(data, meanline=True, labels=labels, patch_artist=True)
@@ -2648,6 +2684,9 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # data = list([(snw_fcalls + snw_scalls)/ scale_by, (swa_tfcalls + swa_tscalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (swh_tfcalls + swh_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
     if ps:
         data = list([(snw_fcalls + snw_scalls)/ scale_by, (swd_tfcalls + swd_tscalls)/ scale_by, (ps_fcalls + ps_scalls)/ scale_by])
+        if ps_wec:
+            data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by,
+                         (ps_fcalls + ps_scalls) / scale_by, (ps_wec_fcalls + ps_wec_scalls) / scale_by])
     else:
         data = list([(snw_fcalls + snw_scalls) / scale_by, (swd_tfcalls + swd_tscalls) / scale_by])
     bp = ax.boxplot(data, meanline=True, labels=labels)
@@ -2715,6 +2754,8 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # data = list([snw_run_time/60., swa_time/60., swd_time/60., swh_time/60., ps_run_time/60.])
     if ps:
         data = list([snw_run_time/60., swd_time/60., ps_run_time/60.])
+        if ps_wec:
+            data = list([snw_run_time / 60., swd_time / 60., ps_run_time / 60., ps_wec_run_time / 60.])
     else:
         data = list([snw_run_time / 60., swd_time / 60.])
 
@@ -4621,8 +4662,8 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/38turbs_results_jensen"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=38, model="JENSEN", ps=False)
+    filename = "./images/16turbs_results_bpa_wec"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True)
 
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
