@@ -4056,7 +4056,7 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
     # xi = 7
     # plt.text(-1, data[location==0, 6]/1E6-.25, "High WEC", color=colors[2])
 
-    ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($Y/D_r$)")
+    ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($y/d$)")
     ax.set_ylabel('Annual Energy Production (GWh)')
     if wake_model is "BPA":
         ax.set_ylim([20, 35])
@@ -4441,7 +4441,7 @@ def plot_simple_design_space(filename, save_figs, show_figs):
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(True)
-    plt.xlabel("$y/D_r$")
+    plt.xlabel("$y/d$")
 
     plt.xticks([-4.0, 0.0, 4.0])
     plt.yticks([])
@@ -4662,8 +4662,8 @@ if __name__ == "__main__":
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/16turbs_results_bpa_wec"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True)
+    # filename = "./images/16turbs_results_bpa_wec"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True)
 
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
@@ -4736,8 +4736,8 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    # filename = "./images/smoothing_jensen_wec_d.pdf"
-    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
+    filename = "./images/smoothing_jensen_wec_d.pdf"
+    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
