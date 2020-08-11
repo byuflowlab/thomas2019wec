@@ -625,13 +625,13 @@ As a proof of concept in applying WEC to other wake models, we implemented WEC w
 %
 %The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
 
-\section{Test Cases and Optimization}
-To demonstrate the effectiveness of WEC on a range of problems, we present three wind farm optimization cases. For each case, we used the Vestas V-80 2MW wind turbine. The cases were chosen to represent a range in the size, complexity, and difficulty of the optimization problem.
+\section{Case Studies}
+To demonstrate the effectiveness of WEC on a range of problems, we present three wind farm optimization case studies. For each case, we used the Vestas V-80 2MW wind turbine. The cases were chosen to represent a range in size, complexity, and difficulty of the optimization problem.
 
 We created 199 pseudo-random starting wind farm layouts for each case. Each of the starting layouts had all the turbines inside the wind farm boundary constraint and did not have any turbines spaced less than one rotor diameter apart. These starting locations, along with the planned locations shown in \cref{fig:grid_case,fig:round_case,fig:amalia_base_layout}, served as the 200 starting locations for the optimizations.
 
 \subsection{Case 1: Small Grid}
-Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters (see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
+Case 1 was carefully selected to provide a meaningful problem that would be tractable for all the optimization methods. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with spacings of five rotor diameters between rows and columns(see \cref{fig:grid_case}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
 \begin{figure}[h!]
 \centering
 \begin{minipage}[t]{18pc}
@@ -661,7 +661,7 @@ For case 1, the optimization problem was formulated as shown in \cref{eqn:opt1}
 	\end{aligned}
 \end{equation}
 %
-Where $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, and $x_{max/min}$ and $y_{max/min}$ represent the boundaries of the wind farm. This case has a total of 32 variables and 120 constraints.
+Where $x_{max/min}$ and $y_{max/min}$ represent the boundaries of the wind farm. This case has a total of 32 variables and 120 constraints.
 
 \subsection{Case 2: Round Farm}
 
@@ -709,7 +709,7 @@ The optimization problem for case 2 was formulated as
 Case 2 has a total of 76 variables and 741 constraints.
 
 \subsection{Case 3: Princess Amalia Wind Farm}
-Case 3 was selected to provide a larger and somewhat more realistic problem. The Amalia wind farm has 60 wind turbines and a convex polygonal boundary. We used wind data binned into 72 wind directions with wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_72dir,fig:freqwindrose_72dir}
+Case 3 was selected to provide a larger and somewhat more realistic problem. The Amalia wind farm has 60 wind turbines. We used the convex hull of the existing turbine locations to create a convex polygonal boundary. We used wind data binned into 72 wind directions with wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_72dir,fig:freqwindrose_72dir}
 \begin{figure}[h!]
 	\centering
 	\begin{minipage}[t]{18pc}
