@@ -12,6 +12,7 @@ from math import radians
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from scipy.stats import ttest_ind
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 def heatmap(data, row_labels, col_labels, ax=None,
@@ -2353,7 +2354,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             data_ps = np.loadtxt(
                 "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
             tmax_aep = 1630166.61601323 * nturbs # kWh
-
+            ps_wec = False
         elif nturbs == 60:
                     # load data
             data_snopt_no_wec = np.loadtxt(
@@ -2365,6 +2366,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             data_ps = np.loadtxt(
                 "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
             tmax_aep = 6653047.52233728  * nturbs # kWh
+            ps_wec = False
         else:
             ValueError("please include results for %i turbines before rerunning the plotting script" % nturbs)
     elif model is "JENSEN":
@@ -2377,7 +2379,7 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             #     "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
 
             tmax_aep = 5904352.21200323 * nturbs  # kWh
-
+            ps_wec = False
         elif nturbs == 38:
             # 202005
             data_snopt_no_wec = np.loadtxt(
@@ -2387,6 +2389,49 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             # data_ps = np.loadtxt(
             #     "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
             tmax_aep = 5679986.82794711 * nturbs  # kWh
+            ps_wec = False
+    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+    # run time (s), obj func calls, sens func calls
+    snw_id = data_snopt_no_wec[:, 0]
+    snw_ef = np.ones_like(snw_id)
+    snw_ti_opt = data_snopt_no_wec[:, 2]
+    snw_orig_aep = data_snopt_no_wec[0, 4]
+    # swa_run_start_aep = data_snopt_relax[0, 7]
+    if model is "BPA":
+        snw_run_end_aep = data_snopt_no_wec[snw_ti_opt == 5, 6]
+    else:
+        snw_run_end_aep = data_snopt_no_wec[:, 6]
+    snw_run_time = data_snopt_no_wec[:, 7]
+    snw_fcalls = data_snopt_no_wec[:, 8]
+    snw_scalls = data_snopt_no_wec[:, 9]
+
+    snw_tfcalls = np.zeros_like(snw_run_end_aep)
+    snw_tscalls = np.zeros_like(snw_run_end_aep)
+    for i in np.arange(0, snw_tfcalls.size):
+        snw_tfcalls[i] = np.sum(snw_fcalls[snw_id == i])
+        snw_tscalls[i] = np.sum(snw_scalls[snw_id == i])
+
+    # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
+    snw_run_wake_loss = 100.0 * (1.0 - (snw_run_end_aep / tmax_aep))
+    snw_mean_wake_loss = np.average(snw_run_wake_loss)
+    snw_std_wake_loss = np.std(snw_run_wake_loss)
+    snw_meadian_wake_loss = np.median(snw_run_wake_loss)
+    snw_max_wake_loss = np.max(snw_run_wake_loss)
+    snw_min_wake_loss = np.min(snw_run_wake_loss)
+    snw_ctfcalls = snw_tfcalls + snw_tscalls
+    snw_meadian_ctfcalls = np.median(snw_ctfcalls)
+    snw_max_ctfcalls = np.max(snw_ctfcalls)
+    snw_min_ctfcalls = np.min(snw_ctfcalls)
+    print("")
+    print("SNOPT:")
+    print("Max Wake Loss (\%): ", snw_max_wake_loss)
+    print("Min Wake Loss (\%): ", snw_min_wake_loss)
+    print("Ave. Wake Loss (\%): ", snw_mean_wake_loss)
+    print("Med. Wake Loss (\%): ", snw_meadian_wake_loss)
+    print("Std Wake Loss (\%): ", snw_std_wake_loss)
+    print("Max fcalls (\%): ", snw_max_ctfcalls)
+    print("Min fcalls (\%): ", snw_min_ctfcalls)
+    print("Median fcalls (\%): ", snw_meadian_ctfcalls)
 
     # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
     # aep run opt (kW), run time (s), obj func calls, sens func calls
@@ -2430,6 +2475,27 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     swd_run_wake_loss = 100.0*(1.0 - (swd_run_end_aep / tmax_aep))
     swd_mean_run_wake_loss = np.average(swd_run_wake_loss)
     swd_std_wake_loss = np.std(swd_run_wake_loss)
+    swd_meadian_wake_loss = np.median(swd_run_wake_loss)
+    swd_max_wake_loss = np.max(swd_run_wake_loss)
+    swd_min_wake_loss = np.min(swd_run_wake_loss)
+    swd_t, swd_p = ttest_ind(snw_run_wake_loss, swd_run_wake_loss, equal_var=False)
+
+    swd_ctfcalls = swd_tfcalls + swd_tscalls
+    swd_meadian_ctfcalls = np.median(swd_ctfcalls)
+    swd_max_ctfcalls = np.max(swd_ctfcalls)
+    swd_min_ctfcalls = np.min(swd_ctfcalls)
+    print("")
+    print("SNOPT+WEC-D:")
+    print("Max Wake Loss (\%): ", swd_max_wake_loss)
+    print("Min Wake Loss (\%): ", swd_min_wake_loss)
+    print("Ave. Wake Loss (\%): ", swd_mean_run_wake_loss)
+    print("Med. Wake Loss (\%): ", swd_meadian_wake_loss)
+    print("Std Wake Loss (\%): ", swd_std_wake_loss)
+    print("Welch's t-test t: ", swd_t)
+    print("Welch's t-test p: ", swd_p)
+    print("Max fcalls (\%): ", swd_max_ctfcalls)
+    print("Min fcalls (\%): ", swd_min_ctfcalls)
+    print("Median fcalls (\%): ", swd_meadian_ctfcalls)
 
     # swh_id = data_snopt_wech[:, 0]
     # swh_ef = data_snopt_wech[:, 1]
@@ -2448,32 +2514,6 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
     # swh_mean_run_improvement = np.average(swh_run_improvement)
     # swh_std_improvement = np.std(swh_run_improvement)
 
-    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
-    # run time (s), obj func calls, sens func calls
-    snw_id = data_snopt_no_wec[:, 0]
-    snw_ef = np.ones_like(snw_id)
-    snw_ti_opt = data_snopt_no_wec[:, 2]
-    snw_orig_aep = data_snopt_no_wec[0, 4]
-    # swa_run_start_aep = data_snopt_relax[0, 7]
-    if model is "BPA":
-        snw_run_end_aep = data_snopt_no_wec[snw_ti_opt==5, 6]
-    else:
-        snw_run_end_aep = data_snopt_no_wec[:, 6]
-    snw_run_time = data_snopt_no_wec[:, 7]
-    snw_fcalls = data_snopt_no_wec[:, 8]
-    snw_scalls = data_snopt_no_wec[:, 9]
-
-    snw_tfcalls = np.zeros_like(snw_run_end_aep)
-    snw_tscalls = np.zeros_like(snw_run_end_aep)
-    for i in np.arange(0, snw_tfcalls.size):
-        snw_tfcalls[i] = np.sum(snw_fcalls[snw_id == i])
-        snw_tscalls[i] = np.sum(snw_scalls[snw_id == i])
-
-    # snw_run_improvement = snw_run_end_aep / snw_orig_aep - 1.
-    snw_run_wake_loss = 100.0 * (1.0 - (snw_run_end_aep / tmax_aep))
-    snw_mean_wake_loss = np.average(snw_run_wake_loss)
-    snw_std_wake_loss = np.std(snw_run_wake_loss)
-
     if ps:
         ps_id = data_ps[:, 0]
         ps_ef = np.ones_like(ps_id)
@@ -2488,6 +2528,25 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
         ps_run_wake_loss = 100.0 * (1.0 - (ps_run_end_aep / tmax_aep))
         ps_mean_wake_loss = np.average(ps_run_wake_loss)
         ps_std_wake_loss = np.std(ps_run_wake_loss)
+
+        ps_meadian_wake_loss = np.median(ps_run_wake_loss)
+        ps_max_wake_loss = np.max(ps_run_wake_loss)
+        ps_min_wake_loss = np.min(ps_run_wake_loss)
+
+        ps_ctfcalls = ps_fcalls + ps_scalls
+        ps_meadian_ctfcalls = np.median(ps_ctfcalls)
+        ps_max_ctfcalls = np.max(ps_ctfcalls)
+        ps_min_ctfcalls = np.min(ps_ctfcalls)
+        print("")
+        print("ALPSO:")
+        print("Max Wake Loss (\%): ", ps_max_wake_loss)
+        print("Min Wake Loss (\%): ", ps_min_wake_loss)
+        print("Ave. Wake Loss (\%): ", ps_mean_wake_loss)
+        print("Med. Wake Loss (\%): ", ps_meadian_wake_loss)
+        print("Std Wake Loss (\%): ", ps_std_wake_loss)
+        print("Max fcalls (\%): ", ps_max_ctfcalls)
+        print("Min fcalls (\%): ", ps_min_ctfcalls)
+        print("Median fcalls (\%): ", ps_meadian_ctfcalls)
 
         if ps_wec:
             ps_wec_id = data_ps_wec[:, 0]
@@ -2505,11 +2564,33 @@ def plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="
             ps_wec_mean_wake_loss = np.average(ps_wec_run_wake_loss)
             ps_wec_std_wake_loss = np.std(ps_wec_run_wake_loss)
 
+            ps_wec_meadian_wake_loss = np.median(ps_wec_run_wake_loss)
+            ps_wec_max_wake_loss = np.max(ps_wec_run_wake_loss)
+            ps_wec_min_wake_loss = np.min(ps_wec_run_wake_loss)
+
             ps_wec_tfcalls = np.zeros_like(ps_wec_run_end_aep)
             ps_wec_tscalls = np.zeros_like(ps_wec_run_end_aep)
             for i in np.arange(0, ps_wec_tfcalls.size):
                 ps_wec_tfcalls[i] = np.sum(ps_wec_fcalls[ps_wec_id == i])
                 ps_wec_tscalls[i] = np.sum(ps_wec_scalls[ps_wec_id == i])
+            ps_wec_t, ps_wec_p = ttest_ind(ps_run_wake_loss, ps_wec_run_wake_loss, equal_var=False)
+
+            ps_wec_ctfcalls = ps_wec_tfcalls+ps_wec_tscalls
+            ps_wec_meadian_ctfcalls = np.median(ps_wec_ctfcalls)
+            ps_wec_max_ctfcalls = np.max(ps_wec_ctfcalls)
+            ps_wec_min_ctfcalls = np.min(ps_wec_ctfcalls)
+            print("")
+            print("ALPSO+WEC-D:")
+            print("Max Wake Loss (\%): ", ps_wec_max_wake_loss)
+            print("Min Wake Loss (\%): ", ps_wec_min_wake_loss)
+            print("Ave. Wake Loss (\%): ", ps_wec_mean_wake_loss)
+            print("Med. Wake Loss (\%): ", ps_wec_meadian_wake_loss)
+            print("Std Wake Loss (\%): ", ps_wec_std_wake_loss)
+            print("Welch's t-test t: ", ps_wec_t)
+            print("Welch's t-test p: ", ps_wec_p)
+            print("Max fcalls (\%): ", ps_wec_max_ctfcalls)
+            print("Min fcalls (\%): ", ps_wec_min_ctfcalls)
+            print("Median fcalls (\%): ", ps_wec_meadian_ctfcalls)
 
     fig, ax = plt.subplots(1)
 
@@ -4626,7 +4707,7 @@ def plot_jensen_diagram(filename, save_figs, show_figs):
 if __name__ == "__main__":
 
     show_figs = True
-    save_figs = True
+    save_figs = False
 
     for_presentation = False
 
@@ -4656,8 +4737,8 @@ if __name__ == "__main__":
     # filename = "./images/38turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    # filename = "./images/60turbs_results_alpso"
-    # plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
+    filename = "./images/60turbs_results_alpso"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
@@ -4736,8 +4817,8 @@ if __name__ == "__main__":
     # filename = "./images/model_contours_vertical_after.pdf"
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
-    filename = "./images/smoothing_jensen_wec_d.pdf"
-    plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
+    # filename = "./images/smoothing_jensen_wec_d.pdf"
+    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
