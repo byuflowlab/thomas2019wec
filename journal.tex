@@ -227,7 +227,11 @@ AEP = (24)(365)\sum_{j=1}^{n_d} \bigg( p_j \sum_{i=1}^{n_t} P_i \bigg)
  In \cref{eq:aep}, $n_d$ is the number of wind directions, or states, $p_j$ is the probability of wind for a given state (direction and speed), and $n_t$ is the number of wind turbines.
 
 \section{Implementation Details and Optimization Algorithms}
-Wake model code was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, SNOPT and ALPSO. SNOPT is a gradient-based sparse non-linear optimization algorithm \cite{gill2005}. ALPSO is a particle swarm algorithm that uses an augmented Legrangian approach to handle constraints \cite{jansen2011_alpso}. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for the Bastankhah and Port\'e-Agel wake model using algorithmic differentiation provided by Tapenade \cite{tapenade2013}. Gradients for the Jensen cosine wake model were obtained through a central difference approach. 
+The code for each wake model was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, SNOPT and ALPSO. SNOPT is a gradient-based sparse non-linear optimization algorithm \cite{gill2005}. ALPSO is a particle swarm algorithm that uses an augmented Legrangian approach to handle constraints \cite{jansen2011_alpso}. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for the Bastankhah and Port\'e-Agel wake model using algorithmic differentiation provided by Tapenade \cite{tapenade2013}. Gradients for the Jensen cosine wake model were obtained through a central difference approach. 
+
+SNOPT was run with a convergence tolerance of 1E-4. The objective and constraints were scaled to be on the order of 1. ALPSO was run with a convergence criteria of 10\% diversity among the swarm population with cognitive parameters set to $c_1 = c_2 = 2.0$. with a swarm size of 25 for each optimization run.
+
+While it may be noted that each optimization run with ALPSO is similar to running 25 optimizations using a gradient-based algorithm in population size, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, while the individual runs of gradient-based techniques are self-contained, do not influence one another, and represent a single solution. We consider a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm.
 
 \section{Applying WEC to the  Wake Models}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Bastankhah and Port\'e-Agel wake model and the Jensen cosine wake model. To test the wake spreading approaches discussed in \cref{sec:wecmethods}, we implemented each of them in the Bastankhah and Port\'{e}-Agel wake model. Once we understood which approach is most effective, we implemented and tested only that approach in the Jensen cosine model.
@@ -387,7 +391,7 @@ When the maximum WEC factor value was varied, the number of steps was held at si
 \end{aligned}
 \end{equation}
 %
-In \cref{eq:obj_wec_methods}, $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, $(x_c,y_c)$ is the location of the center of the wind farm, and $r_b$ is the radius of the wind farm boundary. This case has a total of 76 variables and 741 constraints.
+In \cref{eq:obj_wec_methods}, $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, $(x_c,y_c)$ is the location of the center of the wind farm, and $r_b$ is the radius of the wind farm boundary. For the case here used to compare WEC methods, the $k*$ value was not adjusted to the local turbulence intensity during optimization, but was adjusted for calculating the results shown. This case has a total of 76 variables and 741 constraints.
 
 When the optimizations for all starting layouts and parameter combinations were complete, we compared the minimum, mean, and standard deviation of wake loss (energy lost due to wake effects) across all the optimizations. Wake loss percentage was calculated as shown in \cref{eq:wake_loss}.
 %
@@ -550,6 +554,25 @@ As a proof of concept in applying WEC to other wake models, we implemented WEC w
 	\end{minipage}
 \end{figure}
 
+%\subsection{Testing WEC-D with ALPSO}
+%
+%Beside knowing if WEC works with different wake models, it is also of interest to know if WEC can improve the results of gradient-free algorithm. To test this we ran the same case shown in \cref{fig:round_case,fig:nantucket12dirs} using ALPSO with and without WEC-D. The results of this test are shown in \cref{
+%
+%\begin{figure}[h!]  
+%	\centering
+%	\begin{minipage}[t]{18pc}    
+%		\centering
+%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_percent_wake_loss.pdf}
+%		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
+%		\label{fig:jensen-38-wake-loss}
+%	\end{minipage}\hspace{1pc}
+%	\begin{minipage}[t]{18pc}    
+%		\centering
+%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_fcalls.pdf}
+%		\caption{Function calls for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
+%		\label{fig:jensen-38-wake-fcalls}
+%	\end{minipage}
+%\end{figure}
 
 %\subsection{Applying WEC to the FLORIS Wake Model}
 %In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
@@ -783,7 +806,7 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 	Method  & & Median & Low & High & & Mean & SD & Low & High & $p$ \\
 	\cline{1-1}\cline{3-5}\cline{7-12}
 	SNOPT  & & 556.0 & 184.0 & 2,280.0 & & 11.88 & 1.42 & 8.32 & 15.56 &   \\
-	SNOPT+WEC-D & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & 1E-74\\
+	SNOPT+WEC-D & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & $<.001$\\
 	ALPSO & & 71,652.0 & 5,277.0 & 136,527.0 & & 13.49 & 1.50 & 10.77 & 16.68 & \\
 	\br
 \end{tabular}
@@ -827,7 +850,7 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
   Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
    \cline{1-1}\cline{3-5}\cline{7-12}
   SNOPT  & & 1,847.0 & 166.0 & 8,618.0 & & 23.72 & 1.00 & 22.78 & 36.64  &  \\
-  SNOPT+WEC-D & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & 7E-27\\
+  SNOPT+WEC-D & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & $< .001$ \\
   ALPSO & & 3,338.0 & 170.0 & 9,242.0 & & 26.08 & 0.95 & 22.89 & 31.89 & \\
   \br
   \end{tabular}
@@ -874,35 +897,27 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
 		\cline{1-1}\cline{3-5}\cline{7-12}
 		SNOPT  & & 4,415.0 & 254.0 & 20,318.0 & & 10.07 & 1.55 & 9.41 & 21.90 &  \\
-		SNOPT+WEC-D & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & 3E-11 \\
+		SNOPT+WEC-D & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & $<.001$ \\
 	    ALPSO & & 2042.0 & 170.0 & 6,218.0 & & 10.33 & 0.39 & 9.52 & 12.62 &\\
 		\br
 	\end{tabular}
 \end{table}
 
-\section{Discussion}
-The results from case 0 appear promising (\cref{fig:SmallScaleOptimizations}). While optimizations without WEC are unable to escape the local optimum between wakes, optimizations with WEC are able to escape the local optimum and achieve better optima. These  results suggest that large-scale optimization test results should display similar improvements in optimization performance.
-
 In the more general WFLO problem, we are looking for high AEP values, a tight distribution, and relatively few function calls. The benefit of high AEP means that the resulting wind farm will be more efficient, likely leading to a reduced cost of energy. A tight distribution means that the method is consistent, that the optimized solution is independent of the starting layout. The tighter the distribution the fewer optimizations need to be run before we are confident that we have one of the best wind farm designs we can get. A low number of function calls means that wind farm design can be done more cheaply and that more variables could potentially be tested, which could again lead to a lower cost of energy. Each of the methods tested demonstrated at least one of these characteristics.
 
-The relatively high AEP results from NSGA-II on the smaller case, compared to the relatively low AEP results of NSGA-II on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}. As shown by the high number of function calls for NSGA-II, gradient-free algorithms also tend to take a relatively long time to run. These weakness are the main drivers for increasing interest in gradient-based algorithms.
+The relatively low wake loss results from ALPSO on the smaller case, compared to the relatively high wake loss results of ALPSO on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}.
 
-The relatively wide spread and moderate results from SNOPT on both cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. That WEC AEP results were relatively much higher and less spread for both test cases, as compared with SNOPT, seems to indicate that the process is at least partially remedying the problem of local optima.
+The relatively wide spread and moderate results from SNOPT on both cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. That WEC-D wake loss results were lower and less spread for all test cases, as compared with SNOPT, seems to indicate that the process is at least partially remedying the problem of local optima.
 
-The high values of AEP and lower standard deviation of AEP compared to SNOPT with WEC, indicates that SNOPT with WEC is more accurate and reliable. So much so that, ignoring outliers, the probability distributions for SNOPT with and without WEC from case 2 just overlap only slightly (see \cref{fig:aep2}). This reliability does come at the cost of more function calls than SNOPT without WEC. The increase in function calls when using WEC is expected because the relaxation optimization method ran nine optimizations to convergence (one for each value of $\xi$) for every one optimization by SNOPT alone. The number of function calls needed for WEC was still only a fraction of what was need for NSGA-II, so the added cost in function calls seems reasonable from that perspective. However, because WEC has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
+The low values of wake loss and lower standard deviation of wake loss for SNOPT with WEC-D, indicates that SNOPT with WEC-D is more accurate and reliable than SNOPT alone. So much so that, ignoring outliers, the probability distributions for SNOPT with and without WEC from case 3 overlap only slightly (see \cref{fig:case-3-wake-loss-no-outliers}). This improvement in performance does come at the cost of more function calls than SNOPT without WEC-D. The increase in function calls when using WEC is expected because the WEC-D ran seven optimizations to convergence (one for each value of $\xi$, and a final optimization to account for local turbulence intensity) for every one optimization by SNOPT alone. Because WEC-D has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
 
 \section{Conclusion}
-The WEC proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested WEC on three WFLO problems, one with 3 turbines (one movable turbine), one with 16 turbines, and one with 38 turbines. The first case demonstrated that the WEC concept works. Results for the second and third cases using WEC show a $4\%$ mean optimized AEP improvement compared to gradient-based optimization without WEC for both test cases. A gradient-free algorithm had a mean optimized AEP that was $1\%$ higher than WEC for the 16-turbine case, but WEC resulted in a $10\%$ higher mean optimized AEP compared to a gradient-free optimization method for the 38-turbine problem.
+The WEC method proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested three versions of WEC on a simple wind farm and tested the final version of WEC with two wake models and three WFLO problems, one with 16 turbines, one with 38 turbines, and one with 60 turbines. Results for the case studies using WEC show a statistically significant reduction  (p<.001) in optimized wake loss compared to gradient-based optimization without WEC and gradient-free optimization for all test cases.
 
-Applying WEC to other turbine wake models (e.g., Jensen Cosine and FLORIS) produced mixed results. Small-scale optimization tests resulted in promising results that seemed to predict desirable performance in large-scale optimizations. However, the large-scale optimizations did not return similarly promising results, and seemed to indicate even undesirable results. Further work will be necessary to determine the root cause of these results.
-
-%Future work should investigate potential improvements and best practices for WEC, apply WEC to other wake models, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
-
-Future work should investigate potential improvements and best practices for WEC, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
+Future work should investigate potential improvements and best practices for WEC to reduce the number of function calls required, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
 
 \ack 
 This work was supported by the National Science Foundation under Grant No. 1539384. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
-
 
 \section*{References}
 \bibliographystyle{iopart-num}

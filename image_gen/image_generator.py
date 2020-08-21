@@ -4737,7 +4737,7 @@ if __name__ == "__main__":
     # filename = "./images/38turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = "./images/60turbs_results_alpso"
+    # filename = "./images/60turbs_results_alpso"
     plot_optimization_results(filename, save_figs, show_figs, nturbs=60)
 
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=9)
