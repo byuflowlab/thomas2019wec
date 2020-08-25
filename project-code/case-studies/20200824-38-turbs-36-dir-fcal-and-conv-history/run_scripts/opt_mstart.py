@@ -449,9 +449,9 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
             'Summary file'] = output_directory + 'SNOPT_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)  # ,
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)  # ,
         # active_tol=(2. * rotor_diameter) ** 2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)  # ,
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)  # ,
         # active_tol=2. * rotor_diameter)
 
         prob.driver.options['dynamic_derivs_sparsity'] = True
@@ -478,8 +478,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
         prob.driver.opt_settings['file_number'] = run_number
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)
 
 
     elif opt_algorithm == 'ps':
@@ -513,8 +513,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         #
         # prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)
 
         # prob.driver.add_objective('obj', scaler=1E0)
     prob.model.add_objective('obj', scaler=1E-4)
