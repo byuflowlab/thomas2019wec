@@ -7,12 +7,12 @@
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
-#SBATCH --array=193,8    # job array of size 200
+#SBATCH --array=0-199     # job array of size 200
 
 echo ${SLURM_ARRAY_TASK_ID}
 
 model_number=1
-op_alg_number=0
+op_alg_number=1
 wec_method_number=0
 maxwec=1
 nsteps=1
