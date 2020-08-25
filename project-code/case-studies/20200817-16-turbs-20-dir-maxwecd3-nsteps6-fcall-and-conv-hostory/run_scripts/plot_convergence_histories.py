@@ -17,6 +17,7 @@ input_file_wec = input_directory_wec + "convergence_histories.txt"
 input_file_snopt = input_directory_snopt + "convergence_histories.txt"
 input_file_ps = input_directory_ps + "convergence_histories.txt"
 
+fig1, ax1 = plt.subplots(1)
 # find how many entries are in the longest WEC convergence history
 f = open(input_file_wec)
 maxlength = 0
@@ -50,6 +51,7 @@ for row in f.readlines():
     else:
         s = pd.Series(data, name=rownum)
         dfcalc_wec.insert(run, run, s)
+        ax1.plot(s)
         run += 1
     rownum += 1
 # fill in missing values with last value
@@ -70,6 +72,7 @@ for row in f.readlines():
 f.close()
 
 # extract SNOPT convergence histories to a data frame
+fig2, ax2 = plt.subplots(1)
 dfcalc_snopt = pd.DataFrame({'Function Calls': np.arange(maxlength)})
 dfopt_snopt = pd.DataFrame({'Function Calls': np.arange(maxlength)})
 rownum = -1
@@ -90,8 +93,10 @@ for row in f.readlines():
         s = pd.Series(data, name=rownum)
         dfcalc_snopt.insert(run, run, s)
         run += 1
+        ax2.plot(s)
     rownum += 1
 
+plt.show()
 # fill in missing values with last value
 dfcalc_snopt.fillna(method='ffill', inplace=True)
 dfopt_snopt.fillna(method='ffill', inplace=True)
@@ -148,6 +153,7 @@ print(dfcalc_snopt)
 print(dfcalc_wec)
 print(dfcalc_ps)
 # quit()
+
 
 # rearrange data frame
 dfcalc_wec = dfcalc_wec.melt(id_vars=["Function Calls"], value_vars=np.arange(runs), var_name="run", value_name="AEP")
