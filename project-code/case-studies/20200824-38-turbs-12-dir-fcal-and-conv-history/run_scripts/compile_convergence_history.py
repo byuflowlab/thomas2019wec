@@ -1,8 +1,8 @@
 import openmdao.api as om
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
+#import seaborn as sns
 import re
 
 def get_alpso_history(filepath):
@@ -42,13 +42,14 @@ output_file_snopt = output_directory_snopt + "convergence_histories.txt"
 output_file_ps = output_directory_ps + "convergence_histories.txt"
 
 # indicate how many optimization runs are to be compiled
-runs = 10
+runs = 200
 
 # compile SNOPT+WEC convergence history
 for run_number in np.arange(0, runs):
-
-    data_in = np.loadtxt(output_directory_wec+"convergence_history_run%i.txt" %(run_number))
-
+    try:
+        data_in = np.loadtxt(output_directory_wec+"convergence_history_run%i.txt" %(run_number))
+    except:
+        print(output_directory_wec+"convergence_history_run%i.txt" %(run_number), " not found")
     nits = data_in.shape[0]
     AEPopt = data_in[:, 0]
     AEPcalc = data_in[:, 1]
@@ -63,9 +64,10 @@ for run_number in np.arange(0, runs):
 
 # compile SNOPT convergence history
 for run_number in np.arange(0, runs):
-
-    data_in = np.loadtxt(output_directory_snopt+"convergence_history_run%i.txt" %(run_number))
-
+    try:
+        data_in = np.loadtxt(output_directory_snopt+"convergence_history_run%i.txt" %(run_number))
+    except:
+        print(output_directory_snopt+"convergence_history_run%i.txt" %(run_number), " not found")
     nits = data_in.shape[0]
     AEPopt = data_in[:, 0]
     AEPcalc = data_in[:, 1]
@@ -80,10 +82,16 @@ for run_number in np.arange(0, runs):
 
 # compile ALPSO convergence history
 for run_number in np.arange(0, runs):
+    try:
+        fcalls, obj = get_alpso_history(output_directory_ps + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_print.out" %(run_number))
+    except:
+        print(output_directory_ps + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_print.out" %(run_number), " not found")
 
-    fcalls, obj = get_alpso_history(output_directory_ps + "ALPSO_summary_multistart_16turbs_directionalWindRose_20dirs_BPAModel_RunID%i_print.out" %(run_number))
-
-    nits = len(obj)
+    try:
+        nits = len(obj)
+    except: 
+        print("no data found for run %i" %(run_number))
+        continue
     AEPcalc = obj*1E7
 
     f = open(output_file_ps, "a")
@@ -98,7 +106,7 @@ for run_number in np.arange(0, runs):
 
 
 # if __name__ == "__main__":
-#     filepath = "../output_files/ps/ALPSO_summary_multistart_16turbs_directionalWindRose_20dirs_BPAModel_RunID1_print.out"
+#     filepath = "../output_files/ps/ALPSO_summary_multistart_38turbs_directionalWindRose_20dirs_BPAModel_RunID1_print.out"
 #     fcalls, obj = get_alpso_history(filepath)
 #     print(fcalls, obj)
 #     plt.plot(fcalls, obj)
