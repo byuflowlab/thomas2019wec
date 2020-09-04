@@ -945,7 +945,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     #     case = pr.get_case(prob_cases[i])
     #     print(case)
     # plt.show()
-    os.remove(output_directory + 'recorded_data_driver_%s.sql' %run_number)
+    # os.remove(output_directory + 'recorded_data_driver_%s.sql' %run_number)
 
     # cr = om.CaseReader(output_directory + 'recorded_data_model.sql')
     #

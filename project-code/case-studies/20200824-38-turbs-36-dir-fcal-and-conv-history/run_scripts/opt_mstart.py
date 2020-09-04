@@ -7,7 +7,7 @@ from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
 from plantenergy import config
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
 from plantenergy.GeneralWindFarmComponents import calculate_distance
 
@@ -19,8 +19,6 @@ import matplotlib.pyplot as plt
 
 # import cProfile
 import sys
-import os
-
 import mpi4py.MPI
 
 

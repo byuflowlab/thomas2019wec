@@ -102,6 +102,28 @@ for run_number in np.arange(0, runs):
     np.savetxt(f, (fcalls, -AEPcalc), header=header)
     f.close()
 
+# compile ALPSO+WEC convergence history
+for run_number in np.arange(0, runs):
+    try:
+        fcalls, obj = get_alpso_history(output_directory_ps + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_print.out" %(run_number))
+    except:
+        print(output_directory_ps + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_print.out" %(run_number), " not found")
+
+    try:
+        nits = len(obj)
+    except:
+        print("no data found for run %i" %(run_number))
+        continue
+    AEPcalc = obj*1E7
+
+    f = open(output_file_ps, "a")
+    if run_number == 0:
+        header = "convergence history alternating row function calls, AEP (W)"
+    else:
+        header = ""
+    np.savetxt(f, (fcalls, -AEPcalc), header=header)
+    f.close()
+
 
 
 

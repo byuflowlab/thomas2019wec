@@ -92,7 +92,7 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
     if show_start:
         plt.show()
 
-def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps):
+def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps, get_aept=False):
     OPENMDAO_REQUIRE_MPI = False
     run_number = layout_number
     model = wake_model
@@ -302,8 +302,12 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     # layout_data = np.loadtxt(layout_directory + "layouts/grid_16turbs/nTurbs16_spacing5_layout_%i.txt" % layout_number)
     # layout_data = np.loadtxt(layout_directory+"layouts/nTurbs9_spacing5_layout_%i.txt" % layout_number)
 
-    turbineX = layout_data[:, 0] * rotor_diameter + rotor_diameter / 2.
-    turbineY = layout_data[:, 1] * rotor_diameter + rotor_diameter / 2.
+    if get_aept:
+        turbineX = np.array([0.0, 1E10])
+        turbineY = np.array([0.0, 1E10])
+    else:
+        turbineX = layout_data[:, 0] * rotor_diameter + rotor_diameter / 2.
+        turbineY = layout_data[:, 1] * rotor_diameter + rotor_diameter / 2.
 
     turbineX_init = np.copy(turbineX)
     turbineY_init = np.copy(turbineY)
@@ -449,7 +453,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
             'Summary file'] = output_directory + 'SNOPT_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
             nTurbs, wind_rose_file, size, MODELS[model], run_number)
 
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)  # ,
+        if not get_aept:
+            prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-2)  # ,
         # active_tol=(2. * rotor_diameter) ** 2)
         prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)  # ,
         # active_tol=2. * rotor_diameter)
@@ -633,6 +638,10 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     prob.run_model(case_prefix='ModelRun%i' %modelruns)
     AEP_init_calc = np.copy(prob['AEP'])
     print(AEP_init_calc * 1E-6)
+
+    if get_aept:
+        print(0.5*AEP_init_calc)
+        quit()
 
     if MODELS[model] == 'BPA':
         prob['model_params:ti_calculation_method'] = np.copy(ti_opt_method)
@@ -976,21 +985,21 @@ if __name__ == "__main__":
     #     run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
 
     # specify which starting layout should be used
-    layout_number = int(sys.argv[1])
-    # layout_number = 0
-    wec_method_number = int(sys.argv[2])
-    # wec_method_number = 1
-    model = int(sys.argv[3])
-    # model = 1
-    opt_alg_number = int(sys.argv[4])
-    # opt_alg_number = 0
-    max_wec = int(sys.argv[5])
-    # max_wec = 3
-    nsteps = int(sys.argv[6])
-    # nsteps = 6
+    # layout_number = int(sys.argv[1])
+    layout_number = 0
+    # wec_method_number = int(sys.argv[2])
+    wec_method_number = 1
+    # model = int(sys.argv[3])
+    model = 1
+    # opt_alg_number = int(sys.argv[4])
+    opt_alg_number = 0
+    # max_wec = int(sys.argv[5])
+    max_wec = 3
+    # nsteps = int(sys.argv[6])
+    nsteps = 6
 
     # for layout_number in np.arange(0, 10):
     #     print("#######################################")
     #     print("\n Starting with Layout %i \n" %layout_number)
     #     print("#######################################")
-    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps)
+    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps, get_aept=True)

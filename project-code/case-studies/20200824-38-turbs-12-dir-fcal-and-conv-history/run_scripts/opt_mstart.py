@@ -687,8 +687,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                                                expansion_factor, ti_opt_method)
             elif opt_algorithm == 'ps':
                 prob.driver.opt_settings[
-                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
-                    nTurbs, wind_rose_file, size, MODELS[model], run_number)
+                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.out' % (
+                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
                 prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
 
                     nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
