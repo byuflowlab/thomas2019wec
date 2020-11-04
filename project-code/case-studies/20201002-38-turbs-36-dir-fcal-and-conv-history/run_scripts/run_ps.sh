@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --time=48:00:00   # walltime
+#SBATCH --time=72:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores per sub-job(i.e. tasks)
-#SBATCH --mem-per-cpu=3G  # memory per CPU core
+#SBATCH --mem-per-cpu=4G  # memory per CPU core
 #SBATCH -J '38 turbs 36 dir. alg: ps. wec method: none. # job name'
 #SBATCH --mail-user=jaredthomas68@gmail.com   # email address
 #SBATCH --mail-type=BEGIN
