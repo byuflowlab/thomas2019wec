@@ -7,7 +7,7 @@ from plantenergy.OptimizationGroups import OptAEP
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
 from plantenergy import config
-# from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
+from plantenergy.jensen import jensen_wrapper, add_jensen_params_IndepVarComps
 from plantenergy.utilities import sunflower_points
 from plantenergy.GeneralWindFarmComponents import calculate_distance
 
@@ -390,7 +390,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                           'interp_type': 1,
                           'use_rotor_components': False,
                           'differentiable': differentiable,
-                          'verbose': False}
+                          'verbose': False,
+                          'variant': "CosineFortran"}
 
     if MODELS[model] == 'BPA':
         # initialize problem
@@ -412,14 +413,15 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                        params_IdepVar_func=add_floris_params_IndepVarComps,
                                        params_IdepVar_args={},
                                        record_function_calls=True))
-    # elif MODELS[model] == 'JENSEN':
-    #     initialize problem
-    # prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-    #                                       minSpacing=minSpacing, differentiable=False, use_rotor_components=False,
-    #                                       wake_model=jensen_wrapper,
-    #                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
-    #                                       params_IdepVar_args={},
-    #                                               record_function_calls=True))
+    elif MODELS[model] == 'JENSEN':
+        # initialize problem
+        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+                                       minSpacing=minSpacing, differentiable=differentiable, use_rotor_components=False,
+                                       wake_model=jensen_wrapper, wake_model_options=wake_model_options,
+                                       params_IdepVar_func=add_jensen_params_IndepVarComps,
+                                       cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
+                                       params_IdepVar_args={}, runparallel=False,
+                                       record_function_calls=True))    
     else:
         ValueError('The %s model is not currently available. Please select BPA or FLORIS' % (MODELS[model]))
     # prob.model.deriv_options['type'] = 'fd'
@@ -439,7 +441,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     if opt_algorithm == 'snopt':
         # set up optimizer
         prob.driver.options['optimizer'] = 'SNOPT'
-        # prob.driver.options['gradient method'] = 'snopt_fd'
+        prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
         prob.driver.opt_settings['Verify level'] = -1
@@ -640,6 +642,9 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
+    if MODELS[model] is 'JENSEN':
+        prob['model_params:alpha'] = 0.1
+        prob['model_params:wec_factor'] = 1.0
 
     modelruns = 0
     prob.run_model(case_prefix='ModelRun%i' %modelruns)
