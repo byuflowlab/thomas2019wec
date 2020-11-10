@@ -49,7 +49,7 @@ def plot_round_farm(turbineX, turbineY, rotor_diameter, boundary_center, boundar
                  (boundary_center_y + boundary_radius) / rotor_diameter + 1.])
 
     if save_start:
-        if save_file is None:
+        if save_file == None:
             plt.savefig('round_farm_%iTurbines_%0.2fDSpacing.pdf' % (turbineX.size, min_spacing))
         else:
             plt.savefig(save_file)
@@ -85,7 +85,7 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
     ax.set_ylabel('Turbine Y Position ($Y/D_r$)')
 
     if save_start:
-        if save_file is None:
+        if save_file == None:
             plt.savefig('round_farm_%iTurbines_%0.2fDSpacing.pdf' % (turbineX.size, min_spacing))
         else:
             plt.savefig(save_file)
@@ -642,7 +642,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob['model_params:WECH'] = WECH
         if nRotorPoints > 1:
             prob['model_params:RotorPointsY'], prob['model_params:RotorPointsZ'] = sunflower_points(nRotorPoints)
-    if MODELS[model] is 'JENSEN':
+    if MODELS[model] == 'JENSEN':
         prob['model_params:alpha'] = 0.1
         prob['model_params:wec_factor'] = 1.0
 
@@ -1007,7 +1007,7 @@ if __name__ == "__main__":
     wec_method_number = int(sys.argv[2])
     # wec_method_number = 0
     model = int(sys.argv[3])
-    # model = 1
+    # model = 2
     opt_alg_number = int(sys.argv[4])
     # opt_alg_number = 0
     max_wec = int(sys.argv[5])
