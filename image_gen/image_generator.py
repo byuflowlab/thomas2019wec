@@ -4101,7 +4101,7 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, t
         plt.show()
 
 def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="BPA"):
-    from mpltools import color
+    # from mpltools import color
     # load data
     if wake_model == "BPA":
         data = np.loadtxt("./image_data/smoothing_bpa_WEC-%s.txt" %wec_method)
@@ -4955,7 +4955,7 @@ if __name__ == "__main__":
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
 
     # filename = "./images/16turbs_results_alpso"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
 
     # filename = "./images/38turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=38)
@@ -4968,6 +4968,10 @@ if __name__ == "__main__":
 
     # filename = "./images/16turbs_results_bpa_wec"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True)
+
+    filename = "./38turbs_results_"
+    plot_optimization_results(filename, save_figs, show_figs, nturbs=38, model="JENSEN", ps=False, ps_wec=False)
+
 
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
@@ -5055,8 +5059,8 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    # nturbs = 60
-    # ndirs = 72
+    # nturbs = 16
+    # ndirs = 20
     # model = "BPA"
     # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
     # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs)
