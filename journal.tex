@@ -229,9 +229,42 @@ AEP = (24)(365)\sum_{j=1}^{n_d} \bigg( p_j \sum_{i=1}^{n_t} P_i \bigg)
 \section{Implementation Details and Optimization Algorithms}
 The code for each wake model was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, SNOPT and ALPSO. SNOPT is a gradient-based sparse non-linear optimization algorithm \cite{gill2005}. ALPSO is a particle swarm algorithm that uses an augmented Legrangian approach to handle constraints \cite{jansen2011_alpso}. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for the Bastankhah and Port\'e-Agel wake model using algorithmic differentiation provided by Tapenade \cite{tapenade2013}. Gradients for the Jensen cosine wake model were obtained through a central difference approach. 
 
-SNOPT was run with a convergence tolerance of 1E-4. The objective and constraints were scaled to be on the order of 1. ALPSO was run with a convergence criteria of 10\% diversity among the swarm population with cognitive parameters set to $c_1 = c_2 = 2.0$. with a swarm size of 25 for each optimization run.
+SNOPT was run with a convergence tolerance of 1E-4. The objective and constraints were scaled to be on the order of 1. ALPSO was run using the default parameters provided in pyOptSparse \cite{wu2020} with a few exceptions. First, the craziness velocity was set to be $1E-2$ as this value resulted in increased performance compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results for the cases tested. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about 20000 as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts. The number of outer iterations was determined based on the number inner iterations and desired function call cap for each case. The ALPSO convergence history for each case study with varied inner iteration counts is shown in \cref{fig:alpso-ii-16-20,fig:alpso-ii-38-12}. The objective and design variables were all scaled to be between -1 and 1.  All optimization runs using ALPSO had a population size of 30.
 
-While it may be noted that each optimization run with ALPSO is similar to running 25 optimizations using a gradient-based algorithm in population size, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, while the individual runs of gradient-based techniques are self-contained, do not influence one another, and represent a single solution. We consider a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm.
+\begin{figure}[htp]
+	\centering
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{alpso_test_16turbs_20dirs.pdf}
+		\caption{Comparing ALPSO convergence history for 16 turbines, 20 directions, and varying numbers of inner iterations.}
+		\label{fig:alpso-ii-16-20}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{alpso_test_38turbs_12dirs.pdf}
+		\caption{Comparing ALPSO convergence history for 38 turbines, 12 directions, and varying numbers of inner iterations.}
+		\label{fig:alpso-ii-38-12}
+	\end{minipage} 
+\end{figure}
+\begin{figure}[htp]
+	\centering
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{alpso_test_38turbs_36dirs.pdf}
+		\caption{Comparing ALPSO convergence history for 38 turbines, 36 directions, and varying numbers of inner iterations.}
+		\label{fig:alpso-ii-38-36}
+	\end{minipage}\hspace{1pc}%
+	\begin{minipage}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{alpso_test_60turbs_72dirs.pdf}
+		\caption{Comparing ALPSO convergence history for 60 turbines, 72 directions, and varying numbers of inner iterations.}
+		\label{fig:alpso-ii-60-72}
+	\end{minipage} 
+\end{figure}
+
+While it may be noted that each optimization run with ALPSO is similar to running 30 optimizations using a gradient-based algorithm in population size, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, while the individual runs of gradient-based techniques are self-contained, do not influence one another, and represent a single solution. We consider a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm.
+
+
 
 \section{Applying WEC to the  Wake Models}
 In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the Bastankhah and Port\'e-Agel wake model and the Jensen cosine wake model. To test the wake spreading approaches discussed in \cref{sec:wecmethods}, we implemented each of them in the Bastankhah and Port\'{e}-Agel wake model. Once we understood which approach is most effective, we implemented and tested only that approach in the Jensen cosine model.
@@ -281,7 +314,7 @@ Now that we have direct control of the wake spreading angle, for angles greater 
 \label{eq:bpa_angle}
 \end{equation}
 %
-A simple investigation of the design space yields the cross-section shown in \cref{fig:smoothing_bpa_wec_a}. In \cref{fig:smoothing_bpa_wec_a} the impact of $\theta_\xi$ is much more pronounced for the turbine that is further upstream due to the increased wake growth rate. 
+For WEC-A, The impact of $\theta_\xi$ is much more pronounced for turbines that are further upstream due to the increased wake growth rate. 
 
 \subsubsection{Bastankhah and Port\'e-Agel WEC Step (2) - WEC-D}
 In the diameter spreading method (WEC-D), independent control of the wake diameter is obtained by applying a factor, $\xi$, to $\sigma_y$ and $\sigma_z$ inside the exponential terms of \cref{eq:bpa}, as shown in \cref{eq:bpa_relax}.
@@ -322,7 +355,7 @@ Where $\sigma_{yo}$ is the original wake spread at $x_0$, the onset of the far w
 \label{eq:wechapplied}
 \end{equation}
 
-Note that the $\sigma_{y,\xi}$ term is only applied to the wake width terms and the original model values are used in calculating the magnitude of the center-line wake deficit. As in WEC-A and WEC-D, increasing the value of the WEC factor, $\xi$, allows us to widen the wake without changing the magnitude of the velocity deficit in the center of the wake. As the wakes widen, they mix and smooth out the local optima, as shown in \cref{fig:smoothing_bpa_wec_h}. 
+Note that the $\sigma_{y,\xi}$ term is only applied to the wake width terms and the original model values are used in calculating the magnitude of the center-line wake deficit. As in WEC-A and WEC-D, increasing the value of the WEC factor, $\xi$, allows us to widen the wake without changing the magnitude of the velocity deficit in the center of the wake. As the wakes widen, they mix and smooth out the local optima. 
 
 
 \begin{figure}[ht]
@@ -330,30 +363,30 @@ Note that the $\sigma_{y,\xi}$ term is only applied to the wake width terms and 
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim={-2.0cm -0.0cm -2.0cm 3.5cm}, clip]{final_images/layouts/3turb-design-space}
-		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the WEC factors, $\theta_\xi$ and $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_bpa_wec_a,fig:smoothing_bpa_wec_d,fig:smoothing_bpa_wec_h}). Wind is from the top.}
+		\caption{Simple wind farm, seen from above, used to demonstrate the effects of the WEC factors, $\theta_\xi$ and $\xi$, on the wind farm layout design space (see \cref{fig:smoothing_bpa_wec_d}). Wind is from the top.}
 		\label{fig:smoothing_locations_bpa}
 	\end{minipage}\hspace{1pc}
 	%
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{smoothing_bpa_wec_a}
-		\caption{The impact of changing the wake spread angle, $\theta_\xi$, for WEC-A on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
-		\label{fig:smoothing_bpa_wec_a}
-	\end{minipage} 
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{smoothing_bpa_wec_a}
+%		\caption{The impact of changing the wake spread angle, $\theta_\xi$, for WEC-A on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
+%		\label{fig:smoothing_bpa_wec_a}
+%	\end{minipage} 
 	%
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{smoothing_bpa_wec_d}
 		\caption{The impact of the relaxation factor, $\xi$, for WEC-D on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
 		\label{fig:smoothing_bpa_wec_d}
-	\end{minipage} \hspace{1pc}
+	\end{minipage} %\hspace{1pc}
 	%
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{smoothing_bpa_wec_h}
-		\caption{The impact of changing the wake spread angle, $\xi$, for WEC-H on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
-		\label{fig:smoothing_bpa_wec_h}
-	\end{minipage}
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{smoothing_bpa_wec_h}
+%		\caption{The impact of changing the wake spread angle, $\xi$, for WEC-H on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
+%		\label{fig:smoothing_bpa_wec_h}
+%	\end{minipage}
 \end{figure}
 
 \subsubsection{Bastankhah and Port\'e-Agel WEC Step (3)}
@@ -407,26 +440,26 @@ When the optimizations for all starting layouts and parameter combinations were 
  %
  In \cref{eq:aept}, $P$ is the power of a single un-waked wind turbine calculated using \cref{eq:power}. 
  
- The minimum wake loss results are shown in \cref{fig:aepmin-wm,fig:aepmin-ws}.
+% The minimum wake loss results are shown in \cref{fig:aepmin-wm,fig:aepmin-ws}.
+%%
+%\begin{figure}[ht]
+%	\centering
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_min}
+%		\caption{Minimum wake loss results for varying the maximum WEC expansion parameter while hold the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
+%		\label{fig:aepmin-wm}
+%	\end{minipage}\hspace{1pc}
+%	% Figure displaying results from aep vs crosswind position tests for Jensen
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{nsteps_const_maxwec_min}
+%		\caption{Minimum wake loss results for varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
+%		\label{fig:aepmin-ws}
+%	\end{minipage}
+%\end{figure}
 %
-\begin{figure}[ht]
-	\centering
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_min}
-		\caption{Minimum wake loss results for varying the maximum WEC expansion parameter while hold the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepmin-wm}
-	\end{minipage}\hspace{1pc}
-	% Figure displaying results from aep vs crosswind position tests for Jensen
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{nsteps_const_maxwec_min}
-		\caption{Minimum wake loss results for varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepmin-ws}
-	\end{minipage}
-\end{figure}
-%
-From \cref{fig:aepmin-wm}, we can see that the minimum wake loss is achieved when the maximum WEC angle is $9^\circ$ for WEC-A and when the maximum WEC value is 3 for WEC-D and WEC-H. It also appears that while WEC generally out performs SNOPT alone, lower WEC values tend to result in less wake loss. Looking at \cref{fig:aepmin-ws}, we can see that WEC step numbers greater than or equal to 3 perform equally well for WEC-D and WEC-H, but there does not appear to be a clear relationship between minimum wake loss and number of steps for WEC-A.
+We found that the minimum wake loss is achieved when the maximum WEC angle is $9^\circ$ for WEC-A and when the maximum WEC value is 3 for WEC-D and WEC-H. While WEC generally out performs SNOPT alone, lower WEC values tend to result in less wake loss. There does not appear to be a clear relationship between minimum wake loss and number of steps for WEC-A. WEC step numbers greater than or equal to 3 achieve approximately equal minimum wake loss for WEC-D and WEC-H, but on average WEC-D performs much better.
 
 The mean wake loss results are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC-D results in less wake loss with a WEC value of 3 and using 5 or more steps, while WEC-A has its lowest average wake loss for a maximum WEC angle of $6^\circ$, and WEC-H minimizes average wake loss most with lower WEC values. On average, wake loss minimized using WEC-A or WEC-H does not appear to be impacted by changing the number of steps.
 
@@ -435,7 +468,7 @@ The mean wake loss results are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}.
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_mean}
-		\caption{Mean wake loss results for varying the maximum WEC expansion parameter while hold the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
+		\caption{Mean wake loss results for varying the maximum WEC expansion parameter while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points. Note: the WEC value and WEC angle axes are not directly comparable.}
 		\label{fig:aepmean-wm}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
@@ -447,31 +480,31 @@ The mean wake loss results are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}.
 	\end{minipage}
 \end{figure}
 
-The standard deviation of wake loss across all runs is shown in \cref{fig:aepstd-wm,fig:aepstd-ws}. The lowest standard deviations occur when the WEC angle is $5^\circ$ for WEC-A, the WEC value is 3 for WEC-D, and when the WEC value is 2 for WEC-H. There is no clear relationship between number of steps and the standard deviation for WEC-A and WEC-H, but it appears best to use at least 4 or 5 steps with WEC-D to achieve a small standard deviation (meaning more consistent results).
+The lowest standard deviations occur when the WEC angle is $5^\circ$ for WEC-A, the WEC value is 3 for WEC-D, and when the WEC value is 2 for WEC-H. There is no clear relationship between number of steps and the standard deviation for WEC-A and WEC-H, but we found it best to use at least 4 or 5 steps with WEC-D to achieve a small standard deviation (meaning more consistent results).
 
-\begin{figure}[ht]
-	\centering
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_std}
-		\caption{Standard deviation of wake loss results for varying the maximum WEC expansion parameter while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepstd-wm}
-	\end{minipage}\hspace{1pc}
-	% Figure displaying results from aep vs crosswind position tests for Jensen
-	\begin{minipage}[t]{0.47\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{nsteps_const_maxwec_std}
-		\caption{Standard deviation of wake loss results for varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
-		\label{fig:aepstd-ws}
-	\end{minipage}
-\end{figure}
+%\begin{figure}[ht]
+%	\centering
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{maxwec_const_nsteps6_std}
+%		\caption{Standard deviation of wake loss results for varying the maximum WEC expansion parameter while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
+%		\label{fig:aepstd-wm}
+%	\end{minipage}\hspace{1pc}
+%	% Figure displaying results from aep vs crosswind position tests for Jensen
+%	\begin{minipage}[t]{0.47\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{nsteps_const_maxwec_std}
+%		\caption{Standard deviation of wake loss results for varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
+%		\label{fig:aepstd-ws}
+%	\end{minipage}
+%\end{figure}
 
- After considering the data presented in \cref{fig:aepmin-wm,fig:aepmin-ws,fig:aepmean-wm,fig:aepmean-ws,fig:aepstd-wm,fig:aepstd-ws}, we determined that the WEC-D method is the best method to use as it resulted in the lowest minimum, mean, and standard deviation of wake loss. We decided to use WEC-D with 6 steps and a maximum WEC spread parameter of three for the remaining studies.
+ As discussed, we found that the WEC-D method is the best wake spreading method we investigated as it had the lowest minimum, mean, and standard deviation of wake loss. We decided to use WEC-D with 6 steps and a maximum WEC spread parameter of three for the remaining studies.
  
- The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}.
+ The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}. In the balance of this paper we will refer to WEC-D as WEC because the other methods have no more relevance in this discussion. 
  
 \subsection{Applying WEC to the Jensen Cosine Wake Model}
-In this section we apply WEC-D, step by step as presented in \cref{sec:dsrop}, to the Jensen Cosine wake model. A diagram displaying the Jensen cosine wake model from an overhead perspective is shown in  \cref{fig:JensenDiagrams}. This diagram will give context to the variables and parameters discussed in this section.
+In this section we apply WEC, step by step as presented in \cref{sec:dsrop}, to the Jensen Cosine wake model. A diagram displaying the Jensen cosine wake model from an overhead perspective is shown in  \cref{fig:JensenDiagrams}. This diagram will give context to the variables and parameters discussed in this section.
 
 \subsubsection{Jensen Cosine WEC Step (1)} 
 %Identify where the magnitude and spread of the wake are within the Jensen Cosine equation.
@@ -510,7 +543,7 @@ Through a series of substitutions, this new vertex distance, \cref{eq:WECvertexc
 \label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
-Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. This behavior is shown in \cref{fig:smoothing_locations_jensen,fig:smoothing_jensen_wec_d}, which also shows that local optima can be smoothed out through WEC-D for the Jensen Cosine model.
+Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. This behavior is shown in \cref{fig:smoothing_locations_jensen,fig:smoothing_jensen_wec_d}, which also shows that local optima can be smoothed out through WEC for the Jensen Cosine model.
 
 % Figure describing setup for aep vs crosswind position tests for Jensen
 \begin{figure}[ht]
@@ -525,17 +558,17 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 	\begin{minipage}[t]{0.52\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{smoothing_jensen_wec_d}
-		\caption{The impact of changing the wake spread angle, $\xi$, for WEC-D on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_jensen}) using the Jensen cosine wake model. The local optimum between the wakes disappears as the WEC factor increases.}
+		\caption{The impact of changing the wake spread angle, $\xi$, for WEC on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_jensen}) using the Jensen cosine wake model. The local optimum between the wakes disappears as the WEC factor increases.}
 		\label{fig:smoothing_jensen_wec_d}
 	\end{minipage}
 \end{figure}
 
 \subsubsection{Jensen Cosine WEC Step (3)}
 
-The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models. 
+The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models.
 
-\subsection{Testing WEC-D with the Jensen Cosine Wake Model}
-As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (three) and the same number of WEC steps (six) as found best for use with WEC-D as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC-D using the Jensen cosine model applied to the case shown in \cref{fig:method_study_layout,fig:nantucket12dirs,eq:obj_wec_methods} using the same 200 starting layouts as used to test the various WEC methods. Results of this test, shown in \cref{fig:jensen-38-wake-loss,fig:jensen-38-wake-fcalls}, clearly demonstrate significant improvement in minimum, median, and standard deviation of wake loss for using WEC-D with SNOPT as opposed to using SNOPT alone, at the expense of an increase in the number of function calls.
+\subsection{Testing WEC with the Jensen Cosine Wake Model}
+As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (three) and the same number of WEC steps (six) as found best for use with WEC as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC using the Jensen cosine model applied to the case shown in \cref{fig:method_study_layout,fig:nantucket12dirs,eq:obj_wec_methods} using the same 200 starting layouts as used to test the various WEC methods. Results of this test, shown in \cref{fig:jensen-38-wake-loss,fig:jensen-38-wake-fcalls}, clearly demonstrate significant improvement in minimum, median, and standard deviation of wake loss for using WEC with SNOPT as opposed to using SNOPT alone, at the expense of an increase in the number of function calls.
 
 
 \begin{figure}[h!]  
@@ -543,7 +576,7 @@ As a proof of concept in applying WEC to other wake models, we implemented WEC w
 	\begin{minipage}[t]{18pc}    
 		\centering
 		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_percent_wake_loss.pdf}
-		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
+		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
 		\label{fig:jensen-38-wake-loss}
 	\end{minipage}\hspace{1pc}
 	\begin{minipage}[t]{18pc}    
@@ -554,22 +587,22 @@ As a proof of concept in applying WEC to other wake models, we implemented WEC w
 	\end{minipage}
 \end{figure}
 
-%\subsection{Testing WEC-D with ALPSO}
+%\subsection{Testing WEC with ALPSO}
 %
-%Beside knowing if WEC works with different wake models, it is also of interest to know if WEC can improve the results of gradient-free algorithm. To test this we ran the same case shown in \cref{fig:round_case,fig:nantucket12dirs} using ALPSO with and without WEC-D. The results of this test are shown in \cref{
+%Beside knowing if WEC works with different wake models, it is also of interest to know if WEC can improve the results of gradient-free algorithm. To test this we ran the same case shown in \cref{fig:round_case,fig:nantucket12dirs} using ALPSO with and without WEC. The results of this test are shown in \cref{
 %
 %\begin{figure}[h!]  
 %	\centering
 %	\begin{minipage}[t]{18pc}    
 %		\centering
 %		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_percent_wake_loss.pdf}
-%		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
+%		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
 %		\label{fig:jensen-38-wake-loss}
 %	\end{minipage}\hspace{1pc}
 %	\begin{minipage}[t]{18pc}    
 %		\centering
 %		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_fcalls.pdf}
-%		\caption{Function calls for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
+%		\caption{Function calls for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
 %		\label{fig:jensen-38-wake-fcalls}
 %	\end{minipage}
 %\end{figure}
@@ -774,7 +807,7 @@ Where $b_{i,k}$ represents the distance of each turbine $i$ from each boundary $
 
 \section{Results and Discussion}\label{sec:resultsanddiscussion}
 %\todo{Jared: figure out how to best present these results now that we have 3 models}
-We compared wake loss and the number of function calls required for each of the cases discussed previously. We also performed a Welch's t-test between the SNOPT and SNOPT+WEC-D results. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). 
+We compared wake loss and the number of function calls required for each of the cases discussed previously. We also performed a Welch's t-test between the SNOPT and SNOPT+WEC results. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). 
 
 Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab:case1}. Results for case 2 are presented in \cref{fig:case-2-wake-loss,fig:case-2-wake-loss-no-outliers,fig:case-2-fcalls,tab:case2}.  Results for case 3 are presented in \cref{fig:case-3-wake-loss,fig:case-3-wake-loss-no-outliers,fig:case-3-fcalls,tab:case3}. 
 %
@@ -816,7 +849,7 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 	Method  & & Median & Low & High & & Mean & SD & Low & High & $p$ \\
 	\cline{1-1}\cline{3-5}\cline{7-12}
 	SNOPT  & & 550.0 & 156 & 3352 & & 11.88 & 1.42 & 8.32 & 15.56 &   \\
-	SNOPT+WEC-D & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & $<.001$\\
+	SNOPT+WEC & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & $<.001$\\
 	ALPSO & & 71,652.0 & 5,277.0 & 136,527.0 & & 13.49 & 1.50 & 10.77 & 16.68 & \\
 	\br
 \end{tabular}
@@ -870,7 +903,7 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
   Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
    \cline{1-1}\cline{3-5}\cline{7-12}
   SNOPT  & & 1,847.0 & 166.0 & 8,618.0 & & 23.72 & 1.00 & 22.78 & 36.64  &  \\
-  SNOPT+WEC-D & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & $< .001$ \\
+  SNOPT+WEC & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & $< .001$ \\
   ALPSO & & 3,338.0 & 170.0 & 9,242.0 & & 26.08 & 0.95 & 22.89 & 31.89 & \\
   \br
   \end{tabular}
@@ -925,7 +958,7 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
 		\cline{1-1}\cline{3-5}\cline{7-12}
 		SNOPT  & & 4,415.0 & 254.0 & 20,318.0 & & 10.07 & 1.55 & 9.41 & 21.90 &  \\
-		SNOPT+WEC-D & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & $<.001$ \\
+		SNOPT+WEC & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & $<.001$ \\
 	    ALPSO & & 2042.0 & 170.0 & 6,218.0 & & 10.33 & 0.39 & 9.52 & 12.62 &\\
 		\br
 	\end{tabular}
@@ -935,9 +968,9 @@ In the more general WFLO problem, we are looking for high AEP values, a tight di
 
 The relatively low wake loss results from ALPSO on the smaller case, compared to the relatively high wake loss results of ALPSO on larger case illustrates an inherent weakness of gradient-free algorithms. Namely, that increased dimensionality generally leads to a decrease in the performance of gradient-free algorithms \cite{rios2013-grad-free-comparison}.
 
-The relatively wide spread and moderate results from SNOPT on both cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. That WEC-D wake loss results were lower and less spread for all test cases, as compared with SNOPT, seems to indicate that the process is at least partially remedying the problem of local optima.
+The relatively wide spread and moderate results from SNOPT on both cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. That WEC wake loss results were lower and less spread for all test cases, as compared with SNOPT, seems to indicate that the process is at least partially remedying the problem of local optima.
 
-The low values of wake loss and lower standard deviation of wake loss for SNOPT with WEC-D, indicates that SNOPT with WEC-D is more accurate and reliable than SNOPT alone. So much so that, ignoring outliers, the probability distributions for SNOPT with and without WEC from case 3 overlap only slightly (see \cref{fig:case-3-wake-loss-no-outliers}). This improvement in performance does come at the cost of more function calls than SNOPT without WEC-D. The increase in function calls when using WEC is expected because the WEC-D ran seven optimizations to convergence (one for each value of $\xi$, and a final optimization to account for local turbulence intensity) for every one optimization by SNOPT alone. Because WEC-D has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
+The low values of wake loss and lower standard deviation of wake loss for SNOPT with WEC, indicates that SNOPT with WEC is more accurate and reliable than SNOPT alone. So much so that, ignoring outliers, the probability distributions for SNOPT with and without WEC from case 3 overlap only slightly (see \cref{fig:case-3-wake-loss-no-outliers}). This improvement in performance does come at the cost of more function calls than SNOPT without WEC. The increase in function calls when using WEC is expected because the WEC ran seven optimizations to convergence (one for each value of $\xi$, and a final optimization to account for local turbulence intensity) for every one optimization by SNOPT alone. Because WEC has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
 
 \section{Conclusion}
 The WEC method proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested three versions of WEC on a simple wind farm and tested the final version of WEC with two wake models and three WFLO problems, one with 16 turbines, one with 38 turbines, and one with 60 turbines. Results for the case studies using WEC show a statistically significant reduction  (p<.001) in optimized wake loss compared to gradient-based optimization without WEC and gradient-free optimization for all test cases.

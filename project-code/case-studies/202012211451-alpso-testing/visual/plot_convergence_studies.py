@@ -21,15 +21,20 @@ if __name__ == "__main__":
     vcrazy = [1E-4, 1E-2, 1E-2]
     for j in np.arange(0,3):
         if j < 1:
-            directory = "../output_files/ps/"
+            directory = "../output_files/ps-vinit-1p0-vcrazy-1em4/"
         else:
             directory = "../output_files/ps-vinit-%ip0/" % (vinit[j])
         for i in np.arange(0,4):
-            if j<2 and i>1:
+            if j<1 and i>1:
+                continue
+            if j<2 and i>2:
                 continue
             for ii in np.arange(5,31,5):
                 filename = directory+"ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_BPAModel_RunID0_TItype4_II%i_print.out" %(turbs[i],windrose[i],dirs[i],ii)
                 obj, fcalls = parse_alpso_files(filename)
+                obj = np.asfarray(obj,float)
+                fcalls = np.asfarray(fcalls,float)
+                print(obj,fcalls)
                 ax[i,j].plot(fcalls, obj, label="II = %i" %(ii))
                 ax[i,j].set_ylabel("Objective")
                 ax[i,j].set_title("%i Turbs, %i Dirs, vinit=%i, vcrazy=%.1e" %(turbs[i],dirs[i], vinit[j], vcrazy[j]))

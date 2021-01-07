@@ -15,6 +15,7 @@ from scipy.stats import ttest_ind
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pandas as pd
 import seaborn as sns
+import re
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", use_cbar=True, **kwargs):
@@ -4422,8 +4423,8 @@ def plot_ct_curve(filename, save_figs, show_figs):
     plt.plot(data[:,0], data[:,1], 'ob', mfc="none")
 
 
-    plt.xticks([5, 10, 15, 20])
-    plt.yticks([0.2, 0.4, 0.6, 0.8])
+    plt.xticks([0, 5, 10, 15, 20])
+    plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
     plt.xlabel('Wind Speed (m/s)')
     plt.ylabel('Thrust Coefficient')
@@ -4460,8 +4461,8 @@ def plot_cp_curve(filename, save_figs, show_figs):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
-    plt.xticks([5, 10, 15, 20])
-    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5])
+    plt.xticks([0, 5, 10, 15, 20])
+    plt.yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
     ax.yaxis.set_ticks_position('left')
     ax.xaxis.set_ticks_position('bottom')
@@ -4927,6 +4928,45 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
     return
 
+def parse_alpso_files(filename):
+    with open(filename) as f:
+        fcalls = re.findall('(?<=EVALUATIONS: ).\d+',f.read(),re.MULTILINE)
+    with open(filename) as f:
+        obj = re.findall('(?<=F = -).*',f.read(),re.MULTILINE)
+    return obj, fcalls
+
+def plot_alpso_tests(filename="", save_figs=False, show_figs=True):
+
+    directory = "./image_data/alpso-tuning/"
+
+    nturbs = [16, 38, 38, 60] 
+    ndirs = [20, 12, 36, 72] 
+    scaler = [1E2, 1E3, 1E3, 1E3]
+    windrose = ["directional", "nantucket", "nantucket", "amalia"]
+
+    for i in np.arange(0,4):
+        fig, ax = plt.subplots(1)
+        for ii in np.arange(5,31,5):
+            datafile = directory+"ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_BPAModel_RunID0_TItype4_II%i_print.out" %(nturbs[i],windrose[i],ndirs[i],ii)
+            obj, fcalls = parse_alpso_files(datafile)
+            obj = np.asfarray(obj,float)
+            fcalls = np.asfarray(fcalls,float)
+            ax.plot(fcalls, obj*scaler[i], label="II = %i" %(ii))
+        ax.set_ylabel("Objective (GWh)")
+        ax.set_xlabel("Function Calls")
+        ax.legend(loc=4,frameon=False)
+        ax.set_xlim([0,20000])    
+    
+        if save_figs:
+            plt.tight_layout()
+            filename = "./images/alpso_test_%iturbs_%idirs.pdf" %(nturbs[i], ndirs[i])
+            plt.savefig(filename, transparent=True)
+
+        if show_figs:
+            plt.show()
+
+    return
+
 if __name__ == "__main__":
 
     show_figs = True
@@ -4969,8 +5009,8 @@ if __name__ == "__main__":
     # filename = "./images/16turbs_results_bpa_wec"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, model="BPA", ps=True)
 
-    filename = "./38turbs_results_"
-    plot_optimization_results(filename, save_figs, show_figs, nturbs=38, model="JENSEN", ps=False, ps_wec=False)
+    # filename = "./38turbs_results_"
+    # plot_optimization_results(filename, save_figs, show_figs, nturbs=38, model="JENSEN", ps=False, ps_wec=False)
 
 
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
@@ -5064,3 +5104,5 @@ if __name__ == "__main__":
     # model = "BPA"
     # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
     # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs)
+
+    plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)

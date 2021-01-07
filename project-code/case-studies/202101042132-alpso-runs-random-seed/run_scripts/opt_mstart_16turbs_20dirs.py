@@ -518,7 +518,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         # prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-2)
 
         # prob.driver.add_objective('obj', scaler=1E0)
-    prob.model.add_objective('obj', scaler=1E-9)
+    prob.model.add_objective('obj', scaler=1E-8)
 
     # select design variables
     prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.ones(nTurbines) * (boundary_x[0] + rotor_diameter / 2.),

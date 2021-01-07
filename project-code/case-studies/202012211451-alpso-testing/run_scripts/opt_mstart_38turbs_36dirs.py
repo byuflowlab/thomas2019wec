@@ -501,7 +501,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.driver.opt_settings["printInnerIters"] = 0  # Number of Iterations Before Print Inner Loop Information
         prob.driver.opt_settings["rinit"] = 1.0  # Initial Penalty Factor
         prob.driver.opt_settings["xinit"] = 1  # Initial Position Flag (0 - no position, 1 - position given)
-        prob.driver.opt_settings["vinit"] = 2.0  # Initial Velocity of Particles in Normalized [-1, 1] Design Space
+        prob.driver.opt_settings["vinit"] = 1.0  # Initial Velocity of Particles in Normalized [-1, 1] Design Space
         prob.driver.opt_settings["vmax"] = 2.0  # Maximum Velocity of Particles in Normalized [-1, 1] Design Space
         prob.driver.opt_settings["c1"] = 2.0  # Cognitive Parameter
         prob.driver.opt_settings["c2"] = 1.0  # Social Parameter
@@ -527,10 +527,10 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     prob.model.add_objective('obj', scaler=1E-9)
 
     # select design variables
-    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
-    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
+    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines) - boundary_radius + boundary_center_x,
+                              upper=np.zeros(nTurbines) + boundary_radius + boundary_center_x)
+    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines) - boundary_radius + boundary_center_y,
+                              upper=np.zeros(nTurbines)  + boundary_radius + boundary_center_y)
 
     # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
     # prob.model.ln_solver.options['mode'] = 'rev'
@@ -1016,7 +1016,7 @@ if __name__ == "__main__":
     #     print("#######################################")
     # run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps, InnerIter=1, record=False)
     pop = 30
-    maxcalls = 15000
+    maxcalls = 20000
     print("\n\n ########### Start 38 turbs  36 dirs############ \n\n")
     for ii in np.arange(5, 31, 5):
         oi = np.int(np.round(maxcalls/(30*ii))+1)

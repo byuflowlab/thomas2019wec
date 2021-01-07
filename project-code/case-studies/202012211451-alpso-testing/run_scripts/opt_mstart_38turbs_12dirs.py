@@ -514,7 +514,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.driver.opt_settings["ns"] = 15 # Number of Consecutive Successes in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
         prob.driver.opt_settings["nf"] = 5 # Number of Consecutive Failures in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
         prob.driver.opt_settings["dt"] = 1.0  # Time step
-        prob.driver.opt_settings["vcrazy"] = 1e-4 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
+        prob.driver.opt_settings["vcrazy"] = 1e-2 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
         prob.driver.opt_settings["fileout"] = 1  # Flag to Turn On Output to filename
         # prob.driver.opt_settings["filename"] = "ALPSO.out" # We could probably remove fileout flag if filename or fileinstance is given
         prob.driver.opt_settings["seed"] = 1.0  # Random Number Seed (0 - Auto-Seed based on time clock)
@@ -531,10 +531,10 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     prob.model.add_objective('obj', scaler=1E-9)
 
     # select design variables
-    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
-    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
+    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines) - boundary_radius + boundary_center_x,
+                              upper=np.zeros(nTurbines) + boundary_radius + boundary_center_x)
+    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines) - boundary_radius + boundary_center_y,
+                              upper=np.zeros(nTurbines)  + boundary_radius + boundary_center_y)
 
     # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
     # prob.model.ln_solver.options['mode'] = 'rev'
@@ -1025,7 +1025,7 @@ if __name__ == "__main__":
     #     print("#######################################")
     # run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps, InnerIter=1, record=False)
     pop = 30
-    maxcalls = 10000
+    maxcalls = 20000
     print("\n\n ########### Start 38 turbs  12 dirs############ \n\n")
     for ii in np.arange(5, 31, 5):
         oi = np.int(np.round(maxcalls/(30*ii))+1)
