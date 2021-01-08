@@ -25,11 +25,15 @@ if __name__ == "__main__":
         else:
             directory = "../output_files/ps-vinit-%ip0/" % (vinit[j])
         for i in np.arange(0,4):
-            if j<1 and i>1:
+            if j<1 and i>2:
                 continue
-            if j<2 and i>2:
+            if j<1 and i>2:
                 continue
-            for ii in np.arange(5,31,5):
+            if j==0 and i ==2:
+                mval = 26
+            else:
+                mval = 31
+            for ii in np.arange(5,mval,5):
                 filename = directory+"ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_BPAModel_RunID0_TItype4_II%i_print.out" %(turbs[i],windrose[i],dirs[i],ii)
                 obj, fcalls = parse_alpso_files(filename)
                 obj = np.asfarray(obj,float)

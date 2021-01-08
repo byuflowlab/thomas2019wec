@@ -510,7 +510,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.driver.opt_settings["ns"] = 15 # Number of Consecutive Successes in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
         prob.driver.opt_settings["nf"] = 5 # Number of Consecutive Failures in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
         prob.driver.opt_settings["dt"] = 1.0  # Time step
-        prob.driver.opt_settings["vcrazy"] = 1e-2 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
+        prob.driver.opt_settings["vcrazy"] = 1e-4 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
         prob.driver.opt_settings["fileout"] = 1  # Flag to Turn On Output to filename
         # prob.driver.opt_settings["filename"] = "ALPSO.out" # We could probably remove fileout flag if filename or fileinstance is given
         prob.driver.opt_settings["seed"] = 1.0  # Random Number Seed (0 - Auto-Seed based on time clock)
@@ -524,7 +524,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-7)
 
         # prob.driver.add_objective('obj', scaler=1E0)
-    prob.model.add_objective('obj', scaler=1E-9)
+    prob.model.add_objective('obj', scaler=1E-8)
 
     # select design variables
     prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines) - boundary_radius + boundary_center_x,
