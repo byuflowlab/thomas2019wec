@@ -140,7 +140,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
         expansion_factors = np.linspace(1.0, max_wec, nsteps)
         if opt_algorithm == 'ps':
-            expansion_factors = np.flip(expansion_factors)
+            expansion_factors = np.append(np.flip(expansion_factors), 1.0)
         else:
             expansion_factors = np.append(np.flip(expansion_factors), 1.0)
         conv_tols = np.array([9E-3, 9E-3, 9E-3, 9E-3, 9E-3, 9E-3, 1E-3])
@@ -202,7 +202,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         ti_opt_method = 0
     final_ti_opt_method = 5
 
-    if opt_algorithm == 'ps':
+    if opt_algorithm == 'ps' and wec_method == 'none':
         ti_opt_method = ti_calculation_method
 
     sm_smoothing = 700.
@@ -686,19 +686,16 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                                                nTurbs, wind_rose_file, size, MODELS[model], run_number,
                                                                expansion_factor, ti_opt_method)
             elif opt_algorithm == 'ps':
-                print("SETTING FILENAME")
-                quit()
                 prob.driver.opt_settings[
-                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.out' % (
-                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
-                prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
+                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.out' % (
+                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor,ti_opt_method)
+                prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.txt' % (
 
-                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
+                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor,ti_opt_method)
 
             if opt_algorithm == 'ps':
                 if i > 0:
                     print("Using hot start")
-                    quit()
                     prob.driver.hot_start = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
                         nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[i-1])
             else:
@@ -996,9 +993,11 @@ if __name__ == "__main__":
 
     pop = 30
     maxcalls = 20000
+    if wec_method_number > 0 and opt_alg_number == 2:
+        maxcalls = int(maxcalls/nsteps)
     ii = 25
     oi = np.int(np.round(maxcalls/(30*ii))+1)
     print("\n\n ########### Start 38 turbs, 12 dirs ############ \n\n")
     print("\n\nRunning with InnerIter=%i" %(ii))
     print("OuterIter=%i\n\n" %(oi))
-    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps, ii, oi, False)
+    run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps, ii, oi, True)
