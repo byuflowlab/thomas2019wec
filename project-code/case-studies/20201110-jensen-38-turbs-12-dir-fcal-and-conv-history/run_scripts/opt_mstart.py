@@ -552,31 +552,32 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     #     recorder.options['includes'] = ['turbineX', 'turbineY', 'AEP']
     #     prob.driver.add_recorder(recorder)
 
-    driver_recorder = om.SqliteRecorder(output_directory + 'recorded_data_driver_%s.sql' %(run_number))
-    # model_recorder = om.SqliteRecorder(output_directory + 'recorded_data_model_%s.sql' %(run_number))
-    prob.driver.add_recorder(driver_recorder)
-    # prob.model.add_recorder(model_recorder)
-    prob.driver.recording_options['record_constraints'] = False
-    prob.driver.recording_options['record_derivatives'] = False
-    prob.driver.recording_options['record_desvars'] = True
-    prob.driver.recording_options['record_inputs'] = False
-    prob.driver.recording_options['record_model_metadata'] = True
-    prob.driver.recording_options['record_objectives'] = True
-    prob.driver.recording_options['includes'] = ['AEP']
-    prob.driver.recording_options['record_responses'] = False
-    #
-    # prob_recorder = om.SqliteRecorder(output_directory + 'recorded_data_prob_%s.sql' %(run_number))
-    # prob.add_recorder(prob_recorder)
-    # prob.recording_options['includes'] = []
-    # prob.recording_options['record_objectives'] = True
+    if opt_algorithm != 'ps':
+        driver_recorder = om.SqliteRecorder(output_directory + 'recorded_data_driver_%s.sql' %(run_number))
+        # model_recorder = om.SqliteRecorder(output_directory + 'recorded_data_model_%s.sql' %(run_number))
+        prob.driver.add_recorder(driver_recorder)
+        # prob.model.add_recorder(model_recorder)
+        prob.driver.recording_options['record_constraints'] = False
+        prob.driver.recording_options['record_derivatives'] = False
+        prob.driver.recording_options['record_desvars'] = True
+        prob.driver.recording_options['record_inputs'] = False
+        prob.driver.recording_options['record_model_metadata'] = True
+        prob.driver.recording_options['record_objectives'] = True
+        prob.driver.recording_options['includes'] = ['AEP']
+        prob.driver.recording_options['record_responses'] = False
+        #
+        # prob_recorder = om.SqliteRecorder(output_directory + 'recorded_data_prob_%s.sql' %(run_number))
+        # prob.add_recorder(prob_recorder)
+        # prob.recording_options['includes'] = []
+        # prob.recording_options['record_objectives'] = True
 
-    # set up profiling
-    # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
-    # methods = [
-    #     ('*', (WindFarmAEP,))
-    # ]
-    #
-    # iprofile.setup(methods=methods)
+        # set up profiling
+        # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
+        # methods = [
+        #     ('*', (WindFarmAEP,))
+        # ]
+        #
+        # iprofile.setup(methods=methods)
 
     print("almost time for setup")
     tic = time.time()
@@ -907,70 +908,73 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob['model_params:ti_calculation_method'] = 4
         prob['model_params:calc_k_star'] = True
 
-    cr = om.CaseReader(output_directory + 'recorded_data_driver_%s.sql' %run_number)
 
-    driver_cases = cr.list_cases('driver')
-    nits = len(driver_cases)
-    objectives = np.zeros(nits)
-    AEPopt = np.zeros(nits)
-    AEPcalc = np.zeros(nits)
-    calls = np.zeros(nits)
-    for i in np.arange(0,nits):
-        case = cr.get_case(driver_cases[i])
+    if opt_algorithm != 'ps':
+        cr = om.CaseReader(output_directory + 'recorded_data_driver_%s.sql' %run_number)
+
+        driver_cases = cr.list_cases('driver')
+        nits = len(driver_cases)
+        objectives = np.zeros(nits)
+        AEPopt = np.zeros(nits)
+        AEPcalc = np.zeros(nits)
+        calls = np.zeros(nits)
+        for i in np.arange(0,nits):
+            case = cr.get_case(driver_cases[i])
+            # print(case)
+            AEPopt[i] = case['AEP']
+            objectives[i] = case.get_objectives()['obj']
+
+            prob['turbineX'] = np.copy(case['turbineX'])
+            prob['turbineY'] = np.copy(case['turbineY'])
+            if opt_algorithm == "snopt":
+                prob.run_model(case_prefix='ProcessingRun')
+                AEPcalc[i] = np.copy(prob['AEP'])
+            else:
+                AEPcalc[i] = case['AEP']
+
+            calls[i] = i
+
+        header = "Convergence history of AEP (Wh): opt model, analysis model, obj"
+        np.savetxt(output_directory + "convergence_history_run%i.txt" %(run_number), np.c_[AEPopt*1e3, AEPcalc*1e3, objectives], header=header)
+        # plt.plot(objectives*1E-3)
+        # plt.plot(AEPopt*1E-6)
+        # plt.plot(AEPcalc*1E-6)
+        # plt.xlabel("Function Calls")
+        # plt.ylabel("AEP (GWh)")
+        print("Function Calls: ", i)
+        #
+        # pr = om.CaseReader(output_directory + 'recorded_data_prob_%s.sql' %run_number)
+        # prob_cases = pr.list_cases()
+        # nits = len(prob_cases)
+        # print(nits)
+        # for i in np.arange(0, nits):
+        #     case = pr.get_case(prob_cases[i])
+        #     print(case)
+        # plt.show()
+        os.remove(output_directory + 'recorded_data_driver_%s.sql' %run_number)
+
+        # cr = om.CaseReader(output_directory + 'recorded_data_model.sql')
+        #
+        # model_cases = cr.list_cases('root')
+        # nits = len(model_cases)
+        # objectives = np.zeros(modelruns)
+        # AEPs = np.zeros(modelruns)
+        # calls = np.zeros(modelruns)
+        # for i in np.arange(0, modelruns):
+        #     case = cr.get_case(model_cases[i])
+        #     print(case)
+        #     AEPs[i] = np.copy(case['AEP'])
+        #     calls[i] = i
+        # # plt.plot(objectives)
+        # plt.plot(AEPs * 1E-6)
+        # plt.xlabel("Function Calls")
+        # plt.ylabel("AEP (GWh)")
+        # plt.show()
+        # case = cr.get_case(driver_cases[0])
+        #
+        # objectives = case.get_objectives()
+
         # print(case)
-        AEPopt[i] = case['AEP']
-        objectives[i] = case.get_objectives()['obj']
-
-        prob['turbineX'] = np.copy(case['turbineX'])
-        prob['turbineY'] = np.copy(case['turbineY'])
-        if opt_algorithm == "snopt":
-            prob.run_model(case_prefix='ProcessingRun')
-            AEPcalc[i] = np.copy(prob['AEP'])
-        else:
-            AEPcalc[i] = case['AEP']
-
-        calls[i] = i
-    header = "Convergence history of AEP (Wh): opt model, analysis model, obj"
-    np.savetxt(output_directory + "convergence_history_run%i.txt" %(run_number), np.c_[AEPopt*1e3, AEPcalc*1e3, objectives], header=header)
-    # plt.plot(objectives*1E-3)
-    # plt.plot(AEPopt*1E-6)
-    # plt.plot(AEPcalc*1E-6)
-    # plt.xlabel("Function Calls")
-    # plt.ylabel("AEP (GWh)")
-    print("Function Calls: ", i)
-    #
-    # pr = om.CaseReader(output_directory + 'recorded_data_prob_%s.sql' %run_number)
-    # prob_cases = pr.list_cases()
-    # nits = len(prob_cases)
-    # print(nits)
-    # for i in np.arange(0, nits):
-    #     case = pr.get_case(prob_cases[i])
-    #     print(case)
-    # plt.show()
-    os.remove(output_directory + 'recorded_data_driver_%s.sql' %run_number)
-
-    # cr = om.CaseReader(output_directory + 'recorded_data_model.sql')
-    #
-    # model_cases = cr.list_cases('root')
-    # nits = len(model_cases)
-    # objectives = np.zeros(modelruns)
-    # AEPs = np.zeros(modelruns)
-    # calls = np.zeros(modelruns)
-    # for i in np.arange(0, modelruns):
-    #     case = cr.get_case(model_cases[i])
-    #     print(case)
-    #     AEPs[i] = np.copy(case['AEP'])
-    #     calls[i] = i
-    # # plt.plot(objectives)
-    # plt.plot(AEPs * 1E-6)
-    # plt.xlabel("Function Calls")
-    # plt.ylabel("AEP (GWh)")
-    # plt.show()
-    # case = cr.get_case(driver_cases[0])
-    #
-    # objectives = case.get_objectives()
-
-    # print(case)
 
     return 0
 

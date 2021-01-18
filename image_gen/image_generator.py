@@ -4731,7 +4731,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     # indicate how many optimization runs are to be plotted
     runs = 200
 
-    labels = ["SNOPT+WEC-D", 'SNOPT', "ALPSO"]
+    labels = ["SNOPT+WEC", 'SNOPT', "ALPSO"]
     colors = ['b', 'c', 'r']
     alpha = 0.1
     markeralpha = 0.5
@@ -4739,27 +4739,34 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     if nturbs == 60:
         date = 20200824
         aept = 6653047.52233728*nturbs*1E3 #Wh
+        psscale = 1E5
     elif nturbs == 38:
         date = 20200821
         if ndirs == 12:
             aept = 4994091.77684705*nturbs*1E3 #Wh
+            psscale = 1E5
         elif ndirs == 36:
             aept = 1630166.61601323*nturbs*1E3 # Wh
+            psscale = 1E5
     elif nturbs == 16:
         date = 20200821
         aept = 5191363.5933961*nturbs*1E3 # Wh
-
+        psscale = 1E4
+    # print(aept)
     # Define input location
     base_input_directory = "./image_data/opt_results/%i-%i-turbs-%i-dir-fcall-and-conv-history/" % (date, nturbs, ndirs)
+    ps_input_directory = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
     input_directory_wec = base_input_directory + "snopt_wec_diam_max_wec_3_nsteps_6.000/"
     input_directory_snopt = base_input_directory + "snopt/"
-    input_directory_ps = base_input_directory + "ps/"
+    input_directory_ps = ps_input_directory + "ps/"
 
     # Specify output file name
     input_file_wec = input_directory_wec + "convergence_histories.txt"
     input_file_snopt = input_directory_snopt + "convergence_histories.txt"
-    input_file_ps = input_directory_ps + "convergence_histories.txt"
+    input_file_ps = input_directory_ps + "convergence_histories_%iturbs_%idirs.txt" %(nturbs, ndirs)
 
+    # store initial AEP values
+    aepinit = np.zeros(200)
     fig1, ax1 = plt.subplots(1)
 
     # find how many entries are in the longest WEC convergence history
@@ -4790,7 +4797,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         else:
             s = pd.Series(data, name=rownum)
             ax1.semilogx(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+            # ax1.plot(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
             ax1.scatter(s.size, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
+            
             run += 1
         rownum += 1
     f.close()
@@ -4824,12 +4833,15 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             s = pd.Series(data, name=rownum)
         else:
             s = pd.Series(data, name=rownum)
+            aepinit[run] = s[0]
             run += 1
 
             loss = 100*(1-s/aept)
             ax1.semilogx(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
+            # ax1.plot(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
 
             ax1.scatter(s.size, 100*(1 - s.iloc[-1] / aept), marker='o', edgecolor='k', color=colors[1], zorder=10, alpha=markeralpha)
+            
         rownum += 1
     f.close()
 
@@ -4866,13 +4878,25 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         # print(data.size)
         if rownum % 2 == 0:
             # dfcalc.(run, run, pd.Series(data, name=rownum))
+            
+            # sall = pd.Series(data, name=rownum)
+            # slist = [aepinit[run]*1E-4]
+            # slist[1:] = sall
+            # s = pd.Series(slist)
             s = pd.Series(data, name=rownum)
+            # if rownum == 2:
+            #     print(s.max())
             # else:
             #     dfcalc_ps.insert(run, run, pd.Series(data, name=rownum))
-            ax1.semilogx(fcalls, 100*(1-s/aept), alpha=alpha, color=colors[2], zorder=1)
-            ax1.scatter(fcalls.iloc[-1], 100*(1 - s.iloc[-1] / aept), marker='o', edgecolor='k', color=colors[2], zorder=10, alpha=markeralpha)
+            ax1.semilogx(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+            # ax1.plot(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+            ax1.scatter(fcalls.iloc[-1], 100*(1 + s.iloc[-1]*psscale / aept), marker='o', edgecolor='k', color=colors[2], zorder=10, alpha=markeralpha)
             run += 1
         else:
+            # fcallsall = pd.Series(data, name=rownum)
+            # fcallslist = [0]
+            # fcallslist[1:] = fcallsall 
+            # fcalls = pd.Series(fcallslist)
             fcalls = pd.Series(data, name=rownum)
 
         rownum += 1
@@ -4882,36 +4906,36 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     lineweight = 2
     if nturbs == 16:
         txt0 = plt.text(1E2, 4, labels[0], color=colors[0])
-        txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         txt1 = plt.text(2E1, 6, labels[1], color=colors[1])
-        txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         txt2 = plt.text(4E3, 5, labels[2], color=colors[2])
-        txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         plt.ylim([0, 40])
     if nturbs == 38:
         if ndirs == 12:
             txt0 = plt.text(3E2, 9, labels[0], color=colors[0])
-            txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
             txt1 = plt.text(5E1, 12, labels[1], color=colors[1])
-            txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt2 = plt.text(7E3, 14, labels[2], color=colors[2])
-            txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            txt2 = plt.text(7E3, 11, labels[2], color=colors[2])
+            # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
             plt.ylim([5, 40])
         if ndirs == 36:
             txt0 = plt.text(8E2, 18, labels[0], color=colors[0])
-            txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
             txt1 = plt.text(1E2, 18, labels[1], color=colors[1])
-            txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt2 = plt.text(8E3, 21, labels[2], color=colors[2])
-            txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+            txt2 = plt.text(8E3, 24, labels[2], color=colors[2])
+            # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
             plt.ylim([15, 45])
     if nturbs == 60:
         txt0 = plt.text(1.5E1, 6.75, labels[0], color=colors[0])
-        txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         txt1 = plt.text(9E2, 7.0, labels[1], color=colors[1])
-        txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-        txt2 = plt.text(7E3, 7.25, labels[2], color=colors[2])
-        txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+        txt2 = plt.text(7E3, 6.75, labels[2], color=colors[2])
+        # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         plt.ylim([5, 25])
     # plt.text(labels[0])
     ax1.spines['top'].set_visible(False)
@@ -5099,10 +5123,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    # nturbs = 16
-    # ndirs = 20
-    # model = "BPA"
-    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs)
+    nturbs = 16
+    ndirs = 20
+    model = "BPA"
+    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs)
 
-    plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
+    # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
