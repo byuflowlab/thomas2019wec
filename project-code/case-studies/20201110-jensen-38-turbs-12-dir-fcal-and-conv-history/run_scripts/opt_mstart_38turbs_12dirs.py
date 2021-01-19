@@ -92,7 +92,7 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
     if show_start:
         plt.show()
 
-def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps):
+def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps, InnerIter, OuterIter, record=True):
     OPENMDAO_REQUIRE_MPI = False
     run_number = layout_number
     model = wake_model
@@ -489,55 +489,54 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
 
     elif opt_algorithm == 'ps':
-
-
-
         prob.driver.options['optimizer'] = 'ALPSO'
+        prob.driver.opt_settings["SwarmSize"] = 30  # Number of Particles (Depends on Problem dimensions)
+        prob.driver.opt_settings["maxOuterIter"] = OuterIter # Maximum Number of Outer Loop Iterations (Major Iterations)
+        prob.driver.opt_settings["maxInnerIter"] = InnerIter  # Maximum Number of Inner Loop Iterations (Minor Iterations)
+        prob.driver.opt_settings["minInnerIter"] = InnerIter  # Minimum Number of Inner Loop Iterations (Dynamic Inner Iterations)
+        prob.driver.opt_settings["dynInnerIter"] = 0  # Dynamic Number of Inner Iterations Flag
+        prob.driver.opt_settings["stopCriteria"] = 0  # Stopping Criteria Flag (0 - maxIters, 1 - convergence)
+        prob.driver.opt_settings["stopIters"] = 5  # Consecutive Number of Iterations for which the Stopping Criteria must be Satisfied
+        prob.driver.opt_settings["etol"] = 1e-3  # Absolute Tolerance for Equality constraints
+        prob.driver.opt_settings["itol"] = 1e-3  # Absolute Tolerance for Inequality constraints
+        # 'ltol':[float, 1e-2],            # Absolute Tolerance for Lagrange Multipliers
+        prob.driver.opt_settings["rtol"] = 1e-6  # Relative Tolerance for Lagrange Multipliers
+        prob.driver.opt_settings["atol"] = 1e-6  # Absolute Tolerance for Lagrange Function
+        prob.driver.opt_settings["dtol"] = 1e-1  # Relative Tolerance in Distance of All Particles to Terminate (GCPSO)
+        prob.driver.opt_settings["printOuterIters"] = 0  # Number of Iterations Before Print Outer Loop Information
+        prob.driver.opt_settings["printInnerIters"] = 0  # Number of Iterations Before Print Inner Loop Information
+        prob.driver.opt_settings["rinit"] = 1.0  # Initial Penalty Factor
+        prob.driver.opt_settings["xinit"] = 1  # Initial Position Flag (0 - no position, 1 - position given)
+        prob.driver.opt_settings["vinit"] = 1.0  # Initial Velocity of Particles in Normalized [-1, 1] Design Space
+        prob.driver.opt_settings["vmax"] = 2.0  # Maximum Velocity of Particles in Normalized [-1, 1] Design Space
+        prob.driver.opt_settings["c1"] = 2.0  # Cognitive Parameter
+        prob.driver.opt_settings["c2"] = 1.0  # Social Parameter
+        prob.driver.opt_settings["w1"] = 0.99  # Initial Inertia Weight
+        prob.driver.opt_settings["w2"] = 0.55  # Final Inertia Weight
+        prob.driver.opt_settings["ns"] = 15 # Number of Consecutive Successes in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
+        prob.driver.opt_settings["nf"] = 5 # Number of Consecutive Failures in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
+        prob.driver.opt_settings["dt"] = 1.0  # Time step
+        prob.driver.opt_settings["vcrazy"] = 1e-2 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
+        prob.driver.opt_settings["fileout"] = 1  # Flag to Turn On Output to filename
+        # prob.driver.opt_settings["filename"] = "ALPSO.out" # We could probably remove fileout flag if filename or fileinstance is given
+        prob.driver.opt_settings["seed"] = 0.0  # Random Number Seed (0 - Auto-Seed based on time clock)
+        prob.driver.opt_settings["HoodSize"] = 5  # Number of Neighbours of Each Particle
+        prob.driver.opt_settings["HoodModel"] = "gbest" # Neighbourhood Model (dl/slring - Double/Single Link Ring, wheel - Wheel, Spatial - based on spatial distance, sfrac - Spatial Fraction)
+        prob.driver.opt_settings["HoodSelf"] = 1 # Selfless Neighbourhood Model (0 - Include Particle i in NH i, 1 - Don't Include Particle i)
+        prob.driver.opt_settings["Scaling"] = 1  # Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1, 1])
+        # prob.driver.opt_settings["parallelType"] = 'EXT'  # Type of parallelization ('' or 'EXT')
 
-        prob.driver.opt_settings['fileout'] = 1
-
-        prob.driver.opt_settings[
-
-            'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
-
-            nTurbs, wind_rose_file, size, MODELS[model], run_number)
-
-        if relax:
-            prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
-
-                nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[0])
-
-        prob.driver.opt_settings['maxOuterIter'] = 10000
-
-        prob.driver.opt_settings['SwarmSize'] = 25
-
-        prob.driver.opt_settings['xinit'] = 1  # Initial Position Flag (0 - no position, 1 - position given)
-
-        prob.driver.opt_settings[
-            'Scaling'] = 1  # Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1, 1])
-        # if relax:
-        #     prob.driver()
-        # prob.driver.opt_settings['rtol'] = 1E-3  # Relative Tolerance for Lagrange Multipliers
-        #
-        # prob.driver.opt_settings['atol'] = 1E-2  # Absolute Tolerance for Lagrange Function
-        #
-        prob.driver.opt_settings['dtol'] = 0.01  # Relative Tolerance in Distance of All Particles to Terminate (GCPSO)
-        #
-        # prob.driver.opt_settings['itol'] = 1E-3  # Absolute Tolerance for Inequality constraints
-        #
-        # prob.driver.opt_settings['dynInnerIter'] = 1  # Dynamic Number of Inner Iterations Flag
-
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)
+        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-7)
+        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-7)
 
         # prob.driver.add_objective('obj', scaler=1E0)
-    prob.model.add_objective('obj', scaler=1E-4)
+    prob.model.add_objective('obj', scaler=1E-9)
 
     # select design variables
-    prob.model.add_design_var('turbineX', scaler=1E0, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 3. * boundary_radius)
-    prob.model.add_design_var('turbineY', scaler=1E0, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 3. * boundary_radius)
+    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines),
+                              upper=np.ones(nTurbines) * 2. * boundary_radius)
+    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines),
+                              upper=np.ones(nTurbines) * 2. * boundary_radius)
 
     # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
     # prob.model.ln_solver.options['mode'] = 'rev'
@@ -565,19 +564,19 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.driver.recording_options['record_objectives'] = True
         prob.driver.recording_options['includes'] = ['AEP']
         prob.driver.recording_options['record_responses'] = False
-        #
-        # prob_recorder = om.SqliteRecorder(output_directory + 'recorded_data_prob_%s.sql' %(run_number))
-        # prob.add_recorder(prob_recorder)
-        # prob.recording_options['includes'] = []
-        # prob.recording_options['record_objectives'] = True
+    #
+    # prob_recorder = om.SqliteRecorder(output_directory + 'recorded_data_prob_%s.sql' %(run_number))
+    # prob.add_recorder(prob_recorder)
+    # prob.recording_options['includes'] = []
+    # prob.recording_options['record_objectives'] = True
 
-        # set up profiling
-        # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
-        # methods = [
-        #     ('*', (WindFarmAEP,))
-        # ]
-        #
-        # iprofile.setup(methods=methods)
+    # set up profiling
+    # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
+    # methods = [
+    #     ('*', (WindFarmAEP,))
+    # ]
+    #
+    # iprofile.setup(methods=methods)
 
     print("almost time for setup")
     tic = time.time()
@@ -694,17 +693,17 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                                                expansion_factor, ti_opt_method)
             elif opt_algorithm == 'ps':
                 prob.driver.opt_settings[
-                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.out' % (
-                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
-                prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
+                    'filename'] = output_directory + 'ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.out' % (
+                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor,ti_opt_method)
+                prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.txt' % (
 
-                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor)
+                    nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factor,ti_opt_method)
 
-            if opt_algorithm == "ps":
+            if opt_algorithm == 'ps':
                 if i > 0:
                     print("Using hot start")
-                    prob.driver.hot_start = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
-                        nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[i-1])
+                    prob.driver.hot_start = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.txt' % (
+                        nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[i-1],ti_opt_method_last)
             else:
                 turbineX = np.copy(prob['turbineX'])
                 turbineY = np.copy(prob['turbineY'])
@@ -823,7 +822,6 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                     nTurbs, wind_rose_file, size, MODELS[model], run_number, ti_opt_method, InnerIter)
                 prob.driver.hist_file = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_TItype%i_II%i.txt' % (
                     nTurbs, wind_rose_file, size, MODELS[model], run_number, ti_opt_method, InnerIter)
-
             print("starting run with exp. fac = ", expansion_factor)
             # run the problem
             print('start %s run' % (MODELS[model]))
@@ -986,50 +984,20 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
 if __name__ == "__main__":
 
-    # rank = mpi4py.MPI.COMM_WORLD.Get_rank()
-    # size = mpi4py.MPI.COMM_WORLD.Get_size()
-    #
-    # wake_model = 1
-    # opt_alg_number = 0
-    # max_wec = 3
-    #
-    # wec_method_numbers = np.array([1, 2, 3])
-    # nstepss = np.arange(1, 11)
-    # layout_numbers = np.arange(0, 200)
-    #
-    # wmns, nss, lns = np.meshgrid(wec_method_numbers, nstepss, layout_numbers)
-    # wmns = wmns.flatten()
-    # nss = nss.flatten()
-    # lns = lns.flatten()
-    #
-    # ntasks = wec_method_numbers.size*nstepss.size*layout_numbers.size
-    #
-    # for i in np.arange(0, ntasks):
-    #
-    #     if i % size != rank: continue
-    #     print("Task number %d being done by processor %d of %d" % (i, rank, size))
-    #     print(wmns[i], nss[i], lns[i])
-    #     run_opt(lns[i], wmns[i], wake_model, opt_alg_number, max_wec, nss[i])
-
     # specify which starting layout should be used
     layout_number = int(sys.argv[1])
     # layout_number = 0
     wec_method_number = int(sys.argv[2])
     # wec_method_number = 0
     model = int(sys.argv[3])
-    # model = 2
+    # model = 1
     opt_alg_number = int(sys.argv[4])
-    # opt_alg_number = 0
+    # opt_alg_number = 2
     max_wec = int(sys.argv[5])
     # max_wec = 3
     nsteps = int(sys.argv[6])
     # nsteps = 6
 
-    # for layout_number in np.arange(0, 10):
-    #     print("#######################################")
-    #     print("\n Starting with Layout %i \n" %layout_number)
-    #     print("#######################################")
-    # run_opt(layout_number, wec_method_number, model, opt_alg_number, max_wec, nsteps)
     pop = 30
     maxcalls = 20000
     if wec_method_number > 0 and opt_alg_number == 2:

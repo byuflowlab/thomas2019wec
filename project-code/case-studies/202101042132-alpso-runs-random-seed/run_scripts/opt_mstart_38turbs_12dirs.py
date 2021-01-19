@@ -663,6 +663,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     driverruns = 0
     tict = time.time()
     if relax:
+        ti_opt_method_last = np.copy(ti_opt_method)
         for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):  # best so far
             # print("func calls: ", config.obj_func_calls_array, np.sum(config.obj_func_calls_array))
             # print("grad func calls: ", config.sens_func_calls_array, np.sum(config.sens_func_calls_array))
@@ -696,8 +697,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
             if opt_algorithm == 'ps':
                 if i > 0:
                     print("Using hot start")
-                    prob.driver.hot_start = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f.txt' % (
-                        nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[i-1])
+                    prob.driver.hot_start = output_directory + 'ALPSO_history_%iturbs_%sWindRose_%idirs_%sModel_RunID%i_EF%.3f_TItype%i.txt' % (
+                        nTurbs, wind_rose_file, size, MODELS[model], run_number, expansion_factors[i-1],ti_opt_method_last)
             else:
                 turbineX = np.copy(prob['turbineX'])
                 turbineY = np.copy(prob['turbineY'])
@@ -789,6 +790,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                header=header)
                     f.close()
             expansion_factor_last = expansion_factor
+            ti_opt_method_last = np.copy(ti_opt_method)
     else:
         for expansion_factor, i in zip(expansion_factors, np.arange(0, expansion_factors.size)):  # best so far
             # print("func calls: ", config.obj_func_calls_array, np.sum(config.obj_func_calls_array))
