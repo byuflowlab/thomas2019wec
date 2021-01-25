@@ -97,33 +97,48 @@ runs = 200
 #     f.close()
 
 # compile ALPSO + WEC convergence history
-max_wec = 3.0
-nsteps = 6
-expansion_factors = np.linspace(1.0, max_wec, nsteps)
-expansion_factors = np.append(np.flip(expansion_factors), 1.0)
-ti_types = np.zeros(nsteps+1)
-ti_types[-1] = 5
+# max_wec = 3.0
+# nsteps = 6
+# expansion_factors = np.linspace(1.0, max_wec, nsteps)
+# expansion_factors = np.append(np.flip(expansion_factors), 1.0)
+# ti_types = np.zeros(nsteps+1)
+# ti_types[-1] = 5
+# for run_number in np.arange(0, runs):
+#     print("getting history for run %i" %(run_number))
+#     fcalls = np.empty(0)
+#     obj = np.empty(0)
+
+#     for i in np.arange(0, len(expansion_factors)):
+#         fcallsi, obji = get_alpso_history(output_directory_pswec + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_EF%.3f_TItype%i_print.out" %(run_number, expansion_factors[i], ti_types[i]))
+#         fcalls = np.append(fcalls,fcallsi)
+#         obj = np.append(obj,obji)
+
+#     nits = len(obj)
+#     AEPcalc = obj*1E7
+
+#     f = open(output_file_pswec, "a")
+#     if run_number == 0:
+#         header = "convergence history alternating row function calls, AEP (W)"
+#     else:
+#         header = ""
+#     np.savetxt(f, (fcalls, -AEPcalc), header=header)
+#     f.close()
+
 for run_number in np.arange(0, runs):
-    print("getting history for run %i" %(run_number))
-    fcalls = np.empty(0)
-    obj = np.empty(0)
 
-    for i in np.arange(0, len(expansion_factors)):
-        fcallsi, obji = get_alpso_history(output_directory_pswec + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_EF%.3f_TItype%i_print.out" %(run_number, expansion_factors[i], ti_types[i]))
-        fcalls = np.append(fcalls,fcallsi)
-        obj = np.append(obj,obji)
+    data_in = np.loadtxt(output_directory_pswec+"convergence_history_run%i.txt" %(run_number))
 
-    nits = len(obj)
-    AEPcalc = obj*1E7
+    nits = data_in.shape[0]
+    AEPopt = data_in[:, 0]
+    AEPcalc = data_in[:, 1]
 
     f = open(output_file_pswec, "a")
     if run_number == 0:
-        header = "convergence history alternating row function calls, AEP (W)"
+        header = "convergence history alternating row AEP (W) unadjusted, AEP (W) adjusted"
     else:
         header = ""
-    np.savetxt(f, (fcalls, -AEPcalc), header=header)
+    np.savetxt(f, (AEPopt, AEPcalc), header=header)
     f.close()
-
 
 
 # if __name__ == "__main__":
