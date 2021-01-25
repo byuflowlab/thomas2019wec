@@ -108,7 +108,7 @@ for run_number in np.arange(0, runs):
     fcalls = np.empty(0)
     obj = np.empty(0)
 
-    for i in np.arange(o, len(expansion_factors)):
+    for i in np.arange(0, len(expansion_factors)):
         fcallsi, obji = get_alpso_history(output_directory_pswec + "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_EF%.3f_TItype%i_print.out" %(run_number, expansion_factors[i], ti_types[i]))
         fcalls = np.append(fcalls,fcallsi)
         obj = np.append(obj,obji)
