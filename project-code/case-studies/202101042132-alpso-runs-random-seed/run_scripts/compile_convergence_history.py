@@ -1,8 +1,8 @@
 import openmdao.api as om
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
+# import pandas as pd
+# import seaborn as sns
 import re
 
 def get_alpso_history(filepath):
