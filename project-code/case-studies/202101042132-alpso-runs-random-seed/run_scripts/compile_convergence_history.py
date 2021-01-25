@@ -44,7 +44,7 @@ output_file_ps = output_directory_ps + "convergence_histories.txt"
 output_file_pswec = output_directory_pswec + "convergence_histories.txt"
 
 # indicate how many optimization runs are to be compiled
-runs = 10
+runs = 200
 
 # # compile SNOPT+WEC convergence history
 # for run_number in np.arange(0, runs):
