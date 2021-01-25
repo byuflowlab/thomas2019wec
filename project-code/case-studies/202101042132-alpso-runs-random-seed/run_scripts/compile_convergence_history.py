@@ -97,7 +97,7 @@ runs = 10
 #     f.close()
 
 # compile ALPSO + WEC convergence history
-max_wec = 6.0
+max_wec = 3.0
 nsteps = 6
 expansion_factors = np.linspace(1.0, max_wec, nsteps)
 expansion_factors = np.append(np.flip(expansion_factors), 1.0)
