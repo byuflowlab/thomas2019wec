@@ -4733,40 +4733,62 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
     labels = ["SNOPT+WEC", 'SNOPT', "ALPSO"]
     colors = ['b', 'c', 'r']
-    alpha = 0.1
+    alpha = 0.08
     markeralpha = 0.5
 
-    if nturbs == 60:
-        date = 20200824
-        aept = 6653047.52233728*nturbs*1E3 #Wh
-        psscale = 1E5
-    elif nturbs == 38:
-        date = 20200821
-        if ndirs == 12:
-            aept = 4994091.77684705*nturbs*1E3 #Wh
-            psscale = 1E5
-        elif ndirs == 36:
-            aept = 1630166.61601323*nturbs*1E3 # Wh
-            psscale = 1E5
-    elif nturbs == 16:
-        date = 20200821
-        aept = 5191363.5933961*nturbs*1E3 # Wh
-        psscale = 1E4
+    if wakemodel == "BPA":
+        if nturbs == 60:
+            date = 20200824
+            aept = 6653047.52233728*nturbs*1E3 #Wh
+            psscale = -1E5
+        elif nturbs == 38:
+            date = 20200821
+            if ndirs == 12:
+                labels = ["SNOPT+WEC", 'SNOPT', "ALPSO", "ALPSO+WEC"]
+                colors = ['b', 'c', 'r','m']
+                aept = 4994091.77684705*nturbs*1E3 #Wh
+                psscale = -1E5
+            elif ndirs == 36:
+                aept = 1630166.61601323*nturbs*1E3 # Wh
+                psscale = -1E5
+        elif nturbs == 16:
+            date = 20200821
+            aept = 5191363.5933961*nturbs*1E3 # Wh
+            psscale = -1E4
+        base_input_directory = "./image_data/opt_results/%i-%i-turbs-%i-dir-fcall-and-conv-history/" % (date, nturbs, ndirs)
+        ps_input_directory = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
+    elif wakemodel == "JENSEN":
+        if nturbs == 38:
+            date = 20201110
+            if ndirs == 12:
+                aept = 5679986.827947*nturbs*1E3 #Wh
+                psscale = 1E5
+            else:
+                raise(EnvironmentError("Invalid Model and Case combination"))
+        else:
+            raise(EnvironmentError("Invalid Model and Case combination"))
+        base_input_directory = "./image_data/opt_results/%i-jensen-%i-turbs-%i-dir-fcal-and-conv-history/" % (date, nturbs, ndirs)
+        ps_input_directory = base_input_directory
+    else:
+        raise(EnvironmentError("Invalid Model and Case combination"))
     # print(aept)
     # Define input location
-    base_input_directory = "./image_data/opt_results/%i-%i-turbs-%i-dir-fcall-and-conv-history/" % (date, nturbs, ndirs)
-    ps_input_directory = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
+    
     input_directory_wec = base_input_directory + "snopt_wec_diam_max_wec_3_nsteps_6.000/"
     input_directory_snopt = base_input_directory + "snopt/"
     input_directory_ps = ps_input_directory + "ps/"
+    input_directory_pswec = ps_input_directory + "pswec/"
 
     # Specify output file name
     input_file_wec = input_directory_wec + "convergence_histories.txt"
     input_file_snopt = input_directory_snopt + "convergence_histories.txt"
     input_file_ps = input_directory_ps + "convergence_histories_%iturbs_%idirs.txt" %(nturbs, ndirs)
-
+    input_file_pswec = input_directory_pswec + "convergence_histories_all_pop.txt"
+    
     # store initial AEP values
     aepinit = np.zeros(200)
+
+    # initalize plot
     fig1, ax1 = plt.subplots(1)
 
     # find how many entries are in the longest WEC convergence history
@@ -4879,28 +4901,64 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         if rownum % 2 == 0:
             # dfcalc.(run, run, pd.Series(data, name=rownum))
             
-            # sall = pd.Series(data, name=rownum)
-            # slist = [aepinit[run]*1E-4]
-            # slist[1:] = sall
-            # s = pd.Series(slist)
-            s = pd.Series(data, name=rownum)
+            sall = pd.Series(data, name=rownum)
+            slist = [aepinit[run]/psscale]
+            slist[1:] = sall
+            s = pd.Series(slist)
+            # s = pd.Series(data, name=rownum)
             # if rownum == 2:
             #     print(s.max())
             # else:
             #     dfcalc_ps.insert(run, run, pd.Series(data, name=rownum))
-            ax1.semilogx(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+            ax1.semilogx(fcalls, 100*(1-s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
             # ax1.plot(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
-            ax1.scatter(fcalls.iloc[-1], 100*(1 + s.iloc[-1]*psscale / aept), marker='o', edgecolor='k', color=colors[2], zorder=10, alpha=markeralpha)
+            ax1.scatter(fcalls.iloc[-1], 100*(1 - s.iloc[-1]*psscale / aept), marker='o', edgecolor='k', color=colors[2], zorder=10, alpha=markeralpha)
             run += 1
         else:
-            # fcallsall = pd.Series(data, name=rownum)
-            # fcallslist = [0]
-            # fcallslist[1:] = fcallsall 
-            # fcalls = pd.Series(fcallslist)
-            fcalls = pd.Series(data, name=rownum)
+            fcallsall = pd.Series(data, name=rownum)
+            fcallslist = [1]
+            fcallslist[1:] = fcallsall 
+            fcalls = pd.Series(fcallslist)
+            # fcalls = pd.Series(data, name=rownum)
 
         rownum += 1
     f.close()
+
+    if wakemodel == "BPA" and ndirs == 12:
+        #  find how many entries are in the longest ALPSO+WEC convergence history
+        f = open(input_file_pswec)
+        maxlength = 0
+        rownum = -1
+        for row in f.readlines():
+            if rownum < 0:
+                rownum += 1
+                continue
+            data = np.fromstring(row, sep=" ")
+            if data.size > maxlength:
+                maxlength = data.size
+        f.close()
+
+        # extract WEC convergence histories to a data frame
+        rownum = -1
+        run = 0
+        f = open(input_file_pswec)
+        for row in f.readlines():
+            if rownum < 0:
+                rownum += 1
+                continue
+
+            data = np.fromstring(row, sep=" ")
+            if rownum % 2 == 0:
+                s = pd.Series(data, name=rownum)
+            else:
+                s = pd.Series(data, name=rownum)
+                ax1.semilogx(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[3], zorder=1)
+                # ax1.plot(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+                ax1.scatter(s.size, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[3], zorder=10, alpha=markeralpha)
+                
+                run += 1
+            rownum += 1
+        f.close()
 
     import matplotlib.patheffects as PathEffects
     lineweight = 2
@@ -4914,13 +4972,24 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         plt.ylim([0, 40])
     if nturbs == 38:
         if ndirs == 12:
-            txt0 = plt.text(3E2, 9, labels[0], color=colors[0])
-            # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt1 = plt.text(5E1, 12, labels[1], color=colors[1])
-            # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt2 = plt.text(7E3, 11, labels[2], color=colors[2])
-            # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            plt.ylim([5, 40])
+            if wakemodel == "BPA":
+                txt0 = plt.text(3E2, 9, labels[0], color=colors[0])
+                # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                txt1 = plt.text(5E1, 12, labels[1], color=colors[1])
+                # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                txt2 = plt.text(7E3, 11, labels[2], color=colors[2])
+                # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                txt3 = plt.text(1E2, 35, labels[3], color=colors[3])
+                # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                # plt.ylim([5, 40])
+            elif wakemodel == "JENSEN":
+                txt0 = plt.text(2E3, 15.5, labels[0], color=colors[0])
+                # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                txt1 = plt.text(5E2, 17, labels[1], color=colors[1])
+                # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                txt2 = plt.text(6E3, 21, labels[2], color=colors[2])
+                # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
+                plt.ylim([15,35])
         if ndirs == 36:
             txt0 = plt.text(8E2, 18, labels[0], color=colors[0])
             # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
@@ -4937,6 +5006,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         txt2 = plt.text(7E3, 6.75, labels[2], color=colors[2])
         # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         plt.ylim([5, 25])
+
+    tick_spacing = 5
+    ax1.yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+
     # plt.text(labels[0])
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
@@ -5123,10 +5196,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    nturbs = 16
-    ndirs = 20
+    nturbs = 38
+    ndirs = 12
     model = "BPA"
     filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs)
+    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model)
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)

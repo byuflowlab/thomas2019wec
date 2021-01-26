@@ -125,6 +125,7 @@ runs = 200
 #     f.close()
 
 for run_number in np.arange(0, runs):
+    print("getting history for run %i" %(run_number))
 
     data_in = np.loadtxt(output_directory_pswec+"convergence_history_run%i.txt" %(run_number))
 

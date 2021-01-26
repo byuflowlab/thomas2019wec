@@ -926,11 +926,9 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
             prob['turbineX'] = np.copy(case['turbineX'])
             prob['turbineY'] = np.copy(case['turbineY'])
-            if opt_algorithm == "snopt":
-                prob.run_model(case_prefix='ProcessingRun')
-                AEPcalc[i] = np.copy(prob['AEP'])
-            else:
-                AEPcalc[i] = case['AEP']
+        
+            prob.run_model(case_prefix='ProcessingRun')
+            AEPcalc[i] = np.copy(prob['AEP'])
 
             calls[i] = i
         header = "Convergence history of AEP (Wh): opt model, analysis model, obj"
