@@ -3,7 +3,7 @@ from __future__ import print_function
 import openmdao.api as om
 from openmdao.devtools import iprofile
 
-from plantenergy.OptimizationGroups import OptAEP
+from plantenergy.GeneralWindFarmGroups import AEPGroup
 from plantenergy.gauss import gauss_wrapper, add_gauss_params_IndepVarComps
 from plantenergy.floris import floris_wrapper, add_floris_params_IndepVarComps
 from plantenergy import config
@@ -329,6 +329,10 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     plot_round_farm(turbineX, turbineY, rotor_diameter, [boundary_center_x, boundary_center_y], boundary_radius,
                     show_start=show_start)
+    
+    turbineX = np.zeros(1)
+    turbineY = np.zeros(1)
+    nTurbines = 1
     # quit()
     # initialize input variable arrays
     nTurbs = nTurbines
@@ -339,7 +343,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     Cp = np.zeros(nTurbs)
     generatorEfficiency = np.zeros(nTurbs)
     yaw = np.zeros(nTurbs)
-    minSpacing = 2.  # number of rotor diameters
+    minSpacing = None # number of rotor diameters
 
     # define initial values
     for turbI in range(0, nTurbs):
@@ -384,7 +388,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     wake_model_options = {'nSamples': 0,
                           'nRotorPoints': nRotorPoints,
-                          'use_ct_curve': False,
+                          'use_ct_curve': True,
                           'ct_curve_ct': ct_curve_ct,
                           'ct_curve_wind_speed': ct_curve_wind_speed,
                           'interp_type': 1,
@@ -395,7 +399,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     if MODELS[model] == 'BPA':
         # initialize problem
-        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
+        prob = om.Problem(model=AEPGroup(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
                                        minSpacing=minSpacing, differentiable=differentiable,
                                        use_rotor_components=False,
                                        wake_model=gauss_wrapper,
@@ -406,8 +410,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                        record_function_calls=True, runparallel=False))
     elif MODELS[model] == 'FLORIS':
         # initialize problem
-        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-                                       minSpacing=minSpacing, differentiable=differentiable,
+        prob = om.Problem(model=AEPGroup(nTurbines=nTurbs, nDirections=windDirections.size,
+                                       differentiable=differentiable,
                                        use_rotor_components=False,
                                        wake_model=floris_wrapper,
                                        params_IdepVar_func=add_floris_params_IndepVarComps,
@@ -415,8 +419,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
                                        record_function_calls=True))
     elif MODELS[model] == 'JENSEN':
         # initialize problem
-        prob = om.Problem(model=OptAEP(nTurbines=nTurbs, nDirections=windDirections.size, nVertices=nVertices,
-                                       minSpacing=minSpacing, differentiable=differentiable, use_rotor_components=False,
+        prob = om.Problem(model=AEPGroup(nTurbines=nTurbs, nDirections=windDirections.size, 
+                                       differentiable=differentiable, use_rotor_components=False,
                                        wake_model=jensen_wrapper, wake_model_options=wake_model_options,
                                        params_IdepVar_func=add_jensen_params_IndepVarComps,
                                        cp_points=cp_curve_cp.size, cp_curve_spline=cp_curve_spline,
@@ -436,147 +440,6 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     # prob.model.linear_solver = om.DirectSolver()
 
-    prob.driver = om.pyOptSparseDriver()
-
-    if opt_algorithm == 'snopt':
-        # set up optimizer
-        prob.driver.options['optimizer'] = 'SNOPT'
-        prob.driver.options['gradient method'] = 'snopt_fd'
-
-        # set optimizer options
-        prob.driver.opt_settings['Verify level'] = -1
-        # set optimizer options
-        prob.driver.opt_settings['Major optimality tolerance'] = np.float(1e-3)
-
-        prob.driver.opt_settings[
-            'Print file'] = output_directory + 'SNOPT_print_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
-            nTurbs, wind_rose_file, size, MODELS[model], run_number)
-        prob.driver.opt_settings[
-            'Summary file'] = output_directory + 'SNOPT_summary_multistart_%iturbs_%sWindRose_%idirs_%sModel_RunID%i.out' % (
-            nTurbs, wind_rose_file, size, MODELS[model], run_number)
-
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)  # ,
-        # active_tol=(2. * rotor_diameter) ** 2)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)  # ,
-        # active_tol=2. * rotor_diameter)
-
-        prob.driver.options['dynamic_derivs_sparsity'] = True
-
-    elif opt_algorithm == 'ga':
-
-        prob.driver.options['optimizer'] = 'NSGA2'
-
-        prob.driver.opt_settings['PrintOut'] = 1
-
-        prob.driver.opt_settings['maxGen'] = 50000
-
-        prob.driver.opt_settings['PopSize'] = 10 * nTurbines * 2
-
-        # prob.driver.opt_settings['pMut_real'] = 0.001
-
-        prob.driver.opt_settings['xinit'] = 1
-
-        prob.driver.opt_settings['rtol'] = 1E-4
-
-        prob.driver.opt_settings['atol'] = 1E-4
-
-        prob.driver.opt_settings['min_tol_gens'] = 200
-
-        prob.driver.opt_settings['file_number'] = run_number
-
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-4)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-4)
-
-
-    elif opt_algorithm == 'ps':
-        prob.driver.options['optimizer'] = 'ALPSO'
-        prob.driver.opt_settings["SwarmSize"] = 30  # Number of Particles (Depends on Problem dimensions)
-        prob.driver.opt_settings["maxOuterIter"] = OuterIter # Maximum Number of Outer Loop Iterations (Major Iterations)
-        prob.driver.opt_settings["maxInnerIter"] = InnerIter  # Maximum Number of Inner Loop Iterations (Minor Iterations)
-        prob.driver.opt_settings["minInnerIter"] = InnerIter  # Minimum Number of Inner Loop Iterations (Dynamic Inner Iterations)
-        prob.driver.opt_settings["dynInnerIter"] = 0  # Dynamic Number of Inner Iterations Flag
-        prob.driver.opt_settings["stopCriteria"] = 0  # Stopping Criteria Flag (0 - maxIters, 1 - convergence)
-        prob.driver.opt_settings["stopIters"] = 5  # Consecutive Number of Iterations for which the Stopping Criteria must be Satisfied
-        prob.driver.opt_settings["etol"] = 1e-3  # Absolute Tolerance for Equality constraints
-        prob.driver.opt_settings["itol"] = 1e-3  # Absolute Tolerance for Inequality constraints
-        # 'ltol':[float, 1e-2],            # Absolute Tolerance for Lagrange Multipliers
-        prob.driver.opt_settings["rtol"] = 1e-6  # Relative Tolerance for Lagrange Multipliers
-        prob.driver.opt_settings["atol"] = 1e-6  # Absolute Tolerance for Lagrange Function
-        prob.driver.opt_settings["dtol"] = 1e-1  # Relative Tolerance in Distance of All Particles to Terminate (GCPSO)
-        prob.driver.opt_settings["printOuterIters"] = 0  # Number of Iterations Before Print Outer Loop Information
-        prob.driver.opt_settings["printInnerIters"] = 0  # Number of Iterations Before Print Inner Loop Information
-        prob.driver.opt_settings["rinit"] = 1.0  # Initial Penalty Factor
-        prob.driver.opt_settings["xinit"] = 1  # Initial Position Flag (0 - no position, 1 - position given)
-        prob.driver.opt_settings["vinit"] = 1.0  # Initial Velocity of Particles in Normalized [-1, 1] Design Space
-        prob.driver.opt_settings["vmax"] = 2.0  # Maximum Velocity of Particles in Normalized [-1, 1] Design Space
-        prob.driver.opt_settings["c1"] = 2.0  # Cognitive Parameter
-        prob.driver.opt_settings["c2"] = 1.0  # Social Parameter
-        prob.driver.opt_settings["w1"] = 0.99  # Initial Inertia Weight
-        prob.driver.opt_settings["w2"] = 0.55  # Final Inertia Weight
-        prob.driver.opt_settings["ns"] = 15 # Number of Consecutive Successes in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
-        prob.driver.opt_settings["nf"] = 5 # Number of Consecutive Failures in Finding New Best Position of Best Particle Before Search Radius will be Increased (GCPSO)
-        prob.driver.opt_settings["dt"] = 1.0  # Time step
-        prob.driver.opt_settings["vcrazy"] = 1e-2 # Craziness Velocity (Added to Particle Velocity After Updating the Penalty Factors and Langangian Multipliers)
-        prob.driver.opt_settings["fileout"] = 1  # Flag to Turn On Output to filename
-        # prob.driver.opt_settings["filename"] = "ALPSO.out" # We could probably remove fileout flag if filename or fileinstance is given
-        prob.driver.opt_settings["seed"] = 0.0  # Random Number Seed (0 - Auto-Seed based on time clock)
-        prob.driver.opt_settings["HoodSize"] = 5  # Number of Neighbours of Each Particle
-        prob.driver.opt_settings["HoodModel"] = "gbest" # Neighbourhood Model (dl/slring - Double/Single Link Ring, wheel - Wheel, Spatial - based on spatial distance, sfrac - Spatial Fraction)
-        prob.driver.opt_settings["HoodSelf"] = 1 # Selfless Neighbourhood Model (0 - Include Particle i in NH i, 1 - Don't Include Particle i)
-        prob.driver.opt_settings["Scaling"] = 1  # Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1, 1])
-        # prob.driver.opt_settings["parallelType"] = 'EXT'  # Type of parallelization ('' or 'EXT')
-
-        prob.model.add_constraint('sc', lower=np.zeros(int(((nTurbs - 1.) * nTurbs / 2.))), scaler=1E-7)
-        prob.model.add_constraint('boundaryDistances', lower=(np.zeros(1 * turbineX.size)), scaler=1E-7)
-
-        # prob.driver.add_objective('obj', scaler=1E0)
-    prob.model.add_objective('obj', scaler=1E-9)
-
-    # select design variables
-    prob.model.add_design_var('turbineX', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
-    prob.model.add_design_var('turbineY', scaler=1E-4, lower=np.zeros(nTurbines),
-                              upper=np.ones(nTurbines) * 2. * boundary_radius)
-
-    # prob.model.ln_solver.options['single_voi_relevance_reduction'] = True
-    # prob.model.ln_solver.options['mode'] = 'rev'
-
-    # if run_number == 0:
-    #     # set up recorder
-    #     recorder = SqliteRecorder(output_directory+'recorder_database_run%i' % run_number)
-    #     recorder.options['record_params'] = True
-    #     recorder.options['record_metadata'] = False
-    #     recorder.options['record_unknowns'] = True
-    #     recorder.options['record_derivs'] = False
-    #     recorder.options['includes'] = ['turbineX', 'turbineY', 'AEP']
-    #     prob.driver.add_recorder(recorder)
-
-    if record:
-        driver_recorder = om.SqliteRecorder(output_directory + 'recorded_data_driver_%s.sql' %(run_number))
-        # model_recorder = om.SqliteRecorder(output_directory + 'recorded_data_model_%s.sql' %(run_number))
-        prob.driver.add_recorder(driver_recorder)
-        # prob.model.add_recorder(model_recorder)
-        prob.driver.recording_options['record_constraints'] = False
-        prob.driver.recording_options['record_derivatives'] = False
-        prob.driver.recording_options['record_desvars'] = True
-        prob.driver.recording_options['record_inputs'] = False
-        prob.driver.recording_options['record_model_metadata'] = True
-        prob.driver.recording_options['record_objectives'] = True
-        prob.driver.recording_options['includes'] = ['AEP']
-        prob.driver.recording_options['record_responses'] = False
-    #
-    # prob_recorder = om.SqliteRecorder(output_directory + 'recorded_data_prob_%s.sql' %(run_number))
-    # prob.add_recorder(prob_recorder)
-    # prob.recording_options['includes'] = []
-    # prob.recording_options['record_objectives'] = True
-
-    # set up profiling
-    # from plantenergy.GeneralWindFarmComponents import WindFarmAEP
-    # methods = [
-    #     ('*', (WindFarmAEP,))
-    # ]
-    #
-    # iprofile.setup(methods=methods)
 
     print("almost time for setup")
     tic = time.time()
@@ -619,10 +482,6 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     prob['rated_wind_speed'] = np.ones(nTurbines) * rated_wind_speed
     prob['use_power_curve_definition'] = True
 
-    # assign boundary values
-    prob['boundary_center'] = np.array([boundary_center_x, boundary_center_y])
-    prob['boundary_radius'] = boundary_radius
-
     if MODELS[model] == 'BPA':
         prob['model_params:wake_combination_method'] = np.copy(wake_combination_method)
         prob['model_params:ti_calculation_method'] = np.copy(ti_calculation_method)
@@ -649,8 +508,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     modelruns = 0
     prob.run_model(case_prefix='ModelRun%i' %modelruns)
     AEP_init_calc = np.copy(prob['AEP'])
-    print(AEP_init_calc * 1E-6)
-
+    print("aep for one turbine is %f (kWhr)" %(AEP_init_calc))
+    quit()
     if MODELS[model] == 'BPA':
         prob['model_params:ti_calculation_method'] = np.copy(ti_opt_method)
         prob['model_params:calc_k_star'] = np.copy(calc_k_star_opt)
@@ -985,18 +844,18 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 if __name__ == "__main__":
 
     # specify which starting layout should be used
-    layout_number = int(sys.argv[1])
-    # layout_number = 0
-    wec_method_number = int(sys.argv[2])
-    # wec_method_number = 0
-    model = int(sys.argv[3])
-    # model = 1
-    opt_alg_number = int(sys.argv[4])
-    # opt_alg_number = 2
-    max_wec = int(sys.argv[5])
-    # max_wec = 3
-    nsteps = int(sys.argv[6])
-    # nsteps = 6
+    # layout_number = int(sys.argv[1])
+    layout_number = 0
+    # wec_method_number = int(sys.argv[2])
+    wec_method_number = 0
+    # model = int(sys.argv[3])
+    model = 2
+    # opt_alg_number = int(sys.argv[4])
+    opt_alg_number = 2
+    # max_wec = int(sys.argv[5])
+    max_wec = 3
+    # nsteps = int(sys.argv[6])
+    nsteps = 6
 
     pop = 30
     maxcalls = 20000

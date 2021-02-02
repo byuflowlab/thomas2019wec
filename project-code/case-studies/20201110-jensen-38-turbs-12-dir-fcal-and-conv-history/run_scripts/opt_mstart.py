@@ -92,7 +92,7 @@ def plot_square_farm(turbineX, turbineY, rotor_diameter, boundary_x, boundary_y,
     if show_start:
         plt.show()
 
-def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps):
+def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_wec, nsteps, ii, oi, record):
     OPENMDAO_REQUIRE_MPI = False
     run_number = layout_number
     model = wake_model
@@ -384,7 +384,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     wake_model_options = {'nSamples': 0,
                           'nRotorPoints': nRotorPoints,
-                          'use_ct_curve': True,
+                          'use_ct_curve': False,
                           'ct_curve_ct': ct_curve_ct,
                           'ct_curve_wind_speed': ct_curve_wind_speed,
                           'interp_type': 1,
@@ -441,10 +441,10 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     if opt_algorithm == 'snopt':
         # set up optimizer
         prob.driver.options['optimizer'] = 'SNOPT'
-        prob.driver.options['gradient method'] = 'snopt_fd'
+        # prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = -1
+        prob.driver.opt_settings['Verify level'] = 3
         # set optimizer options
         prob.driver.opt_settings['Major optimality tolerance'] = np.float(1e-3)
 
@@ -661,7 +661,9 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
     AEP_init_opt = np.copy(prob['AEP'])
     AEP_run_opt = np.copy(AEP_init_opt)
     print(AEP_init_opt * 1E-6)
-
+    prob.check_partials(show_only_incorrect=True,abs_err_tol=1E-1,compact_print=True)
+    # prob.check_totals(step=1E-6)
+    # quit()
     config.obj_func_calls_array[:] = 0.0
     config.sens_func_calls_array[:] = 0.0
 
@@ -1017,7 +1019,7 @@ if __name__ == "__main__":
     wec_method_number = int(sys.argv[2])
     # wec_method_number = 0
     model = int(sys.argv[3])
-    # model = 2
+    # model = 2 # [floris, bpa, jensen]
     opt_alg_number = int(sys.argv[4])
     # opt_alg_number = 0
     max_wec = int(sys.argv[5])
