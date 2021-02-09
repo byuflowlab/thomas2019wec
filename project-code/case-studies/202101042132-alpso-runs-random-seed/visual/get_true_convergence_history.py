@@ -46,7 +46,7 @@ def parse_alpso_file(path, nturbines):
     for i in np.arange(0, nturbines):
         with open(path) as f:
             # find the location fot he given wind turbine at all steps
-            pattern = re.compile('(?<=P\\(%i\\) = )\d+.\d+' %(i))
+            pattern = re.compile('(?<=P\\(%i\\) = )\d+.\d+|(?<=P\\(%i\\) = )\d' %(i,i))
             p = re.findall(pattern, f.read())
 
         # save positions for this turbine at all steps
@@ -56,7 +56,7 @@ def parse_alpso_file(path, nturbines):
     for i in np.arange(nturbines, 2*nturbines):
         with open(path) as f:
             # find the location fot he given wind turbine at all steps
-            pattern = re.compile('(?<=P\\(%i\\) = )\d+.\d+' %(i))
+            pattern = re.compile('(?<=P\\(%i\\) = )\d+.\d+|(?<=P\\(%i\\) = )\d' %(i,i))
             p = re.findall(pattern, f.read())
 
         # save positions for this turbine at all steps
@@ -632,5 +632,6 @@ def get_convergencec_histories(directory, nturbines=38, nruns=200, nsteps=6, max
 if __name__ == "__main__":
 
     directory = "../output_files/pswec/"
+    # directory = "../output_files/ps_wec_diam_max_wec_3_nsteps_6.000/"
     get_convergencec_histories(directory, nruns=1)
 
