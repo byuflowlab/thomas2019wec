@@ -50,6 +50,8 @@ def parse_alpso_file(path, nturbines):
             p = re.findall(pattern, f.read())
 
         # save positions for this turbine at all steps
+        if len(p) < steps:
+            print("error at x ", i)
         xpositions[:, i] = p
 
     # parse file for all turbine y locations at each step
@@ -60,6 +62,8 @@ def parse_alpso_file(path, nturbines):
             p = re.findall(pattern, f.read())
 
         # save positions for this turbine at all steps
+        if len(p) < steps:
+            print("error at y ", i)
         ypositions[:, i-nturbines] = p
 
     return fcalls, xpositions*1E4, ypositions*1E4
