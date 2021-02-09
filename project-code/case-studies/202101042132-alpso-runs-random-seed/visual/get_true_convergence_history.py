@@ -637,5 +637,5 @@ if __name__ == "__main__":
 
     directory = "../output_files/pswec/"
     # directory = "../output_files/ps_wec_diam_max_wec_3_nsteps_6.000/"
-    get_convergencec_histories(directory, nruns=1)
+    get_convergencec_histories(directory, nruns=200)
 
