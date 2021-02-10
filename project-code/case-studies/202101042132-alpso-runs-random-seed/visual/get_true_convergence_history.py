@@ -35,7 +35,7 @@ def parse_alpso_file(path, nturbines):
         fcalls = list(map(np.int, re.findall(fcall_pattern,f.read(),re.MULTILINE)))
 
     # find how many steps in optimization
-    print(fcalls)
+    # print(fcalls)
     steps = len(fcalls)
 
     # initialize position array with correct shape steps by turbines
@@ -53,6 +53,7 @@ def parse_alpso_file(path, nturbines):
         if len(p) < steps:
             print("error at x ", i)
         xpositions[:, i] = p
+        # print(p)
 
     # parse file for all turbine y locations at each step
     for i in np.arange(nturbines, 2*nturbines):
@@ -65,6 +66,7 @@ def parse_alpso_file(path, nturbines):
         if len(p) < steps:
             print("error at y ", i)
         ypositions[:, i-nturbines] = p
+        # print(p)
 
     return fcalls, xpositions*1E4, ypositions*1E4
 
@@ -514,7 +516,7 @@ def set_up_prob():
     # print("almost time for setup")
     tic = time.time()
     # print("entering setup at time = ", tic)
-    prob.setup(check=True)
+    prob.setup(check=False)
     toc = time.time()
     # print("setup complete at time = ", toc)
 
@@ -605,14 +607,18 @@ def get_convergencec_histories(directory, nturbines=38, nruns=200, nsteps=6, max
 
     # initialize model
     prob = set_up_prob()
-
     # parse each full set of optimization runs
     for i in np.arange(0, nruns):
-        print("Run: %i" %(i))
+        # print("Run: %i" %(i))
+        aepallsteps = np.empty(0)
+        fcallsallsteps = np.empty(0)
         # parse the file for each step
         for j in np.arange(0, nsteps+1):
-            print("Run: %i" %(i))
-            print("Step: %i" %j)
+            if j == 0:
+                print("Run: %i " %(i), end='')
+                print("Step: %i " %j, end='', flush=True)
+            else:
+                print("%i " %j, end='', flush=True)
             filename = "ALPSO_summary_multistart_38turbs_nantucketWindRose_12dirs_BPAModel_RunID%i_EF%.3f_TItype%i_print.out" % (i, expansion_factors[j], ti_types[j])
             path = directory+filename
             fcalls, xpositions, ypositions = parse_alpso_file(path, nturbines)
@@ -620,16 +626,21 @@ def get_convergencec_histories(directory, nturbines=38, nruns=200, nsteps=6, max
             aep = np.zeros(oi)
             for k in np.arange(0, oi):
                 a = calculate_aep(prob, xpositions[k,:], ypositions[k,:])
-                print(a)
                 aep[k] = a[0]
-            f = open(output_file_pswec, "a")
-            if i == 0 and j == 0:
-                header = "convergence history alternating row function calls, AEP (W)"
-            else:
-                header = ""
-            print(fcalls, aep)
-            np.savetxt(f, (fcalls, aep), header=header)
-            f.close()
+            aepallsteps = np.append(aepallsteps, aep)
+            if j > 0:
+                fcalls += fcallsallsteps[-1]
+            fcallsallsteps = np.append(fcallsallsteps, fcalls)
+            # print(fcallsallsteps, aepallsteps)
+        print('')
+        f = open(output_file_pswec, "a")
+        if i == 0:
+            header = "convergence history alternating row function calls, AEP (W)"
+        else:
+            header = ""
+        # print(fcallsallsteps, aepallsteps)
+        np.savetxt(f, (fcallsallsteps, aepallsteps), header=header)
+        f.close()
 
     return
 
@@ -637,5 +648,5 @@ if __name__ == "__main__":
 
     directory = "../output_files/pswec/"
     # directory = "../output_files/ps_wec_diam_max_wec_3_nsteps_6.000/"
-    get_convergencec_histories(directory, nruns=200)
+    get_convergencec_histories(directory, nruns=1)
 
