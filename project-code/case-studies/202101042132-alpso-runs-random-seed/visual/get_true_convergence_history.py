@@ -590,23 +590,20 @@ def calculate_aep(prob, xpositions, ypositions):
     AEP_init_calc = np.copy(prob['AEP'])*1E3 # convert to Whr
     return AEP_init_calc
 
-# def get_position_set(directory, runid, , titypes=None):
-#     if titypes == None:
-#         titypes = np.zeros_like(expansion_factors)
-#         titypes[-1] = 5
-
-
 def get_convergencec_histories(directory, nturbines=38, nruns=200, nsteps=6, maxwec=3):
 
     # name output file
     output_file_pswec = directory+"convergence_histories.txt"
+    
     # set up expansion factor array
     expansion_factors=np.append(np.flip(np.linspace(1,maxwec,nsteps)),1)
+
     # set up ti types array
     ti_types = np.array([0, 0, 0, 0, 0, 0, 5])
 
     # initialize model
     prob = set_up_prob()
+
     # parse each full set of optimization runs
     for i in np.arange(0, nruns):
         # print("Run: %i" %(i))

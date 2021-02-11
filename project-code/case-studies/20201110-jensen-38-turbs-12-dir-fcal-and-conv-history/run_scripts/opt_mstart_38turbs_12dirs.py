@@ -444,7 +444,8 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
         prob.driver.options['gradient method'] = 'snopt_fd'
 
         # set optimizer options
-        prob.driver.opt_settings['Verify level'] = -1
+        prob.driver.opt_settings['Verify level'] = 3
+        
         # set optimizer options
         prob.driver.opt_settings['Major optimality tolerance'] = np.float(1e-3)
 
