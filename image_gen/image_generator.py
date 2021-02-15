@@ -4726,7 +4726,7 @@ def plot_jensen_diagram(filename, save_figs, show_figs):
 
     return
 
-def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA"):
+def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", logplot=False):
 
     # indicate how many optimization runs are to be plotted
     runs = 200
@@ -4819,9 +4819,11 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             s = pd.Series(data, name=rownum)
         else:
             s = pd.Series(data, name=rownum)
-            ax1.semilogx(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
-            # ax1.plot(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
-            ax1.scatter(s.size, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
+            if logplot:
+                ax1.semilogx(np.arange(1, s.size+1)*2-1, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+            else:
+                ax1.plot(np.arange(1, s.size+1)*2-1, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+            ax1.scatter(s.size*2, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
             
             run += 1
         rownum += 1
@@ -4860,10 +4862,12 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             run += 1
 
             loss = 100*(1-s/aept)
-            ax1.semilogx(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
-            # ax1.plot(np.arange(1, s.size+1), 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
+            if logplot:
+                ax1.semilogx(np.arange(1, s.size+1)*2-1, 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
+            else:
+                ax1.plot(np.arange(1, s.size+1)*2-1, 100*(1-s/aept), alpha=alpha, color=colors[1], zorder=1)
 
-            ax1.scatter(s.size, 100*(1 - s.iloc[-1] / aept), marker='o', edgecolor='k', color=colors[1], zorder=10, alpha=markeralpha)
+            ax1.scatter(s.size*2, 100*(1 - s.iloc[-1] / aept), marker='o', edgecolor='k', color=colors[1], zorder=10, alpha=markeralpha)
             
         rownum += 1
     f.close()
@@ -4912,8 +4916,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
                 #     print(s.max())
                 # else:
                 #     dfcalc_ps.insert(run, run, pd.Series(data, name=rownum))
-                ax1.semilogx(fcalls, 100*(1-s*pswscale/aept), alpha=alpha, color=colors[3], zorder=1)
-                # ax1.plot(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+                if logplot:
+                    ax1.semilogx(fcalls, 100*(1-s*pswscale/aept), alpha=alpha, color=colors[3], zorder=1)
+                else:
+                    ax1.plot(fcalls, 100*(1-s*pswscale/aept), alpha=alpha, color=colors[3], zorder=1)
                 ax1.scatter(fcalls.iloc[-1], 100*(1 - s.iloc[-1]*pswscale / aept), marker='o', edgecolor='k', color=colors[3], zorder=10, alpha=markeralpha)
                 run += 1
             else:
@@ -4969,8 +4975,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             #     print(s.max())
             # else:
             #     dfcalc_ps.insert(run, run, pd.Series(data, name=rownum))
-            ax1.semilogx(fcalls, 100*(1-s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
-            # ax1.plot(fcalls, 100*(1+s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+            if logplot:
+                ax1.semilogx(fcalls, 100*(1-s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
+            else:
+                ax1.plot(fcalls, 100*(1-s*psscale/aept), alpha=alpha, color=colors[2], zorder=1)
             ax1.scatter(fcalls.iloc[-1], 100*(1 - s.iloc[-1]*psscale / aept), marker='o', edgecolor='k', color=colors[2], zorder=10, alpha=markeralpha)
             run += 1
         else:
@@ -5394,7 +5402,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    plot_distributions(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA")
+    # plot_distributions(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA")
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -5501,10 +5509,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    # nturbs = 38
-    # ndirs = 12
-    # model = "BPA"
-    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model)
+    nturbs = 16
+    ndirs = 20
+    model = "BPA"
+    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
