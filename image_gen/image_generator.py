@@ -16,6 +16,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pandas as pd
 import seaborn as sns
 import re
+from time import sleep
+
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", use_cbar=True, **kwargs):
@@ -650,7 +652,8 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
         # set results directory
         # rdir = "./image_data/opt_results/202004011312-max-wec-const-nsteps6/"
         rdir = "./image_data/opt_results/20200520-38-turbs-12-dir-nsteps6-maxwec/"
-
+        psrdir = "./image_data/opt_results/202101042132-alpso-runs-random-seed/ps/"
+        srdir = "./image_data/opt_results/20200821-38-turbs-12-dir-fcall-and-conv-history/snopt/"
         # set wec method directory perfixes
         wadirp = "snopt_wec_angle_max_wec_"
         wddirp = "snopt_wec_diam_max_wec_"
@@ -675,6 +678,8 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     # define maximum AEP
     max_possible_aep = 189.77548752 * 1E6  # GWh -> kWh
 
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
     # loop through each wec approach
     for i in np.arange(0,np.size(approaches)):
         approach = approaches[i]
@@ -745,7 +750,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     # load SNOPT data
     data_snopt_no_wec = np.loadtxt(
-        rdir+"snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        srdir+"snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
     # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
     # run time (s), obj func calls, sens func calls
@@ -766,7 +771,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     snw_min_wake_loss = np.min(snw_run_wake_loss)
 
     # load ALPSO data
-    data_ps = np.loadtxt(rdir+"ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    data_ps = np.loadtxt(psrdir+"ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
     ps_id = data_ps[:, 0]
     ps_ef = np.ones_like(ps_id)
     ps_orig_aep = data_ps[0, 4]
@@ -788,23 +793,24 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     plt.gcf().clear()
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
-    colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
+    # colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
+    colors = ["#F5793A", "#0F2080", "#85C0F9", "#BDB8AD", "#A95AA1", "#382119"]
 
-    ax2.set_xlabel('Max WEC Value', color=colors[1])
-    ax2.tick_params(axis='x', labelcolor=colors[2])
+    ax1.set_xlabel('Max WEC Value', color=colors[1])
+    ax1.tick_params(axis='x', labelcolor=colors[2])
 
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[0])
+    ax2.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax2.tick_params(axis='x', labelcolor=colors[0])
 
     ax1.set_ylabel("Minimum Wake Loss (%)")
 
     labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
 
-    aplt, = ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], min_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--', label=labels[3], color=colors[3])
-    splt, = ax2.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[3])
+    aplt, = ax2.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax1.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax1.plot(wec_step_ranges[2], min_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
+    pplt, = ax1.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--', label=labels[3], color=colors[3])
+    splt, = ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[4])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
@@ -820,21 +826,21 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     fig, ax1 = plt.subplots()
     ax2 = ax1.twiny()
 
-    ax2.set_xlabel('Max WEC Value', color=colors[1])
-    ax2.tick_params(axis='x', labelcolor=colors[2])
+    ax1.set_xlabel('Max WEC Value', color=colors[1])
+    ax1.tick_params(axis='x', labelcolor=colors[2])
 
     ax1.set_ylabel("Mean Wake Loss (%)")
 
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[0])
+    ax2.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax2.tick_params(axis='x', labelcolor=colors[0])
 
-    aplt, = ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3])
-    splt, = ax2.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4])
+    aplt, = ax2.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
+    pplt, = ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3], color=colors[3])
+    splt, = ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4], color=colors[4])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -851,20 +857,20 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     ax1.set_ylabel("Standard Deviation of Wake Loss (%)")
     
-    ax2.set_xlabel('Max WEC Value', color=colors[1])
-    ax2.tick_params(axis='x', labelcolor=colors[2])
+    ax1.set_xlabel('Max WEC Value', color=colors[1])
+    ax1.tick_params(axis='x', labelcolor=colors[2])
 
-    ax1.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
-    ax1.tick_params(axis='x', labelcolor=colors[0])
+    ax2.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+    ax2.tick_params(axis='x', labelcolor=colors[0])
 
-    aplt, = ax1.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    dplt, = ax2.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    hplt, = ax2.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
-    pplt, = ax2.plot([2,10], [ps_std_wake_loss, ps_std_wake_loss], '--k', label=labels[3])
-    splt, = ax2.plot([2,10], [snw_std_wake_loss, snw_std_wake_loss], ':k', label=labels[4])
+    aplt, = ax2.plot(wec_step_ranges[0], std_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+    dplt, = ax1.plot(wec_step_ranges[1], std_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+    hplt, = ax1.plot(wec_step_ranges[2], std_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none")
+    pplt, = ax1.plot([2,10], [ps_std_wake_loss, ps_std_wake_loss], '--', label=labels[3], color=colors[3])
+    splt, = ax1.plot([2,10], [snw_std_wake_loss, snw_std_wake_loss], ':', label=labels[4], color=colors[4])
 
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     plt.tight_layout()
 
     if save_figs:
@@ -1014,7 +1020,9 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
         # set results directory
         # rdir = "./image_data/opt_results/202004080902-nsteps-maxwec-3/"
         rdir = "./image_data/opt_results/20200602-38-turbs-12-dir-nsteps-maxweca9/"
-
+        psrdir = "./image_data/opt_results/202101042132-alpso-runs-random-seed/ps/"
+        srdir = "./image_data/opt_results/20200821-38-turbs-12-dir-fcall-and-conv-history/snopt/"
+        
         # set wec method directory prefixes
         wadirp = "snopt_wec_angle_max_wec_9_nsteps_"
         wddirp = "snopt_wec_diam_max_wec_3_nsteps_"
@@ -1109,7 +1117,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     # load SNOPT data
     data_snopt_no_wec = np.loadtxt(
-        rdir+"snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+        srdir+"snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
 
     # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
     # run time (s), obj func calls, sens func calls
@@ -1130,7 +1138,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     snw_min_wake_loss = np.min(snw_run_wake_loss)
 
     # load ALPSO data
-    data_ps = np.loadtxt(rdir+"ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    data_ps = np.loadtxt(psrdir+"ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
     ps_id = data_ps[:, 0]
     ps_ef = np.ones_like(ps_id)
     ps_orig_aep = data_ps[0, 4]
@@ -1152,7 +1160,8 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     plt.gcf().clear()
     fig, ax1 = plt.subplots()
 
-    colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
+    # colors = ['tab:red', 'tab:blue', 'tab:blue', 'k']
+    colors = ["#F5793A", "#0F2080", "#85C0F9", "#BDB8AD", "#A95AA1", "#382119"]
     ax1.set_xlabel('Number of WEC Steps', color='k')
     ax1.set_ylabel("Minimum Wake Loss (%)")
 
@@ -1162,8 +1171,8 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], min_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--k', label=labels[3])
-    ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':k', label=labels[4])
+    ax1.plot([2,10], [ps_min_wake_loss, ps_min_wake_loss], '--', label=labels[3], color=colors[3])
+    ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
 
@@ -1187,8 +1196,8 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
     ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[2], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3])
-    ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4])
+    ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--', label=labels[3], color=colors[3])
+    ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':', label=labels[4], color=colors[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
     ax1.spines['top'].set_visible(False)
@@ -4732,7 +4741,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     runs = 200
 
     labels = ["SNOPT+WEC", 'SNOPT', "ALPSO"]
-    colors = ['b', 'c', 'r']
+    colors = ["#0F2080", "#85C0F9", "#F5793A"]
     alpha = 0.08
     markeralpha = 0.5
 
@@ -4745,7 +4754,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             date = 20200821
             if ndirs == 12:
                 labels = ["SNOPT+WEC", 'SNOPT', "ALPSO", "ALPSO+WEC"]
-                colors = ['b', 'c', 'r','g']
+                colors = ["#0F2080", "#85C0F9", "#F5793A", "#A95AA1"]
                 aept = 4994091.77684705*nturbs*1E3 #Wh
                 psscale = -1E5
                 pswscale = 1E0
@@ -4791,7 +4800,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
     # initalize plot
     fig1, ax1 = plt.subplots(1)
-
+    # print("initialization complete")
     # find how many entries are in the longest WEC convergence history
     f = open(input_file_wec)
     maxlength = 0
@@ -4828,6 +4837,8 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             run += 1
         rownum += 1
     f.close()
+
+    # print("WEC complete")
 
     # find how many entries are in the longest SNOPT convergence history
     f = open(input_file_snopt)
@@ -4871,6 +4882,8 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             
         rownum += 1
     f.close()
+
+    # print("snopt complete")
     
     if wakemodel == "BPA" and ndirs == 12:
         #  find how many entries are in the longest ALPSO+WEC convergence history
@@ -4931,6 +4944,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
             rownum += 1
         f.close()
+        # print("ps+wec complete")
 
     # find how many entries are in the longest ps convergence history
     f = open(input_file_ps)
@@ -4991,334 +5005,567 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         rownum += 1
     f.close()
 
+    # print("ps complete")
     
     import matplotlib.patheffects as PathEffects
     lineweight = 2
     if nturbs == 16:
-        txt0 = plt.text(1E2, 4, labels[0], color=colors[0])
+        txt0 = plt.text(2E2, 4, labels[0], color=colors[0]) # snopt + wec
         # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-        txt1 = plt.text(2E1, 6, labels[1], color=colors[1])
+        txt1 = plt.text(3E1, 6, labels[1], color=colors[1]) # snopt
         # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-        txt2 = plt.text(4E3, 5, labels[2], color=colors[2])
+        txt2 = plt.text(5E3, 5, labels[2], color=colors[2]) # alpso
         # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         plt.ylim([0, 40])
     if nturbs == 38:
         if ndirs == 12:
             if wakemodel == "BPA":
-                txt0 = plt.text(3E2, 9, labels[0], color=colors[0])
+                txt0 = plt.text(3E2, 9, labels[0], color=colors[0]) # snopt + wec
                 # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-                txt1 = plt.text(5E1, 12, labels[1], color=colors[1])
+                txt1 = plt.text(5E1, 12, labels[1], color=colors[1]) # snopt
                 # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-                txt2 = plt.text(5E3, 11, labels[2], color=colors[2])
+                txt2 = plt.text(7E3, 10, labels[2], color=colors[2]) # alpso
                 # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-                txt3 = plt.text(1.75E3, 26, labels[3], color=colors[3])
+                txt3 = plt.text(1.75E3, 26, labels[3], color=colors[3]) # alpso + wec
                 # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
                 plt.ylim([5, 40])
             elif wakemodel == "JENSEN":
-                txt0 = plt.text(8E1, 15.5, labels[0], color=colors[0])
+                txt0 = plt.text(2E2, 16, labels[0], color=colors[0]) # snopt + wec
                 # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-                txt1 = plt.text(1E1, 17, labels[1], color=colors[1])
+                txt1 = plt.text(2E1, 17, labels[1], color=colors[1]) # snopt
                 # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-                txt2 = plt.text(6E3, 21, labels[2], color=colors[2])
+                txt2 = plt.text(6E3, 21.5, labels[2], color=colors[2]) # alpso
                 # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
                 plt.ylim([15,35])
         if ndirs == 36:
-            txt0 = plt.text(8E2, 18, labels[0], color=colors[0])
+            txt0 = plt.text(1.25E3, 18, labels[0], color=colors[0]) # snopt + wec
             # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt1 = plt.text(1E2, 18, labels[1], color=colors[1])
+            txt1 = plt.text(2E2, 18, labels[1], color=colors[1]) # snopt
             # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-            txt2 = plt.text(8E3, 24, labels[2], color=colors[2])
+            txt2 = plt.text(5E3, 25.5, labels[2], color=colors[2]) # alpso
             # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
             plt.ylim([15, 45])
     if nturbs == 60:
-        txt0 = plt.text(1.5E1, 6.75, labels[0], color=colors[0])
+        txt0 = plt.text(4E1, 6.75, labels[0], color=colors[0]) # snopt + wec
         # txt0.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-        txt1 = plt.text(9E2, 7.0, labels[1], color=colors[1])
+        txt1 = plt.text(9E2, 7.0, labels[1], color=colors[1]) # snopt
         # txt1.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
-        txt2 = plt.text(7E3, 6.75, labels[2], color=colors[2])
+        txt2 = plt.text(5E3, 6.75, labels[2], color=colors[2]) # alpso
         # txt2.set_path_effects([PathEffects.withStroke(linewidth=lineweight, foreground='k')])
         plt.ylim([5, 25])
+
+
+    # print("plot settings complete")
 
     tick_spacing = 5
     ax1.yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
 
+    # print("tick locater complete")
+
     # plt.text(labels[0])
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
+
+    # print("spines complete")
+
     plt.xlabel("Function Calls")
     plt.ylabel("Wake Loss (%)")
+
+    # print("labels complete")
+
     plt.tight_layout()
+
+    # print("tight layout complete")
 
     if save_figs:
         plt.savefig(filename, transparent=True)
 
+        # print("save complete")
     if show_figs:
         plt.show()
 
     return
 
-def plot_distributions(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA"):
+def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", plotcorrelations=False):
 
-    # indicate how many optimization runs are to be plotted
-    # runs = 200
+    # initialize lists to hold data
+    impdata = list()
+    labels = list()
+    boxcolors = list()
+    df = pd.DataFrame()
+    counter=0
+    for wakemodel in ["BPA", "JENSEN"]:
+        for nturbs, ndirs in zip(np.array([16, 38, 38, 60]), np.array([20, 12, 36, 72])):
+            if wakemodel == "BPA":
+                psdir = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
+                if nturbs == 16:
+                    # resdir = "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/"
+                    resdir = "./image_data/opt_results/20200821-16-turbs-20-dir-fcall-and-conv-history/"
+                    data_ps_mstart = np.loadtxt(psdir + "ps/ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+                    # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                    data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+                    data_snopt_wec = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+                    aept = 5191363.5933961*nturbs*1E3 # Wh
+                    psscale = -1E4
+                elif nturbs == 38:
+                    if ndirs == 36:
+                        # resdir = "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/"
+                        resdir = "./image_data/opt_results/20200821-38-turbs-36-dir-fcall-and-conv-history/"
+                        data_ps_mstart = np.loadtxt(psdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                        # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                        data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                        data_snopt_wec = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                        aept = 1630166.61601323*nturbs*1E3 # Wh
+                        psscale = -1E5
+                    elif ndirs == 12:
+                        # resdir = "./image_data/20200602-38-turbs-12-dir-nsteps-maxweca9/"
+                        resdir = "./image_data/opt_results/20200821-38-turbs-12-dir-fcall-and-conv-history/"
+                        data_ps_mstart = np.loadtxt(
+                            psdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                        data_ps_wec = np.loadtxt(
+                            psdir + "pswec/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                        # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                        data_snopt_mstart = np.loadtxt(
+                            resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                        data_snopt_wec = np.loadtxt(
+                            resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                        aept = 4994091.77684705*nturbs*1E3 #Wh
+                        psscale = -1E5
+                    else:
+                        continue
 
-    # labels = ["SNOPT+WEC", 'SNOPT', "ALPSO"]
-    # colors = ['b', 'c', 'r']
-    # alpha = 0.08
-    # markeralpha = 0.5
-    # NTURBS = np.array([16, 38, 38, 60, 60])
-    # NDIRS = np.arra([20, 12, 36, 36, 72])
-    # WAKEMODELS = np.array(["BPA", "JENSEN"])
+                elif nturbs == 60:
+                    # resdir = "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/"
+                    resdir = "./image_data/opt_results/20200824-60-turbs-72-dir-fcall-and-conv-history/"
+                    data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+                    # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+                    data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+                    data_snopt_wec = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+                    aept = 6653047.52233728*nturbs*1E3 #Wh
+                    psscale = -1E5
+                else:
+                    continue
+
+            elif wakemodel == "JENSEN":
+                if ndirs == 12 and nturbs == 38:
+                    resdir = "./image_data/opt_results/20201110-jensen-38-turbs-12-dir-fcal-and-conv-history/"
+                    data_ps_mstart = np.loadtxt(
+                        resdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
+                    # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+                    data_snopt_mstart = np.loadtxt(
+                        resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
+                    data_snopt_wec = np.loadtxt(
+                        resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
+                    aept = 5679986.827947*nturbs*1E3 #Wh
+                    psscale = 1E5
+                else:
+                    continue
+                    # raise(EnvironmentError("Invalid Model and Case combination"))
+
+            # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
+            # aep run opt (kW), run time (s), obj func calls, sens func calls
+            sw_id = data_snopt_wec[:, 0]
+            sw_ef = data_snopt_wec[:, 1]
+            sw_orig_aep = data_snopt_wec[0, 5]
+            sw_run_ti = data_snopt_wec[:, 3]
+            # sw_run_start_aep = data_snopt_wec[0, 7]
+            sw_run_end_aep = data_snopt_wec[sw_run_ti==5, 7]
+            sw_run_time = data_snopt_wec[:, 8]
+            sw_fcalls = data_snopt_wec[:, 9]
+            sw_scalls = data_snopt_wec[:, 10]
+
+            sw_run_improvement = sw_run_end_aep / sw_orig_aep - 1.
+            sw_mean_run_improvement = np.average(sw_run_improvement)
+            sw_std_improvement = np.std(sw_run_improvement)
+
+            sw_tfcalls = np.zeros(200)
+            sw_tscalls = np.zeros(200)
+            for i in np.arange(0, 200):
+                sw_tfcalls[i] = np.sum(sw_fcalls[sw_id == i])
+                sw_tscalls[i] = np.sum(sw_scalls[sw_id == i])
+
+            # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+            # run time (s), obj func calls, sens func calls
+            sm_id = data_snopt_mstart[:, 0]
+            sm_ef = np.ones_like(sm_id)
+            sm_orig_aep = data_snopt_mstart[0, 4]
+            sm_run_ti = data_snopt_mstart[:, 2]
+            # sw_run_start_aep = data_snopt_wec[0, 7]
+            sm_run_end_aep = data_snopt_mstart[sm_run_ti==5, 6]
+            sm_run_time = data_snopt_mstart[:, 7]
+            sm_fcalls = data_snopt_mstart[:, 8]
+            sm_scalls = data_snopt_mstart[:, 9]
+
+            # sm_run_improvement = sm_run_end_aep / sm_orig_aep - 1.
+            sm_run_improvement = sm_run_end_aep / sw_orig_aep - 1.
+            sm_mean_run_improvement = np.average(sm_run_improvement)
+            sm_std_improvement = np.std(sm_run_improvement)
+
+            sm_tfcalls = np.zeros(200)
+            sm_tscalls = np.zeros(200)
+            for i in np.arange(0, 200):
+                sm_tfcalls[i] = np.sum(sm_fcalls[sm_id == i])
+                sm_tscalls[i] = np.sum(sm_scalls[sm_id == i])
+
+            # sw_tfcalls = sw_fcalls[sw_ef == 1]
+            # sw_tscalls = sw_fcalls[sw_ef == 1]
+
+            # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
+            # run time (s), obj func calls, sens func calls
+            ps_id = data_ps_mstart[:, 0]
+            ps_ef = np.ones_like(ps_id)
+            ps_orig_aep = data_ps_mstart[0, 4]
+            ps_run_ti = data_ps_mstart[:, 2]
+            start_aep = data_ps_mstart[:, 3]
+            ps_run_end_aep = data_ps_mstart[ps_run_ti == 4, 6]
+            ps_run_time = data_ps_mstart[:, 7]
+            ps_fcalls = data_ps_mstart[:, 8]
+            ps_scalls = data_ps_mstart[:, 9]
+
+            # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
+            ps_run_improvement = ps_run_end_aep / sw_orig_aep - 1.
+            ps_mean_run_improvement = np.average(ps_run_improvement)
+            ps_std_improvement = np.std(ps_run_improvement)
 
 
-    # for i in np.arange(0, len(WAKEMODELS)):
-    #     for j in np.arange(0, len(NTURBS)):
+            # ps + wec results
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
+                # aep run opt (kW), run time (s), obj func calls, sens func calls
+                psw_id = data_ps_wec[:, 0]
+                psw_ef = data_ps_wec[:, 1]
+                psw_orig_aep = data_ps_wec[0, 5]
+                psw_run_ti = data_ps_wec[:, 3]
+                # sw_run_start_aep = data_snopt_wec[0, 7]
+                psw_run_end_aep = data_ps_wec[psw_run_ti==5, 7]
+                psw_run_time = data_ps_wec[:, 8]
+                psw_fcalls = data_ps_wec[:, 9]
+                psw_scalls = data_ps_wec[:, 10]
 
-    if wakemodel == "BPA":
-        psdir = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
-        if nturbs == 16:
-            # resdir = "./image_data/opt_results/20200527-16-turbs-20-dir-maxwecd3-nsteps6/"
-            resdir = "./image_data/opt_results/20200821-16-turbs-20-dir-fcall-and-conv-history/"
-            data_ps_mstart = np.loadtxt(psdir + "ps_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-            # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-            data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-            data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
-            aept = 5191363.5933961*nturbs*1E3 # Wh
-            psscale = -1E4
-        elif nturbs == 38:
-            if ndirs == 36:
-                # resdir = "./image_data/opt_results/20200527-38-turbs-36-dir-maxwecd3-nsteps6/"
-                resdir = "./image_data/opt_results/20200821-38-turbs-36-dir-fcall-and-conv-history/"
-                data_ps_mstart = np.loadtxt(psdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-                # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-                data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-                data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-                aept = 1630166.61601323*nturbs*1E3 # Wh
-                psscale = -1E5
-            elif ndirs == 12:
-                # resdir = "./image_data/20200602-38-turbs-12-dir-nsteps-maxweca9/"
-                resdir = "./image_data/opt_results/20200821-38-turbs-12-dir-fcall-and-conv-history/"
-                data_ps_mstart = np.loadtxt(
-                    psdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-                data_ps_wec = np.loadtxt(
-                    psdir + "pswec/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-                # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-                data_snopt_mstart = np.loadtxt(
-                    resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-                data_snopt_relax = np.loadtxt(
-                    resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-                aept = 4994091.77684705*nturbs*1E3 #Wh
-                psscale = -1E5
+                psw_run_improvement = psw_run_end_aep / sw_orig_aep - 1.
+                psw_mean_run_improvement = np.average(psw_run_improvement)
+                psw_std_improvement = np.std(psw_run_improvement)
 
-        elif nturbs == 60:
-            # resdir = "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/"
-            resdir = "./image_data/opt_results/20200824-60-turbs-72-dir-fcall-and-conv-history/"
-            data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-            # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
-            data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-            data_snopt_relax = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
-            aept = 6653047.52233728*nturbs*1E3 #Wh
-            psscale = -1E5
+            # get variables
+            nTurbines = nturbs
+            nvars = 2*nTurbines
+            nCons = int(((nTurbines - 1.) * nTurbines / 2.)) + 1 * nTurbines
+            scale_aep = 1E-6
 
-    elif wakemodel == "JENSEN":
-        if ndirs == 12 and nturbs == 38:
-            resdir = "./image_data/opt_results/20201110-jensen-38-turbs-12-dir-fcal-and-conv-history/"
-            data_ps_mstart = np.loadtxt(
-                resdir + "ps/ps_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
-            # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
-            data_snopt_mstart = np.loadtxt(
-                resdir + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
-            data_snopt_relax = np.loadtxt(
-                resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
-            aept = 5679986.827947*nturbs*1E3 #Wh
-            psscale = 1E5
-        else:
-            raise(EnvironmentError("Invalid Model and Case combination"))
 
-    # # run number, exp fac, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW),
-    # aep run opt (kW), run time (s), obj func calls, sens func calls
-    sr_id = data_snopt_relax[:, 0]
-    sr_ef = data_snopt_relax[:, 1]
-    sr_orig_aep = data_snopt_relax[0, 5]
-    sr_run_ti = data_snopt_relax[:, 3]
-    # sr_run_start_aep = data_snopt_relax[0, 7]
-    sr_run_end_aep = data_snopt_relax[sr_run_ti==5, 7]
-    sr_run_time = data_snopt_relax[:, 8]
-    sr_fcalls = data_snopt_relax[:, 9]
-    sr_scalls = data_snopt_relax[:, 10]
+            # get fcalls: med, ave, std-dev
+            # s
+            s_med_fcalls = np.median(sm_tfcalls+sm_tscalls)
+            s_ave_fcalls = np.average(sm_tfcalls+sm_tscalls)
+            s_std_fcalls = np.std(sm_tfcalls+sm_tscalls)
+            s_low_fcalls = np.min(sm_tfcalls+sm_tscalls)
+            s_high_fcalls = np.max(sm_tfcalls+sm_tscalls)
 
-    sr_run_improvement = sr_run_end_aep / sr_orig_aep - 1.
-    sr_mean_run_improvement = np.average(sr_run_improvement)
-    sr_std_improvement = np.std(sr_run_improvement)
+            # sr
+            sw_med_fcalls = np.median(sw_tfcalls+sw_tscalls)
+            sw_ave_fcalls = np.average(sw_tfcalls+sw_tscalls)
+            sw_std_fcalls = np.std(sw_tfcalls+sw_tscalls)
+            sw_low_fcalls = np.min(sw_tfcalls+sw_tscalls)
+            sw_high_fcalls = np.max(sw_tfcalls+sw_tscalls)
 
-    sr_tfcalls = np.zeros(200)
-    sr_tscalls = np.zeros(200)
-    for i in np.arange(0, 200):
-        sr_tfcalls[i] = np.sum(sr_fcalls[sr_id == i])
-        sr_tscalls[i] = np.sum(sr_scalls[sr_id == i])
+            # ps
+            ps_med_fcalls = np.median(ps_fcalls)
+            ps_ave_fcalls = np.average(ps_fcalls)
+            ps_std_fcalls = np.std(ps_fcalls)
+            ps_low_fcalls = np.min(ps_fcalls)
+            ps_high_fcalls = np.max(ps_fcalls)
 
-    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
-    # run time (s), obj func calls, sens func calls
-    sm_id = data_snopt_mstart[:, 0]
-    sm_ef = np.ones_like(sm_id)
-    sm_orig_aep = data_snopt_mstart[0, 4]
-    sm_run_ti = data_snopt_mstart[:, 2]
-    # sr_run_start_aep = data_snopt_relax[0, 7]
-    sm_run_end_aep = data_snopt_mstart[sm_run_ti==5, 6]
-    sm_run_time = data_snopt_mstart[:, 7]
-    sm_fcalls = data_snopt_mstart[:, 8]
-    sm_scalls = data_snopt_mstart[:, 9]
+            # ps + wec
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                psw_med_fcalls = np.median(psw_fcalls)
+                psw_ave_fcalls = np.average(psw_fcalls)
+                psw_std_fcalls = np.std(psw_fcalls)
+                psw_low_fcalls = np.min(psw_fcalls)
+                psw_high_fcalls = np.max(psw_fcalls)
 
-    # sm_run_improvement = sm_run_end_aep / sm_orig_aep - 1.
-    sm_run_improvement = sm_run_end_aep / sr_orig_aep - 1.
-    sm_mean_run_improvement = np.average(sm_run_improvement)
-    sm_std_improvement = np.std(sr_run_improvement)
+            # get aep: base, med, ave, std-dev, low, high
+            # s
+            s_base_aep = sm_orig_aep*scale_aep
+            s_med_aep = np.median(sm_run_end_aep)*scale_aep
+            s_ave_aep = np.average(sm_run_end_aep)*scale_aep
+            s_std_aep = np.std(sm_run_end_aep)*scale_aep
+            s_low_aep = np.min(sm_run_end_aep)*scale_aep
+            s_high_aep = np.max(sm_run_end_aep)*scale_aep
+            s_best_layout = sm_id[np.argmax(sm_run_end_aep)]
 
-    sm_tfcalls = np.zeros(200)
-    sm_tscalls = np.zeros(200)
-    for i in np.arange(0, 200):
-        sm_tfcalls[i] = np.sum(sm_fcalls[sm_id == i])
-        sm_tscalls[i] = np.sum(sm_scalls[sm_id == i])
+            # sr
+            sw_base_aep = sw_orig_aep*scale_aep
+            sw_med_aep = np.median(sw_run_end_aep)*scale_aep
+            sw_ave_aep = np.average(sw_run_end_aep)*scale_aep
+            sw_std_aep = np.std(sw_run_end_aep)*scale_aep
+            sw_low_aep = np.min(sw_run_end_aep)*scale_aep
+            sw_high_aep = np.max(sw_run_end_aep)*scale_aep
+            sw_best_layout = sw_id[np.argmax(sw_run_end_aep)]
 
-    # sr_tfcalls = sr_fcalls[sr_ef == 1]
-    # sr_tscalls = sr_fcalls[sr_ef == 1]
+            # ps
+            ps_base_aep = ps_orig_aep * scale_aep
+            ps_med_aep = np.median(ps_run_end_aep) * scale_aep
+            ps_ave_aep = np.average(ps_run_end_aep) * scale_aep
+            ps_std_aep = np.std(ps_run_end_aep) * scale_aep
+            ps_low_aep = np.min(ps_run_end_aep) * scale_aep
+            ps_high_aep = np.max(ps_run_end_aep) * scale_aep
+            ps_best_layout = ps_id[np.argmax(ps_run_end_aep)]
+            
+            # ps + wec
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                psw_base_aep = psw_orig_aep * scale_aep
+                psw_med_aep = np.median(psw_run_end_aep) * scale_aep
+                psw_ave_aep = np.average(psw_run_end_aep) * scale_aep
+                psw_std_aep = np.std(psw_run_end_aep) * scale_aep
+                psw_low_aep = np.min(psw_run_end_aep) * scale_aep
+                psw_high_aep = np.max(psw_run_end_aep) * scale_aep
+                psw_best_layout = psw_id[np.argmax(psw_run_end_aep)]
 
-    # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
-    # run time (s), obj func calls, sens func calls
-    ps_id = data_ps_mstart[:, 0]
-    ps_ef = np.ones_like(ps_id)
-    ps_orig_aep = data_ps_mstart[0, 4]
-    ps_run_ti = data_ps_mstart[:, 2]
-    # sr_run_start_aep = data_snopt_relax[0, 7]
-    ps_run_end_aep = data_ps_mstart[ps_run_ti == 4, 6]
-    ps_run_time = data_ps_mstart[:, 7]
-    ps_fcalls = data_ps_mstart[:, 8]
-    ps_scalls = data_ps_mstart[:, 9]
+            # get wake loss statistics
+            # base 
+            wake_loss_original = (aept - start_aep*1E3)/aept
 
-    # ps_run_improvement = ps_run_end_aep / ps_orig_aep - 1.
-    ps_run_improvement = ps_run_end_aep / sr_orig_aep - 1.
-    ps_mean_run_improvement = np.average(ps_run_improvement)
-    ps_std_improvement = np.std(sr_run_improvement)
+            # snopt
+            sm_wake_loss = (aept - sm_run_end_aep*1E3)/aept
+            s_wake_loss_mean = np.average(sm_wake_loss)
+            s_wake_loss_std = np.std(sm_wake_loss)
+            s_wake_loss_low = np.min(sm_wake_loss)
+            s_wake_loss_high = np.max(sm_wake_loss)
 
-    # get variables
-    nTurbines = nturbs
-    nvars = 2*nTurbines
-    nCons = int(((nTurbines - 1.) * nTurbines / 2.)) + 1 * nTurbines
-    scale_aep = 1E-6
+            # snopt + wec
+            sw_wake_loss = (aept - sw_run_end_aep*1E3)/aept
+            sw_wake_loss_mean = np.average(sw_wake_loss)
+            sw_wake_loss_std = np.std(sw_wake_loss)
+            sw_wake_loss_low = np.min(sw_wake_loss)
+            sw_wake_loss_high = np.max(sw_wake_loss)
 
-    # get fcalls: med, ave, std-dev
-    # s
-    s_med_fcalls = np.median(sm_tfcalls+sm_tscalls)
-    s_ave_fcalls = np.average(sm_tfcalls+sm_tscalls)
-    s_std_fcalls = np.std(sm_tfcalls+sm_tscalls)
-    s_low_fcalls = np.min(sm_tfcalls+sm_tscalls)
-    s_high_fcalls = np.max(sm_tfcalls+sm_tscalls)
+            # ps
+            ps_wake_loss = (aept - ps_run_end_aep*1E3)/aept
+            ps_wake_loss_mean = np.average(ps_wake_loss)
+            ps_wake_loss_std = np.std(ps_wake_loss)
+            ps_wake_loss_low = np.min(ps_wake_loss)
+            ps_wake_loss_high = np.max(ps_wake_loss)
 
-    # sr
-    sr_med_fcalls = np.median(sr_tfcalls+sr_tscalls)
-    sr_ave_fcalls = np.average(sr_tfcalls+sr_tscalls)
-    sr_std_fcalls = np.std(sr_tfcalls+sr_tscalls)
-    sr_low_fcalls = np.min(sr_tfcalls+sr_tscalls)
-    sr_high_fcalls = np.max(sr_tfcalls+sr_tscalls)
+            # ps + wec
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                psw_wake_loss = (aept - psw_run_end_aep*1E3)/aept
+                psw_wake_loss_mean = np.average(psw_wake_loss)
+                psw_wake_loss_std = np.std(psw_wake_loss)
+                psw_wake_loss_low = np.min(psw_wake_loss)
+                psw_wake_loss_high = np.max(psw_wake_loss)
 
-    # get fcalls: med, ave, std-dev
-    # ps
-    ps_med_fcalls = np.median(ps_fcalls)
-    ps_ave_fcalls = np.average(ps_fcalls)
-    ps_std_fcalls = np.std(ps_fcalls)
-    ps_low_fcalls = np.min(ps_fcalls)
-    ps_high_fcalls = np.max(ps_fcalls)
+            print(" #################### Results for Case Study with %s, %i Turbs, %i Dirs ))###############" %(wakemodel, nturbs, ndirs))
+            print( "nturbs: ", nTurbines)
+            print( "nvars: ", nvars)
+            print( "ncons: ", nCons)
 
-    # get aep: base, med, ave, std-dev, low, high
-    # s
-    s_base_aep = sm_orig_aep*scale_aep
-    s_med_aep = np.median(sm_run_end_aep)*scale_aep
-    s_ave_aep = np.average(sm_run_end_aep)*scale_aep
-    s_std_aep = np.std(sm_run_end_aep)*scale_aep
-    s_low_aep = np.min(sm_run_end_aep)*scale_aep
-    s_high_aep = np.max(sm_run_end_aep)*scale_aep
-    s_best_layout = sm_id[np.argmax(sm_run_end_aep)]
+            print( " ")
 
-    # sr
-    sr_base_aep = sr_orig_aep*scale_aep
-    sr_med_aep = np.median(sr_run_end_aep)*scale_aep
-    sr_ave_aep = np.average(sr_run_end_aep)*scale_aep
-    sr_std_aep = np.std(sr_run_end_aep)*scale_aep
-    sr_low_aep = np.min(sr_run_end_aep)*scale_aep
-    sr_high_aep = np.max(sr_run_end_aep)*scale_aep
-    sr_best_layout = sr_id[np.argmax(sr_run_end_aep)]
+            print( "snopt mstart results: ")
+            print( "med fcalls: ", s_med_fcalls)
+            print( "ave fcalls: ", s_ave_fcalls)
+            print( "std fcalls: ", s_std_fcalls)
+            print( "low fcalls: ", s_low_fcalls)
+            print( "high fcalls: ", s_high_fcalls)
+            print( "base aep: ", s_base_aep)
+            print( "med aep: ", s_med_aep)
+            print( "ave aep: ", s_ave_aep)
+            print( "std aep: ", s_std_aep)
+            print( "low aep: ", s_low_aep)
+            print( "high aep: ", s_high_aep)
+            print("mean wakeloss: ", s_wake_loss_mean)
+            print("std wakeloss: ", s_wake_loss_std)
+            print("low wakeloss: ", s_wake_loss_low)
+            print("high wakeloss: ", s_wake_loss_high)
+            print( "best layout: ", s_best_layout)   
+            print( " ")
 
-    # get aep: base, med, ave, std-dev, low, high
-    # ps
-    ps_base_aep = ps_orig_aep * scale_aep
-    ps_med_aep = np.median(ps_run_end_aep) * scale_aep
-    ps_ave_aep = np.average(ps_run_end_aep) * scale_aep
-    ps_std_aep = np.std(ps_run_end_aep) * scale_aep
-    ps_low_aep = np.min(ps_run_end_aep) * scale_aep
-    ps_high_aep = np.max(ps_run_end_aep) * scale_aep
-    ps_best_layout = ps_id[np.argmax(ps_run_end_aep)]
+            print( "snopt wec results: ")
+            print( "med fcalls: ", sw_med_fcalls)
+            print( "ave fcalls: ", sw_ave_fcalls)
+            print( "std fcalls: ", sw_std_fcalls)
+            print( "low fcalls: ", sw_low_fcalls)
+            print( "high fcalls: ", sw_high_fcalls)
+            print( "base aep: ", sw_base_aep)
+            print( "med aep: ", sw_med_aep)
+            print( "ave aep: ", sw_ave_aep)
+            print( "std aep: ", sw_std_aep)
+            print( "low aep: ", sw_low_aep)
+            print( "high aep: ", sw_high_aep)
+            print("mean wakeloss: ", sw_wake_loss_mean)
+            print("std wakeloss: ", sw_wake_loss_std)
+            print("low wakeloss: ", sw_wake_loss_low)
+            print("high wakeloss: ", sw_wake_loss_high)
+            print( "best layout: ", sw_best_layout)
 
-    print( "nturbs: ", nTurbines)
-    print( "nvars: ", nvars)
-    print( "ncons: ", nCons)
+            print(" ")
 
-    print( " ")
+            print("ALPSO mstart results: ")
+            print("med fcalls: ", ps_med_fcalls)
+            print("ave fcalls: ", ps_ave_fcalls)
+            print("std fcalls: ", ps_std_fcalls)
+            print("low fcalls: ", ps_low_fcalls)
+            print("high fcalls: ", ps_high_fcalls)
+            print("base aep: ", ps_base_aep)
+            print("med aep: ", ps_med_aep)
+            print("ave aep: ", ps_ave_aep)
+            print("std aep: ", ps_std_aep)
+            print("low aep: ", ps_low_aep)
+            print("high aep: ", ps_high_aep)
+            print("mean wakeloss: ", ps_wake_loss_mean)
+            print("std wakeloss: ", ps_wake_loss_std)
+            print("low wakeloss: ", ps_wake_loss_low)
+            print("high wakeloss: ", ps_wake_loss_high)
+            print("best layout: ", ps_best_layout)
 
-    print( "snopt mstart results: ")
-    print( "med fcalls: ", s_med_fcalls)
-    print( "ave fcalls: ", s_ave_fcalls)
-    print( "std fcalls: ", s_std_fcalls)
-    print( "low fcalls: ", s_low_fcalls)
-    print( "high fcalls: ", s_high_fcalls)
-    print( "base aep: ", s_base_aep)
-    print( "med aep: ", s_med_aep)
-    print( "ave aep: ", s_ave_aep)
-    print( "std aep: ", s_std_aep)
-    print( "low aep: ", s_low_aep)
-    print( "high aep: ", s_high_aep)
-    print( "best layout: ", s_best_layout)
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                print(" ")
+                print("ALPSO + WEC results: ")
+                print("med fcalls: ", psw_med_fcalls)
+                print("ave fcalls: ", psw_ave_fcalls)
+                print("std fcalls: ", psw_std_fcalls)
+                print("low fcalls: ", psw_low_fcalls)
+                print("high fcalls: ", psw_high_fcalls)
+                print("base aep: ", psw_base_aep)
+                print("med aep: ", psw_med_aep)
+                print("ave aep: ", psw_ave_aep)
+                print("std aep: ", psw_std_aep)
+                print("low aep: ", psw_low_aep)
+                print("high aep: ", psw_high_aep)
+                print("mean wakeloss: ", psw_wake_loss_mean)
+                print("std wakeloss: ", psw_wake_loss_std)
+                print("low wakeloss: ", psw_wake_loss_low)
+                print("high wakeloss: ", psw_wake_loss_high)
+                print("best layout: ", psw_best_layout)
 
-    print( " ")
+            print(" ")
 
-    print( "snopt relax results: ")
-    print( "med fcalls: ", sr_med_fcalls)
-    print( "ave fcalls: ", sr_ave_fcalls)
-    print( "std fcalls: ", sr_std_fcalls)
-    print( "low fcalls: ", sr_low_fcalls)
-    print( "high fcalls: ", sr_high_fcalls)
-    print( "base aep: ", sr_base_aep)
-    print( "med aep: ", sr_med_aep)
-    print( "ave aep: ", sr_ave_aep)
-    print( "std aep: ", sr_std_aep)
-    print( "low aep: ", sr_low_aep)
-    print( "high aep: ", sr_high_aep)
-    print( "best layout: ", sr_best_layout)
+            impdata.append(list(wake_loss_original*100))
+            impdata.append(list(sm_wake_loss*100))
+            impdata.append(list(sw_wake_loss*100))
+            impdata.append(list(ps_wake_loss*100))
+            dftemp = pd.DataFrame()
+            # print(np.shape(impdata))
+            # print(counter)
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                itlabels = ["Start", "SNOPT", "SNOPT+WEC", "ALPSO", "ALPSO+WEC"]
+                # itboxcolors = ["k", "c", "b", "r", "peru"]
+                itboxcolors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1"]
+                impdata.append(list(psw_wake_loss*100))
+                for i in np.arange(0, len(itlabels)):
+                    dftemp[itlabels[i]] = pd.Series(np.transpose(impdata[counter]))
+                    counter += 1
+                
+            else:
+                itlabels = ["Start", "SNOPT", "SNOPT+WEC", "ALPSO"]
+                # itboxcolors = ["violet", "c", "b", "r"]
+                itboxcolors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A"]
+                for i in np.arange(0, len(itlabels)):
+                    dftemp[itlabels[i]] = pd.Series(np.transpose(impdata[counter]))
+                    counter += 1
 
-    print(" ")
 
-    print("ALPSO mstart results: ")
-    print("med fcalls: ", ps_med_fcalls)
-    print("ave fcalls: ", ps_ave_fcalls)
-    print("std fcalls: ", ps_std_fcalls)
-    print("low fcalls: ", ps_low_fcalls)
-    print("high fcalls: ", ps_high_fcalls)
-    print("base aep: ", ps_base_aep)
-    print("med aep: ", ps_med_aep)
-    print("ave aep: ", ps_ave_aep)
-    print("std aep: ", ps_std_aep)
-    print("low aep: ", ps_low_aep)
-    print("high aep: ", ps_high_aep)
-    print("best layout: ", ps_best_layout)
+            labels.extend(itlabels)
+            boxcolors.extend(itboxcolors)
+            if plotcorrelations:
+                df = df.append(dftemp)
 
-    print(" ")
+                # report correlation 
+                print("correlation for %s, %i Turbs, %i Dirs" %(wakemodel, nturbs, ndirs))
+                print(dftemp.corr())
+                axes = pd.plotting.scatter_matrix(dftemp, figsize=(10,10)) #diagonal='kde',
 
-    labels = ["SNOPT", "SNOPT+WECD", "ALPSO"]
-    fig, ax = plt.subplots(1)
+                plt.suptitle("correlation for %s, %i Turbs, %i Dirs" %(wakemodel, nturbs, ndirs))
+                corr = dftemp.corr().to_numpy()
+                for i, j in zip(*plt.np.triu_indices_from(axes, k=1)):
+                    axes[i, j].annotate("%.3f" %corr[i,j], (0.8, 0.8), xycoords='axes fraction', ha='center', va='center')
+                plt.tight_layout()
+                if save_figs:
+                    plt.savefig(fnamstart + "scatter_matrix_%s_%iTurbs_%iDirs.pdf" %(wakemodel, nturbs, ndirs), transparent=True)
+    # set up dataframe to plot distributions and calculate corelation and covariance 
+    # for each case study, do this
+    #   snopt snopt+wec alpso alpso+wec
+    # 0  
+    # 1
+    # :
+    # create dataframe with snopt results
+    # df = pd.DataFrame()
+    # print(len(labels))
+    # for i in range(5):
+    #     for j in range()
+    # for i in np.arange(0, len(labels)):
+    #     df[labels[i]+("%i" %(i))] = pd.Series(np.transpose(impdata[i]))
+    #     # s = pd.Series(np.transpose(impdata[i]), name=labels[i])
+    #     # dftemp = pd.DataFrame(s)
+    #     # df = df.append(s)
+    #     # print(dftemp.head())
+    if plotcorrelations:
+        print("Overall Correlation")
+        print(df.corr())
+        axes = pd.plotting.scatter_matrix(df, diagonal='kde', figsize=(10,10))
+        plt.suptitle("correlation for all studies")
+        corr = df.corr().to_numpy()
+        for i, j in zip(*plt.np.triu_indices_from(axes, k=1)):
+            axes[i, j].annotate("%.3f" %corr[i,j], (0.8, 0.8), xycoords='axes fraction', ha='center', va='center')
+        plt.tight_layout()
 
-    impdata = list([sm_run_improvement * 100, sr_run_improvement*100, ps_run_improvement*100])
-    ax.boxplot(impdata, meanline=True, labels=labels)
+    fig, ax = plt.subplots(1, figsize=(13,8.5))
+    # if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+    #     labels = ["Start", "SNOPT", "SNOPT+WEC", "ALPSO", "ALPSO+WEC"]
+    #     # impdata = list([sm_run_improvement * 100, sw_run_improvement*100, ps_run_improvement*100, psw_run_improvement*100])
+    #     impdata = list([wake_loss_original*100, sm_wake_loss*100, sw_wake_loss*100, ps_wake_loss*100, psw_wake_loss*100])
+    
+    
+    # for i in np.arange(0, 5):
+    #     boxplt = ax.boxplot(impdata[i], meanline=True, labels=labels[i], patch_artist=True)
+    #     for item in ['boxes', 'whiskers', 'caps']:
+    #         plt.setp(boxplt[item], color=boxcolors[i])
+    #     ax.get_xticklabels()[i].set_color(boxcolors[i])
 
-    ax.set_ylabel('AEP Improvement (%)')
+    for i in np.arange(0, len(labels)):
+        # change outline color
+        ax.boxplot(np.array(impdata[i]), positions=[i+1], meanline=False, labels=[labels[i]], 
+            medianprops=dict(color="gray"), whiskerprops=dict(color=boxcolors[i]), capprops=dict(color=boxcolors[i]),
+            flierprops=dict(markeredgecolor=boxcolors[i]), boxprops=dict(color=boxcolors[i]), widths=0.6)
+        ax.get_xticklabels()[i].set_color(boxcolors[i])
+
+    # boxplot = ax.boxplot(impdata, meanline=False, labels=labels, medianprops=dict(color="gray"))
+    # boxes = boxplot['boxes']
+    # whiskers = boxplot['whiskers']
+    # caps = boxplot['caps']
+    # fliers = boxplot['fliers']
+    # wccount = 0
+    # for i in np.arange(0, len(labels)):
+    #     # change outline color
+    #     boxes[i].set(color=boxcolors[i], linewidth=1)
+    #     whiskers[wccount].set(color=boxcolors[i], linewidth=1)
+    #     whiskers[wccount+1].set(color=boxcolors[i], linewidth=1)
+    #     caps[wccount].set(color=boxcolors[i], linewidth=1)
+    #     caps[wccount+1].set(color=boxcolors[i], linewidth=1)
+    #     ax.get_xticklabels()[i].set_color(boxcolors[i])
+    #     wccount += 2
+    #     # change fill color
+    #     # box.set(facecolor = 'green' )
+    #     # change hatch
+    #     # box.set(hatch = '/')
+
+    # separate groups of boxes
+    [ax.axvline(x, color = 'gray', linestyle='--') for x in [4.5, 9.5, 13.5, 17.5]]
+
+    # rotate tick labels
+    plt.xticks(rotation=90)
+
+    # label y axis
+    ax.set_ylabel('Wake Loss (%)')
+
+    # identify groups of box plots
+
+    ax.annotate("BPA Model\n16 Turbines\n20 Directions", (1.35, 25), color='k', ma='left') # 16 turbs, 20 dirs, BPA model
+    ax.annotate("BPA Model\n38 Turbines\n12 Directions", (6, 25), color='k', ma='left') # 38 turbs, 12 dirs, BPA model
+    ax.annotate("BPA Model\n38 Turbines\n36 Directions", (10.35, 25), color='k', ma='left') # 38 turbs, 36 dirs, BPA model
+    ax.annotate("BPA Model\n60 Turbines\n72 Directions", (14.35, 25), color='k', ma='left') # 60 turbs, 72 dirs, BPA model
+    ax.annotate("Jensen Model\n38 Turbines\n12 Directions", (18.35, 25), color='k', ma='left') # 38 turbs, 12 dirs, Jensen model
+
     # ax.set_ylim([0.0, np.max(impdata)+1])
     # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
     # tick_spacing = 0.01
@@ -5326,11 +5573,20 @@ def plot_distributions(filename="", save_figs=False, show_figs=True, nturbs=38, 
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.tick_params(top='off', right='off')
+    # plt.tick_params(top='off', right='off')
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+    # ax.set_ylim([5,40])
 
     plt.tight_layout()
     if save_figs:
-        plt.savefig(fnamstart + '_percentaep.pdf', transparent=True)
+        plt.savefig(fnamstart + 'boxpercentwakeloss.pdf', transparent=True)
+
+    # calculate correlation and plot distributions 
+    # ax1, fig1 = plt.subplots(1)
+
+    # put all starting points in a bin and all ending points in a bin 
+
 
     if show_figs:
         plt.show()
@@ -5348,24 +5604,34 @@ def plot_alpso_tests(filename="", save_figs=False, show_figs=True):
 
     directory = "./image_data/alpso-tuning/"
 
-    nturbs = [16, 38, 38, 60] 
-    ndirs = [20, 12, 36, 72] 
-    scaler = [1E2, 1E3, 1E3, 1E3]
+    nturbs = np.array([16, 38, 38, 60])
+    ndirs = np.array([20, 12, 36, 72])
+    scaler = np.array([1E2, 1E3, 1E3, 1E3])
+    aept = np.array([5191363.5933961, 4994091.77684705, 1630166.61601323, 6653047.52233728])*nturbs*1E-6 # from kWh to GWh
     windrose = ["directional", "nantucket", "nantucket", "amalia"]
-
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
+    ylims = [(12, 15),(12, 24),(21, 28),(8, 14)]
+    # aept = 4994091.77684705*nturbs*1E-6 #GWh
     for i in np.arange(0,4):
         fig, ax = plt.subplots(1)
-        for ii in np.arange(5,31,5):
+        for ii, j in zip(np.arange(5,31,5), range(6)):
             datafile = directory+"ALPSO_summary_multistart_%iturbs_%sWindRose_%idirs_BPAModel_RunID0_TItype4_II%i_print.out" %(nturbs[i],windrose[i],ndirs[i],ii)
             obj, fcalls = parse_alpso_files(datafile)
             obj = np.asfarray(obj,float)
             fcalls = np.asfarray(fcalls,float)
-            ax.plot(fcalls, obj*scaler[i], label="II = %i" %(ii))
-        ax.set_ylabel("Objective (GWh)")
+            ax.plot(fcalls, 100.0*(aept[i] - obj*scaler[i])/aept[i], label="II = %i" %(ii), color=colors[j], linestyle=linetypes[j])
+        ax.set_ylabel("Wake Loss (%)")
         ax.set_xlabel("Function Calls")
-        ax.legend(loc=4,frameon=False)
+        ax.legend(loc=1,frameon=False)
         ax.set_xlim([0,20000])    
+        ax.set_ylim(ylims[i])
     
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.yaxis.set_ticks_position('left')
+        ax.xaxis.set_ticks_position('bottom')
+
         if save_figs:
             plt.tight_layout()
             filename = "./images/alpso_test_%iturbs_%idirs.pdf" %(nturbs[i], ndirs[i])
@@ -5402,7 +5668,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    # plot_distributions(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA")
+    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", plotcorrelations=False)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -5509,10 +5775,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    nturbs = 16
-    ndirs = 20
-    model = "BPA"
-    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
+    # nturbs = 60
+    # ndirs = 72
+    # model = "BPA"
+    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
-    # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
+    plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
