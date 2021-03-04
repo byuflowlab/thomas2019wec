@@ -813,6 +813,12 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     splt, = ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[4])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    plt.ylim([11, 16])
+    # ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+    ax1.yaxis.set_ticks_position('left')
+    ax2.yaxis.set_ticks_position('left')
     plt.tight_layout()
 
     if save_figs:
@@ -841,6 +847,12 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
     splt, = ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4], color=colors[4])
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    plt.ylim([13, 20])
+    # ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+    ax1.yaxis.set_ticks_position('left')
+    ax2.yaxis.set_ticks_position('left')
     plt.tight_layout()
 
     if save_figs:
@@ -871,7 +883,14 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38):
 
     # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+    plt.ylim([0.0, 2.0])
     plt.tight_layout()
+    # ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+    ax1.yaxis.set_ticks_position('left')
+    ax2.yaxis.set_ticks_position('left')
+    # ax1.xaxis.set_ticks_position('bottom')
 
     if save_figs:
         plt.savefig(filename+'_std.pdf', transparent=True)
@@ -1175,7 +1194,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2,10], [snw_min_wake_loss, snw_min_wake_loss], ':', label=labels[4], color=colors[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
-
+    ax1.set_ylim([11, 15])
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
     plt.tight_layout()
@@ -1200,6 +1219,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':', label=labels[4], color=colors[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
+    ax1.set_ylim([13, 17])
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
     plt.tight_layout()
@@ -1211,7 +1231,6 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
         plt.show()
 
     # set up plots
-    plt.gcf().clear()
     fig, ax1 = plt.subplots()
 
     ax1.set_xlabel('Number of WEC Steps', color='k')
@@ -1223,6 +1242,7 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38):
     ax1.plot([2, 10], [ps_std_wake_loss, ps_std_wake_loss], '--k', label=labels[3])
     ax1.plot([2, 10], [snw_std_wake_loss, snw_std_wake_loss], ':k', label=labels[4])
     handles1, labels1 = ax1.get_legend_handles_labels()
+    ax1.set_ylim([0.3, 1.1])
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
@@ -4796,7 +4816,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     input_file_pswec = input_directory_pswec + "convergence_histories.txt"
     
     # store initial AEP values
-    aepinit = np.zeros(200)
+    aepinit = np.zeros(runs)
+    aepinitdata = np.zeros(runs)
+    aepfinaldata = np.zeros(runs)
+    fcallsdata = np.zeros(runs)
 
     # initalize plot
     fig1, ax1 = plt.subplots(1)
@@ -4834,10 +4857,18 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
                 ax1.plot(np.arange(1, s.size+1)*2-1, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
             ax1.scatter(s.size*2, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
             
+            # save key data for file
+            aepinitdata[run] = s.iloc[0]
+            aepfinaldata[run] = s.iloc[-1]
+            fcallsdata[run] = (s.size)*2
+
             run += 1
+
         rownum += 1
     f.close()
 
+    np.savetxt("snopt_wec_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinitdata, aepfinaldata, fcallsdata], header="snopt wec results: id, AEP init (Whr), AEP final (Whr), fcalls total")
+    
     # print("WEC complete")
 
     # find how many entries are in the longest SNOPT convergence history
@@ -4853,6 +4884,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             maxlength = data.size
     f.close()
 
+    aepinitdata[:] = 0.0
+    aepfinaldata[:] = 0.0
+    fcallsdata[:] = 0.0
+    
     # extract SNOPT convergence histories to a data frame
     rownum = -1
     run = 0
@@ -4869,7 +4904,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             s = pd.Series(data, name=rownum)
         else:
             s = pd.Series(data, name=rownum)
-            aepinit[run] = s[0]
+            aepinitdata[run] = s.iloc[0]
+            aepfinaldata[run] = s.iloc[-1]
+            fcallsdata[run] = (s.size)*2
             run += 1
 
             loss = 100*(1-s/aept)
@@ -4882,6 +4919,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             
         rownum += 1
     f.close()
+
+    np.savetxt("snopt_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinitdata, aepfinaldata, fcallsdata], header="snopt results: id, AEP init (Whr), AEP final (Whr), fcalls total")
+    
 
     # print("snopt complete")
     
@@ -4909,6 +4949,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
         rownum = 0
         run = 0
+        aepinitdata[:] = 0.0
+        aepfinaldata[:] = 0.0
+        fcallsdata[:] = 0.0
         f = open(input_file_pswec)
         for row in f.readlines():
             if rownum < 1:
@@ -4924,6 +4967,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
                 slist = [aepinit[run]/pswscale]
                 slist[1:] = sall
                 s = pd.Series(slist)
+                aepinitdata[run] = s.iloc[0]*pswscale
+                aepfinaldata[run] = s.iloc[-1]*pswscale
+                fcallsdata[run] = fcalls.iloc[-1]
                 # s = pd.Series(data, name=rownum)
                 # if rownum == 2:
                 #     print(s.max())
@@ -4945,6 +4991,8 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             rownum += 1
         f.close()
         # print("ps+wec complete")
+        np.savetxt("alpso_wec_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinit, aepfinal, fcallsdata], header="alpso wec results: id, AEP init (Whr), AEP final (Whr), fcalls total")
+    
 
     # find how many entries are in the longest ps convergence history
     f = open(input_file_ps)
@@ -4967,6 +5015,10 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
         rownum += 1
     f.close()
 
+    aepinitdata[:] = 0.0
+    aepfinaldata[:] = 0.0
+    fcallsdata[:] = 0.0
+
     rownum = 0
     run = 0
     f = open(input_file_ps)
@@ -4984,6 +5036,9 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
             slist = [aepinit[run]/psscale]
             slist[1:] = sall
             s = pd.Series(slist)
+            aepinitdata[run] = s.iloc[0]*psscale
+            aepfinaldata[run] = s.iloc[-1]*psscale
+            fcallsdata[run] = fcalls.iloc[-1]
             # s = pd.Series(data, name=rownum)
             # if rownum == 2:
             #     print(s.max())
@@ -5004,7 +5059,8 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
         rownum += 1
     f.close()
-
+    np.savetxt("alpso_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinitdata, aepfinaldata, fcallsdata], header="alpso results: id, AEP init (Whr), AEP final (Whr), fcalls total")
+    
     # print("ps complete")
     
     import matplotlib.patheffects as PathEffects
@@ -5086,7 +5142,7 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
 
     return
 
-def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", plotcorrelations=False):
+def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", plotcorrelations=False, makelatextable=False):
 
     # initialize lists to hold data
     impdata = list()
@@ -5094,6 +5150,7 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
     boxcolors = list()
     df = pd.DataFrame()
     counter=0
+    
     for wakemodel in ["BPA", "JENSEN"]:
         for nturbs, ndirs in zip(np.array([16, 38, 38, 60]), np.array([20, 12, 36, 72])):
             if wakemodel == "BPA":
@@ -5137,7 +5194,7 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
                 elif nturbs == 60:
                     # resdir = "./image_data/opt_results/20200527-60-turbs-72-dir-amalia-maxwecd3-nsteps6/"
                     resdir = "./image_data/opt_results/20200824-60-turbs-72-dir-fcall-and-conv-history/"
-                    data_ps_mstart = np.loadtxt(resdir + "ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+                    data_ps_mstart = np.loadtxt(psdir + "ps/ps_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
                     # data_ga_mstart = np.loadtxt("./image_data/ga_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
                     data_snopt_mstart = np.loadtxt(resdir + "snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
                     data_snopt_wec = np.loadtxt(resdir + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
@@ -5184,6 +5241,10 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
                 sw_tfcalls[i] = np.sum(sw_fcalls[sw_id == i])
                 sw_tscalls[i] = np.sum(sw_scalls[sw_id == i])
 
+            for i in range(200):
+                if sw_tscalls[i] + sw_tfcalls[i] == 0:
+                    print("Zero function call for SNOPT+WEC run %i" %i)
+
             # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW),
             # run time (s), obj func calls, sens func calls
             sm_id = data_snopt_mstart[:, 0]
@@ -5206,7 +5267,10 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             for i in np.arange(0, 200):
                 sm_tfcalls[i] = np.sum(sm_fcalls[sm_id == i])
                 sm_tscalls[i] = np.sum(sm_scalls[sm_id == i])
-
+            for i in range(200):
+                if sm_tscalls[i] + sm_tfcalls[i] == 0:
+                    print("Zero function call for SNOPT run %i" %i)
+                    sleep(2)
             # sw_tfcalls = sw_fcalls[sw_ef == 1]
             # sw_tscalls = sw_fcalls[sw_ef == 1]
 
@@ -5241,7 +5305,13 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
                 psw_run_time = data_ps_wec[:, 8]
                 psw_fcalls = data_ps_wec[:, 9]
                 psw_scalls = data_ps_wec[:, 10]
-
+                psw_tfcalls = np.zeros(200)
+                psw_tscalls = np.zeros(200)
+                for i in np.arange(0, 200):
+                    psw_tfcalls[i] = np.sum(psw_fcalls[psw_id == i])
+                    psw_tscalls[i] = np.sum(psw_scalls[psw_id == i])
+                    if psw_tscalls[i] > 0:
+                        raise(ValueError("sensitivity calls recorded for ALPSO+WEC"))
                 psw_run_improvement = psw_run_end_aep / sw_orig_aep - 1.
                 psw_mean_run_improvement = np.average(psw_run_improvement)
                 psw_std_improvement = np.std(psw_run_improvement)
@@ -5251,7 +5321,6 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             nvars = 2*nTurbines
             nCons = int(((nTurbines - 1.) * nTurbines / 2.)) + 1 * nTurbines
             scale_aep = 1E-6
-
 
             # get fcalls: med, ave, std-dev
             # s
@@ -5277,11 +5346,11 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
 
             # ps + wec
             if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
-                psw_med_fcalls = np.median(psw_fcalls)
-                psw_ave_fcalls = np.average(psw_fcalls)
-                psw_std_fcalls = np.std(psw_fcalls)
-                psw_low_fcalls = np.min(psw_fcalls)
-                psw_high_fcalls = np.max(psw_fcalls)
+                psw_med_fcalls = np.median(psw_tfcalls)
+                psw_ave_fcalls = np.average(psw_tfcalls)
+                psw_std_fcalls = np.std(psw_tfcalls)
+                psw_low_fcalls = np.min(psw_tfcalls)
+                psw_high_fcalls = np.max(psw_tfcalls)
 
             # get aep: base, med, ave, std-dev, low, high
             # s
@@ -5328,6 +5397,7 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             # snopt
             sm_wake_loss = (aept - sm_run_end_aep*1E3)/aept
             s_wake_loss_mean = np.average(sm_wake_loss)
+            s_wake_loss_med = np.median(sm_wake_loss)
             s_wake_loss_std = np.std(sm_wake_loss)
             s_wake_loss_low = np.min(sm_wake_loss)
             s_wake_loss_high = np.max(sm_wake_loss)
@@ -5335,13 +5405,16 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             # snopt + wec
             sw_wake_loss = (aept - sw_run_end_aep*1E3)/aept
             sw_wake_loss_mean = np.average(sw_wake_loss)
+            sw_wake_loss_med = np.median(sw_wake_loss)
             sw_wake_loss_std = np.std(sw_wake_loss)
             sw_wake_loss_low = np.min(sw_wake_loss)
             sw_wake_loss_high = np.max(sw_wake_loss)
+            sw_t, sw_p = ttest_ind(sm_wake_loss, sw_wake_loss, equal_var=False)
 
             # ps
             ps_wake_loss = (aept - ps_run_end_aep*1E3)/aept
             ps_wake_loss_mean = np.average(ps_wake_loss)
+            ps_wake_loss_med = np.median(ps_wake_loss)
             ps_wake_loss_std = np.std(ps_wake_loss)
             ps_wake_loss_low = np.min(ps_wake_loss)
             ps_wake_loss_high = np.max(ps_wake_loss)
@@ -5350,10 +5423,79 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
                 psw_wake_loss = (aept - psw_run_end_aep*1E3)/aept
                 psw_wake_loss_mean = np.average(psw_wake_loss)
+                psw_wake_loss_med = np.median(psw_wake_loss)
                 psw_wake_loss_std = np.std(psw_wake_loss)
                 psw_wake_loss_low = np.min(psw_wake_loss)
                 psw_wake_loss_high = np.max(psw_wake_loss)
+                psw_t, psw_p = ttest_ind(ps_wake_loss, psw_wake_loss, equal_var=False)
 
+            # collect statistics for table
+            medfcalls = np.array([s_med_fcalls, sw_med_fcalls, ps_med_fcalls], dtype=int)
+            lowfcalls = np.array([s_low_fcalls, sw_low_fcalls, ps_low_fcalls], dtype=int)
+            highfcalls = np.array([s_high_fcalls, sw_high_fcalls, ps_high_fcalls], dtype=int)
+            meanwl = np.array([s_wake_loss_mean, sw_wake_loss_mean, ps_wake_loss_mean])
+            medwl = np.array([s_wake_loss_med, sw_wake_loss_med, ps_wake_loss_med])
+            stdwl = np.array([s_wake_loss_std, sw_wake_loss_std, ps_wake_loss_std])
+            lowwl = np.array([s_wake_loss_low, sw_wake_loss_low, ps_wake_loss_low])
+            highwl = np.array([s_wake_loss_high, sw_wake_loss_high, ps_wake_loss_high])
+            pcutoff = 0.001
+            p = np.empty(len(meanwl), dtype=object)
+            p[:] = np.nan
+            if sw_p >= pcutoff:
+                p[1] = sw_p
+            else:
+                p[1] = "$< %.3f$" %(pcutoff)
+
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                medfcalls = np.append(medfcalls, int(psw_med_fcalls))
+                lowfcalls = np.append(lowfcalls, int(psw_low_fcalls))
+                highfcalls = np.append(highfcalls, int(psw_high_fcalls))
+                meanwl = np.append(meanwl, psw_wake_loss_mean)
+                medwl = np.append(medwl, psw_wake_loss_med)
+                stdwl = np.append(stdwl, psw_wake_loss_std)
+                lowwl = np.append(lowwl, psw_wake_loss_low)
+                highwl = np.append(highwl, psw_wake_loss_high)
+                if sw_p >= pcutoff:
+                    p = np.append(p, psw_p)
+                else:
+                    p = np.append(p, "$< %.3f$" %(pcutoff))
+
+            # put data in array for adding to dataframe
+            data = np.array([medfcalls, lowfcalls, highfcalls, medwl*100, meanwl*100, stdwl*100, lowwl*100, highwl*100, p])
+
+            # row names
+            rows = ["SNOPT", "SNOPT+WEC", "ALPSO"]
+            if wakemodel == "BPA" and nturbs == 38 and ndirs == 12:
+                rows.append("ALPSO+WEC")
+
+            # column names (two levels)
+            cols0 = ["Function Calls", "Function Calls", "Function Calls", "Wake Loss (%)", "Wake Loss (%)", "Wake Loss (%)", "Wake Loss (%)", "Wake Loss (%)", "Wake Loss (%)"]
+            cols1 = ["Median", "Low", "High", "Median", "Mean", "SD", "Low", "High", "p"]
+
+            # combine column names into tuples for handing to pandas Multiindex
+            colstuples = list(zip(cols0,cols1))
+
+            # create multi-level column names
+            colsindex = pd.MultiIndex.from_tuples(colstuples, names=["", ""])
+
+            # generate pandas dataframe
+            df = pd.DataFrame(data.T, index=rows, columns=colsindex)
+
+            # set up formatter function to get correct format for each element
+            def formatter(element):
+                if type(element) is float:
+                    return "%.3f" % element
+                elif type(element) is int:
+                    return "%i" % element
+                else:
+                    return element
+
+            formatters = [formatter, formatter, formatter, formatter, formatter, formatter, formatter, formatter, formatter]
+
+            # generate latex table code of data frame
+            print(df.to_latex(caption="Optimization Results for %s Model: %i Turbines, %i Directions" %(wakemodel, nturbs, ndirs), na_rep="", column_format="lrrrrrrrrr", formatters=formatters, float_format="{:0.3f}".format, multicolumn_format='c'))
+            
+            # print results
             print(" #################### Results for Case Study with %s, %i Turbs, %i Dirs ))###############" %(wakemodel, nturbs, ndirs))
             print( "nturbs: ", nTurbines)
             print( "nvars: ", nvars)
@@ -5668,7 +5810,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", plotcorrelations=False)
+    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=False)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -5775,10 +5917,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
 
-    # nturbs = 60
-    # ndirs = 72
-    # model = "BPA"
-    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
+    nturbs = 16
+    ndirs = 20
+    model = "BPA"
+    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
-    plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
+    # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
