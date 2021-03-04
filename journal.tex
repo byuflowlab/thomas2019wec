@@ -23,6 +23,7 @@
 % formatting packages
 \usepackage{enumitem}
 \usepackage{flafter}
+\usepackage{booktabs}
 
 \graphicspath{{./final_images/}}
 
@@ -839,21 +840,39 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 \end{figure}
 %
 \begin{table}
-\caption{Optimization Results for Case 1}
-\label{tab:case1}
-\centering
-\begin{tabular}{lcrrrcrrrrrr}
-	\br
-	& & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad} \\
-	\cline{3-5}\cline{7-12}
-	Method  & & Median & Low & High & & Mean & SD & Low & High & $p$ \\
-	\cline{1-1}\cline{3-5}\cline{7-12}
-	SNOPT  & & 550.0 & 156 & 3352 & & 11.88 & 1.42 & 8.32 & 15.56 &   \\
-	SNOPT+WEC & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & $<.001$\\
-	ALPSO & & 71,652.0 & 5,277.0 & 136,527.0 & & 13.49 & 1.50 & 10.77 & 16.68 & \\
-	\br
-\end{tabular}
+	\centering
+	\caption{Optimization Results for BPA Model: 16 Turbines, 20 Directions}
+	\label{tab:case1}
+	\begin{tabular}{lrrrrrrrrr}
+		\toprule
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		{} &         Median &    Low &   High &        Median &   Mean &    SD &   Low &   High &          p \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		SNOPT     &            547 &      0 &   3352 &        11.885 & 11.872 & 1.473 & 8.630 & 16.988 &            \\
+		SNOPT+WEC &            625 &      0 &   3594 &         9.169 &  8.858 & 0.703 & 7.346 & 12.137 &  $< 0.001$ \\
+		ALPSO     &          20132 &  20132 &  20132 &        10.951 & 10.940 & 1.094 & 7.479 & 13.523 &            \\
+		\bottomrule
+	\end{tabular}
 \end{table}
+%\begin{table}
+%\caption{Optimization Results for Case 1}
+%\label{tab:case1}
+%\centering
+%\begin{tabular}{lcrrrcrrrrrr}
+%	\br
+%	& & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad} \\
+%	\cline{3-5}\cline{7-12}
+%	Method  & & Median & Low & High & & Mean & SD & Low & High & $p$ \\
+%	\cline{1-1}\cline{3-5}\cline{7-12}
+%	SNOPT  & & 550.0 & 156 & 3352 & & 11.88 & 1.42 & 8.32 & 15.56 &   \\
+%	SNOPT+WEC & & 2,563.5 & 745.0 & 4,487.0 &  &  9.04 & 0.90 & 7.41 & 11.77 & $<.001$\\
+%	ALPSO & & 71,652.0 & 5,277.0 & 136,527.0 & & 13.49 & 1.50 & 10.77 & 16.68 & \\
+%	\br
+%\end{tabular}
+%\end{table}
+
+
 %
 %\begin{figure}[h]  
 %	\centering
@@ -891,22 +910,69 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 	\end{minipage} 
 \end{figure}
 %
-\begin{table}[h]
-  \caption{Optimization Results for Case 2}
-  \label{tab:case2}
-  \centering
-  \begin{tabular}{lcrrrcrrrrrr}
-  \br
-   & & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad } \\
-   \cline{3-5}\cline{7-12} 
-%   \vspace{1pt} 
-  Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
-   \cline{1-1}\cline{3-5}\cline{7-12}
-  SNOPT  & & 1,847.0 & 166.0 & 8,618.0 & & 23.72 & 1.00 & 22.78 & 36.64  &  \\
-  SNOPT+WEC & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & $< .001$ \\
-  ALPSO & & 3,338.0 & 170.0 & 9,242.0 & & 26.08 & 0.95 & 22.89 & 31.89 & \\
-  \br
-  \end{tabular}
+%\begin{table}[h]
+%  \caption{Optimization Results for Case 2}
+%  \label{tab:case2}
+%  \centering
+%  \begin{tabular}{lcrrrcrrrrrr}
+%  \br
+%   & & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad } \\
+%   \cline{3-5}\cline{7-12} 
+%%   \vspace{1pt} 
+%  Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
+%   \cline{1-1}\cline{3-5}\cline{7-12}
+%  SNOPT  & & 1,847.0 & 166.0 & 8,618.0 & & 23.72 & 1.00 & 22.78 & 36.64  &  \\
+%  SNOPT+WEC & & 4,102.0 & 1,183.0 & 10,653.0 &  &  22.80 & 0.37 & 22.02 & 23.96 & $< .001$ \\
+%  ALPSO & & 3,338.0 & 170.0 & 9,242.0 & & 26.08 & 0.95 & 22.89 & 31.89 & \\
+%  \br
+%  \end{tabular}
+%\end{table}
+%\begin{table}
+%	\centering
+%	\caption{Optimization Results for BPA Model: 38 Turbines, 12 Directions}
+%	\begin{tabular}{lrrrrrrrrr}
+%		\toprule
+%		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+%		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
+%		\midrule
+%		SNOPT     &            595 &    206 &   2224 &        16.304 & 16.338 & 0.790 & 14.505 & 19.102 &            \\
+%		SNOPT+WEC &           2693 &    828 &  10710 &        13.285 & 13.280 & 0.341 & 11.725 & 14.035 &  $< 0.001$ \\
+%		ALPSO     &          21032 &  21032 &  21032 &        15.076 & 15.097 & 0.555 & 13.658 & 17.016 &            \\
+%		ALPSO+WEC &           3782 &   3782 &   3782 &        14.098 & 14.096 & 0.425 & 12.532 & 15.762 &  $< 0.001$ \\
+%		\bottomrule
+%	\end{tabular}
+%\end{table}
+\begin{table}
+	\centering
+	\caption{Optimization Results for BPA Model: 38 Turbines, 12 Directions}
+	\begin{tabular}{lrrrrrrrrr}
+		\toprule
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		SNOPT     &            595 &    206 &   2224 &        16.304 & 16.338 & 0.790 & 14.505 & 19.102 &            \\
+		SNOPT+WEC &           2693 &    828 &  10710 &        13.285 & 13.280 & 0.341 & 11.725 & 14.035 &  $< 0.001$ \\
+		ALPSO     &          21032 &  21032 &  21032 &        15.076 & 15.097 & 0.555 & 13.658 & 17.016 &            \\
+		ALPSO+WEC &          26474 &  26474 &  26474 &        14.098 & 14.096 & 0.425 & 12.532 & 15.762 &  $< 0.001$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\begin{table}
+	\centering
+	\caption{Optimization Results for BPA Model: 38 Turbines, 36 Directions}
+	\label{tab:case2}
+	\begin{tabular}{lrrrrrrrrr}
+		\toprule
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		SNOPT     &           1985 &      0 &   7768 &        22.417 & 22.439 & 0.370 & 21.487 & 24.203 &            \\
+		SNOPT+WEC &           3706 &    330 &  12382 &        21.588 & 21.646 & 0.292 & 21.147 & 22.680 &  $< 0.001$ \\
+		ALPSO     &          20282 &  20282 &  20282 &        22.062 & 22.075 & 0.231 & 21.510 & 22.667 &            \\
+		\bottomrule
+	\end{tabular}
 \end{table}
 %
 %\begin{figure}[h!]  
@@ -947,20 +1013,35 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 	\end{minipage} 
 \end{figure}
 %
-\begin{table}[h]
-	\caption{Optimization Results for Case 3}
-	\label{tab:case3}
+%\begin{table}[h]
+%	\caption{Optimization Results for Case 3}
+%	\label{tab:case3}
+%	\centering
+%	\begin{tabular}{lcrrrcrrrrrr}
+%		\br
+%		& & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad} \\
+%		\cline{3-5}\cline{7-12}
+%		Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
+%		\cline{1-1}\cline{3-5}\cline{7-12}
+%		SNOPT  & & 4,415.0 & 254.0 & 20,318.0 & & 10.07 & 1.55 & 9.41 & 21.90 &  \\
+%		SNOPT+WEC & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & $<.001$ \\
+%	    ALPSO & & 2042.0 & 170.0 & 6,218.0 & & 10.33 & 0.39 & 9.52 & 12.62 &\\
+%		\br
+%	\end{tabular}
+%\end{table}
+\begin{table}
 	\centering
-	\begin{tabular}{lcrrrcrrrrrr}
-		\br
-		& & \multicolumn{3}{c}{Function Calls} &  & \multicolumn{6}{c}{\quad \quad \quad \quad \quad Wake Loss (\%) \quad \quad \quad \quad \quad} \\
-		\cline{3-5}\cline{7-12}
-		Method  & & Med. & Low & High & & Mean & SD & Low & High & $p$\\
-		\cline{1-1}\cline{3-5}\cline{7-12}
-		SNOPT  & & 4,415.0 & 254.0 & 20,318.0 & & 10.07 & 1.55 & 9.41 & 21.90 &  \\
-		SNOPT+WEC & & 12,970.0 & 5045.0& 34,565.0 &  &  9.30 & 0.13 & 8.90 & 9.90 & $<.001$ \\
-	    ALPSO & & 2042.0 & 170.0 & 6,218.0 & & 10.33 & 0.39 & 9.52 & 12.62 &\\
-		\br
+	\caption{Optimization Results for BPA Model: 60 Turbines, 72 Directions}
+	\begin{tabular}{lrrrrrrrrr}
+		\toprule
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		{} &         Median &    Low &   High &        Median &  Mean &    SD &   Low &  High &          p \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		SNOPT     &           2701 &      0 &  16644 &         9.033 & 9.041 & 0.176 & 8.625 & 9.445 &            \\
+		SNOPT+WEC &            483 &    180 &   1424 &         8.540 & 8.551 & 0.118 & 8.260 & 8.830 &  $< 0.001$ \\
+		ALPSO     &          20432 &  20432 &  20432 &         8.632 & 8.647 & 0.185 & 8.183 & 9.314 &            \\
+		\bottomrule
 	\end{tabular}
 \end{table}
 
