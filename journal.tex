@@ -83,7 +83,7 @@ To apply the wake expansion technique to the wind farm layout optimization probl
 	\label{fig:wec-methods}
 \end{figure}
 
-\section{Wake and Wind Farm Models}
+\section{Simulation Models}
 Because of the general nature of the proposed method, it could theoretically be applied to a range of wake models. In this study we have applied WEC to the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016} and the cosine version of the Jensen model \cite{jensen1983}. We also used various other models necessary for combining wakes and calculating wind farm AEP.
 
 \subsection{The Bastankhah and Port\'e-Agel Wake Model}
@@ -134,7 +134,7 @@ k_{y_{NEAR}} = \frac{\sigma_{yo}-\sigma_{yd}}{x_o}
 For more details on near wake approximation of the Bastankhah and Port\'e-Agel wake model used in this study, please see \cite{thomas2019-les-validation}.
 
 \subsection{The Jensen Cosine Wake Model}
-The Jensen cosine wake model is a variant of the popular "top hat" model often referred to as the Jensen model. The cosine version simply multiplies the top hat shape with a factor that changes the cross wake deficit shape to follow a cosine curve. The Jensen cosine wake model is shown in \cref{eq:JensenVelocityDeficit}.
+The Jensen cosine wake model is a variant of the popular "top hat" model often referred to as the Jensen model. The cosine version simply multiplies the top hat shape with a factor that changes the cross wake deficit shape to follow a cosine curve. We used the Jensen cosine wake model as shown in \cref{eq:JensenVelocityDeficit}, along with the Katic wake combination model \cite{katic1986}.
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
@@ -169,9 +169,9 @@ The wake spreading angle used in this work, and by Jensen, was $\beta = 20 \degr
 \end{figure}
 
 \subsection{Turbine Model}
-We based our turbines on the Vestas V-80 2MW wind turbine for all studies in this paper. The values of $C_P$ and $C_T$ were based on a linear interpolation of the power and thrust coefficient curves presented in \cite{niayifar2016} and shown in \cref{fig:cp,fig:ct}. The other turbine specifications are provide in \cref{tab:v80}. The $C_T$ curve was only used with the Bastankhah and Port\'e-Agel wake model. We used a constant axial induction value of 1/3 for the Jensen cosine wake model.
+We based our turbines on the Vestas V-80 2MW wind turbine for all studies in this paper. The values of $C_P$ and $C_T$ were based on a linear interpolation of the power and thrust coefficient curves presented in \cite{niayifar2016} and shown in \cref{fig:cp,fig:ct}. The other turbine specifications are provide in \cref{tab:v80}. The $C_T$ curve was only used with the Bastankhah and Port\'e-Agel wake model. We used a constant axial induction value of 1/3 when using the Jensen cosine wake model.
 %
-\begin{figure}[htp]
+\begin{figure}[h!]
 	\centering
 	\begin{minipage}[t]{0.48\textwidth}
 		\centering
@@ -187,7 +187,7 @@ We based our turbines on the Vestas V-80 2MW wind turbine for all studies in thi
 	\end{minipage} 
 \end{figure}
 %
-\begin{table}
+\begin{table}[h!]
 	\caption{Turbine Specifications}
 	\label{tab:v80}
 	\centering
@@ -228,7 +228,7 @@ AEP = (24)(365)\sum_{j=1}^{n_d} \bigg( p_j \sum_{i=1}^{n_t} P_i \bigg)
  In \cref{eq:aep}, $n_d$ is the number of wind directions, or states, $p_j$ is the probability of wind for a given state (direction and speed), and $n_t$ is the number of wind turbines.
 
 \section{Implementation Details and Optimization Algorithms}
-The code for each wake model was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, SNOPT and ALPSO. SNOPT is a gradient-based sparse non-linear optimization algorithm \cite{gill2005}. ALPSO is a particle swarm algorithm that uses an augmented Legrangian approach to handle constraints \cite{jansen2011_alpso}. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for the Bastankhah and Port\'e-Agel wake model using algorithmic differentiation provided by Tapenade \cite{tapenade2013}. Gradients for the Jensen cosine wake model were obtained through a central difference approach. 
+The code for each wake model was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, the gradient-based Sparse Nonlinear OPTimizer (SNOPT)  \cite{gill2005} and the gradient-free Augmented Lagrangian Particle Swarm Optimizer (ALPSO) \cite{jansen2011_alpso} that uses an augmented Lagrangian method to handle constraints. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for both wake models using algorithmic differentiation provided by Tapenade \cite{tapenade2013}.
 
 SNOPT was run with a convergence tolerance of 1E-4. The objective and constraints were scaled to be on the order of 1. ALPSO was run using the default parameters provided in pyOptSparse \cite{wu2020} with a few exceptions. First, the craziness velocity was set to be $1E-2$ as this value resulted in increased performance compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results for the cases tested. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about 20000 as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts. The number of outer iterations was determined based on the number inner iterations and desired function call cap for each case. The ALPSO convergence history for each case study with varied inner iteration counts is shown in \cref{fig:alpso-ii-16-20,fig:alpso-ii-38-12}. The objective and design variables were all scaled to be between -1 and 1.  All optimization runs using ALPSO had a population size of 30.
 
@@ -569,24 +569,34 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models.
 
 \subsection{Testing WEC with the Jensen Cosine Wake Model}
-As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (three) and the same number of WEC steps (six) as found best for use with WEC as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC using the Jensen cosine model applied to the case shown in \cref{fig:method_study_layout,fig:nantucket12dirs,eq:obj_wec_methods} using the same 200 starting layouts as used to test the various WEC methods. Results of this test, shown in \cref{fig:jensen-38-wake-loss,fig:jensen-38-wake-fcalls}, clearly demonstrate significant improvement in minimum, median, and standard deviation of wake loss for using WEC with SNOPT as opposed to using SNOPT alone, at the expense of an increase in the number of function calls.
+As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (three) and the same number of WEC steps (six) as found best for use with WEC as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC using the Jensen cosine model applied to the case shown in \cref{fig:method_study_layout,fig:nantucket12dirs,eq:obj_wec_methods} using the same 200 starting layouts as used to test the various WEC methods. Results of this test, shown in \cref{fig:jensen-38-wake-loss,fig:jensen-38-wake-fcalls}, clearly demonstrate significant improvement in minimum, median, and standard deviation of wake loss for using WEC with SNOPT as opposed to using SNOPT alone, at the expense of an increase in the number of function calls.0659
 
-
-\begin{figure}[h!]  
+\begin{figure}[h]
 	\centering
-	\begin{minipage}[t]{18pc}    
+	\begin{minipage}[t]{.75\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_percent_wake_loss.pdf}
-		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
-		\label{fig:jensen-38-wake-loss}
-	\end{minipage}\hspace{1pc}
-	\begin{minipage}[t]{18pc}    
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_fcalls.pdf}
-		\caption{Function calls for 200 optimizations using the Jensen model with and without WEC-D. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
-		\label{fig:jensen-38-wake-fcalls}
-	\end{minipage}
+		\includegraphics[width=\textwidth]{final_images/results/convergence_history_JENSENmodel_38turbs_12dirs}  
+		\caption{Convergence histories of optimizations run from 200 different starting points for the Jensen model using 38 turbines and 12 directions using three different optimization approaches. Markers indicate optimized values.}
+		\label{fig:case-j-histories}
+	\end{minipage} 
 \end{figure}
+
+\begin{table}
+	\centering
+	\caption{Optimization Results for JENSEN Model: 38 Turbines, 12 Directions}
+	\label{tab:casejensen}
+	\begin{tabular}{lrrrrrrrrr}
+		\toprule
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
+		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
+		SNOPT     &            197 &     96 &   1646 &        19.167 & 19.184 & 0.442 & 18.077 & 20.328 &            \\
+		SNOPT+WEC &            288 &    216 &   5988 &        18.244 & 18.256 & 0.216 & 17.742 & 18.840 &  $< 0.001$ \\
+		ALPSO     &          21030 &  21030 &  21030 &        18.811 & 18.848 & 0.291 & 18.069 & 20.016 &            \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
 %\subsection{Testing WEC with ALPSO}
 %
@@ -811,6 +821,17 @@ Where $b_{i,k}$ represents the distance of each turbine $i$ from each boundary $
 We compared wake loss and the number of function calls required for each of the cases discussed previously. We also performed a Welch's t-test between the SNOPT and SNOPT+WEC results. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). 
 
 Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab:case1}. Results for case 2 are presented in \cref{fig:case-2-wake-loss,fig:case-2-wake-loss-no-outliers,fig:case-2-fcalls,tab:case2}.  Results for case 3 are presented in \cref{fig:case-3-wake-loss,fig:case-3-wake-loss-no-outliers,fig:case-3-fcalls,tab:case3}. 
+
+\begin{figure}[h]
+	\centering
+	\begin{minipage}[t]{\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{final_images/results/dist_boxpercentwakeloss.pdf}  
+		\caption{Results distributions of all case studies.}
+		\label{fig:boxplots}
+	\end{minipage} 
+\end{figure}
+
 %
 %\begin{figure}[h!]  
 %\centering
@@ -849,9 +870,9 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &   Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
-		SNOPT     &            547 &      0 &   3352 &        11.885 & 11.872 & 1.473 & 8.630 & 16.988 &            \\
-		SNOPT+WEC &            625 &      0 &   3594 &         9.169 &  8.858 & 0.703 & 7.346 & 12.137 &  $< 0.001$ \\
-		ALPSO     &          20132 &  20132 &  20132 &        10.951 & 10.940 & 1.094 & 7.479 & 13.523 &            \\
+		SNOPT     &            546 &    152 &   3348 &        11.898 & 11.882 & 1.470 & 8.630 & 16.988 &            \\
+		SNOPT+WEC &            618 &    300 &   3580 &         9.169 &  8.860 & 0.698 & 7.346 & 12.137 &  $< 0.001$ \\
+		ALPSO     &          20130 &  20130 &  20130 &        10.951 & 10.940 & 1.094 & 7.479 & 13.523 &            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -951,10 +972,10 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
-		SNOPT     &            595 &    206 &   2224 &        16.304 & 16.338 & 0.790 & 14.505 & 19.102 &            \\
-		SNOPT+WEC &           2693 &    828 &  10710 &        13.285 & 13.280 & 0.341 & 11.725 & 14.035 &  $< 0.001$ \\
-		ALPSO     &          21032 &  21032 &  21032 &        15.076 & 15.097 & 0.555 & 13.658 & 17.016 &            \\
-		ALPSO+WEC &          26474 &  26474 &  26474 &        14.098 & 14.096 & 0.425 & 12.532 & 15.762 &  $< 0.001$ \\
+		SNOPT     &            591 &    202 &   2220 &        16.304 & 16.338 & 0.790 & 14.505 & 19.102 &            \\
+		SNOPT+WEC &           2679 &    814 &  10696 &        13.285 & 13.280 & 0.341 & 11.725 & 14.035 &  $< 0.001$ \\
+		ALPSO     &          21030 &  21030 &  21030 &        15.076 & 15.097 & 0.555 & 13.658 & 17.016 &            \\
+		ALPSO+WEC &          26460 &  26460 &  26460 &        14.097 & 14.096 & 0.425 & 12.532 & 15.762 &  $< 0.001$ \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -968,9 +989,9 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
-		SNOPT     &           1985 &      0 &   7768 &        22.417 & 22.439 & 0.370 & 21.487 & 24.203 &            \\
-		SNOPT+WEC &           3706 &    330 &  12382 &        21.588 & 21.646 & 0.292 & 21.147 & 22.680 &  $< 0.001$ \\
-		ALPSO     &          20282 &  20282 &  20282 &        22.062 & 22.075 & 0.231 & 21.510 & 22.667 &            \\
+		SNOPT     &           2004 &    514 &   7764 &        22.423 & 22.443 & 0.362 & 21.487 & 24.203 &            \\
+		SNOPT+WEC &           3762 &   1584 &  12368 &        21.592 & 21.646 & 0.287 & 21.148 & 22.680 & $< 0.001$ \\
+		ALPSO     &          20280 &  20280 &  20280 &        22.062 & 22.075 & 0.231 & 21.510 & 22.667 &            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -1038,9 +1059,9 @@ Results for case 1 are shown in \cref{fig:case-1-wake-loss,fig:case-1-fcalls,tab
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &  Mean &    SD &   Low &  High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
-		SNOPT     &           2701 &      0 &  16644 &         9.033 & 9.041 & 0.176 & 8.625 & 9.445 &            \\
-		SNOPT+WEC &            483 &    180 &   1424 &         8.540 & 8.551 & 0.118 & 8.260 & 8.830 &  $< 0.001$ \\
-		ALPSO     &          20432 &  20432 &  20432 &         8.632 & 8.647 & 0.185 & 8.183 & 9.314 &            \\
+		SNOPT     &           2714 &    560 &  16640 &         9.033 & 9.043 & 0.180 & 8.625 & 9.445 &            \\
+		SNOPT+WEC &            471 &    276 &   1410 &         8.539 & 8.551 & 0.118 & 8.260 & 8.830 &  $< 0.001$ \\
+		ALPSO     &          20430 &  20430 &  20430 &         8.632 & 8.647 & 0.185 & 8.183 & 9.314 &            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
