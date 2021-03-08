@@ -4,19 +4,19 @@ import pandas as pd
 
 n = 3
 # create synthetic data
-medfcalls = np.zeros(n, dtype=int)
-lowfcalls = np.ones(n)
-highfcalls = np.ones(n)*2.1567890
-meanwl = np.ones(n)*3
-stdwl = np.ones(n)*4
-lowwl = np.ones(n)*5
-highwl = np.ones(n)*6
-p = np.empty(n, dtype=object)
-p[:] = np.nan
-p[1] = "$< %.3f$" %(0.001)
-print(p)
+a = np.zeros(n, dtype=int)
+b = np.ones(n)
+c = np.ones(n)*2.1567890
+d = np.ones(n)*3
+e = np.ones(n)*4
+f = np.ones(n)*5
+g = np.ones(n)*6
+h = np.empty(n, dtype=object)
+h[:] = np.nan
+h[1] = "$< %.3f$" %(0.001)
+print(h)
 # put data in array for adding to dataframe
-data = np.array([medfcalls, lowfcalls, highfcalls, meanwl, stdwl, lowwl, highwl, p])
+data = np.array([a, b, c, d, e, f, g, h])
 
 # row names
 rows = ["A", "B", "C"]
