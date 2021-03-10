@@ -4410,7 +4410,6 @@ def plot_wec_methods(filename, save_figs, show_figs):
     beta_star = 0.154
     alpha_star = 2.32
 
-
     wec_angle = 6
     wec_factor_d = 4
     wec_factor_h = 3
@@ -4435,31 +4434,31 @@ def plot_wec_methods(filename, save_figs, show_figs):
     # plot
     fig, ax = plt.subplots(1)
 
-
-    line1 = ax.plot(x / d, sigmay_original / d, 'gray')
-    line2 = ax.plot(x / d, -sigmay_original / d, 'gray')
-    line3 = ax.plot(x / d, np.zeros_like(x), '--', color='gray')
+    colors = ["#F5793A", "#0F2080", "#85C0F9", "#BDB8AD", "#A95AA1", "#382119"]
+    line1 = ax.plot(x / d, sigmay_original / d, colors[3])
+    line2 = ax.plot(x / d, -sigmay_original / d, colors[3])
+    line3 = ax.plot(x / d, np.zeros_like(x), '--', color=colors[3])
     ax.text(3, 0.3, 'Original wake',
              verticalalignment='top', horizontalalignment='left',
-             color='gray', fontsize=15)
+             color=colors[3], fontsize=15)
 
-    line4 = ax.plot(x / d, sigmay_a / d, 'r')
-    line5 = ax.plot(x / d, -sigmay_a / d, 'r')
+    line4 = ax.plot(x / d, sigmay_a / d, colors[0])
+    line5 = ax.plot(x / d, -sigmay_a / d, colors[0])
     ax.text(3., 0.72, 'WEC-A',
              verticalalignment='bottom', horizontalalignment='left',
-             color='r', fontsize=15)
+             color=colors[0], fontsize=15)
 
-    line6 = ax.plot(x / d, sigmay_d / d, 'b')
-    line7 = ax.plot(x / d, -sigmay_d / d, 'b')
+    line6 = ax.plot(x / d, sigmay_d / d, colors[1])
+    line7 = ax.plot(x / d, -sigmay_d / d, colors[1])
     ax.text(1, 1.4, 'WEC-D',
              verticalalignment='bottom', horizontalalignment='left',
-             color='b', fontsize=15)
+             color=colors[1], fontsize=15)
 
-    line8 = ax.plot(x / d, sigmay_h / d, 'c')
-    line9 = ax.plot(x / d, -sigmay_h / d, 'c')
+    line8 = ax.plot(x / d, sigmay_h / d, colors[2])
+    line9 = ax.plot(x / d, -sigmay_h / d, colors[2])
     ax.text(1, 0.8, 'WEC-H',
              verticalalignment='bottom', horizontalalignment='left',
-             color='c', fontsize=15)
+             color=colors[2], fontsize=15)
 
     plt.xlabel('Downwind distance ($\Delta x/d$)')
     plt.ylabel('Crosswind distance ($\Delta y/d$)')
@@ -5952,11 +5951,11 @@ if __name__ == "__main__":
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
     # filename = 'maxwec_const_nsteps6'
     # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = 'nsteps_const_maxwec'
-    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = 'nsteps_const_maxwec'
+    # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
-    # filename = './images/wec-methods.pdf'
-    # plot_wec_methods(filename, save_figs, show_figs)
+    filename = './images/wec-methods.pdf'
+    plot_wec_methods(filename, save_figs, show_figs)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
@@ -6035,7 +6034,7 @@ if __name__ == "__main__":
 
     # nturbs = 38
     # ndirs = 12
-    # model = "JENSEN"
+    # model = "BPA"
     # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
     # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
