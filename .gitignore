@@ -25,6 +25,7 @@ openmdao_checks.*
 journal.log
 journal.aux
 journal.synctex.gz
+journal.out
 
 # except don't ignore the summary or layout datafiles.
 !*_all.txt
