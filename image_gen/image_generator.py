@@ -5194,7 +5194,8 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
     boxcolors = list()
     df = pd.DataFrame()
     counter=0
-    
+    onepcaept = np.zeros(5)
+    case = 0
     for wakemodel in ["BPA", "JENSEN"]:
         for nturbs, ndirs in zip(np.array([16, 38, 38, 60]), np.array([20, 12, 36, 72])):
             if from_convergence_history:
@@ -5254,6 +5255,8 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
                 # get AEP 
                 start_aep = np.copy(sm_orig_aep)
                 scale_aep = 1E-6
+                onepcaept[case] = (aept/100)*1E-9
+                case += 1
             else:
                 if wakemodel == "BPA":
                     psdir = "./image_data/opt_results/202101042132-alpso-runs-random-seed/"
@@ -5616,6 +5619,9 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
             print( "nvars: ", nvars)
             print( "ncons: ", nCons)
 
+            print("")
+            print("aept for %i turbs %i dirs (GWh): " %(nturbs,ndirs), aept*1E-9)
+            print("1pc aept for %i turbs %i dirs (GWh): " %(nturbs,ndirs), (aept/100.0)*1E-9)
             print( " ")
 
             print( "snopt mstart results: ")
@@ -5815,13 +5821,12 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
     # label y axis
     ax.set_ylabel('Wake Loss (%)')
 
-    # identify groups of box plots
-
-    ax.annotate("BPA Model\n16 Turbines\n20 Directions", (1.35, 25), color='k', ma='left') # 16 turbs, 20 dirs, BPA model
-    ax.annotate("BPA Model\n38 Turbines\n12 Directions", (6, 25), color='k', ma='left') # 38 turbs, 12 dirs, BPA model
-    ax.annotate("BPA Model\n38 Turbines\n36 Directions", (10.35, 25), color='k', ma='left') # 38 turbs, 36 dirs, BPA model
-    ax.annotate("BPA Model\n60 Turbines\n72 Directions", (14.35, 25), color='k', ma='left') # 60 turbs, 72 dirs, BPA model
-    ax.annotate("Jensen Model\n38 Turbines\n12 Directions", (18.35, 25), color='k', ma='left') # 38 turbs, 12 dirs, Jensen model
+    # identify groups of box plots           
+    ax.annotate("Case 1\nBPA Model\n16 Turbines\n20 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[0]), (1.35, 25), color='k', ma='left') # 16 turbs, 20 dirs, BPA model
+    ax.annotate("Case 2\nBPA Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[1]), (6, 25), color='k', ma='left') # 38 turbs, 12 dirs, BPA model
+    ax.annotate("Case 3\nBPA Model\n38 Turbines\n36 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[2]), (10.35, 25), color='k', ma='left') # 38 turbs, 36 dirs, BPA model
+    ax.annotate("Case 4\nBPA Model\n60 Turbines\n72 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[3]), (14.35, 25), color='k', ma='left') # 60 turbs, 72 dirs, BPA model
+    ax.annotate("Case 2\nJensen Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[4]), (18.35, 25), color='k', ma='left') # 38 turbs, 12 dirs, Jensen model
 
     # ax.set_ylim([0.0, np.max(impdata)+1])
     # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
@@ -5925,7 +5930,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
+    plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -5954,8 +5959,8 @@ if __name__ == "__main__":
     # filename = 'nsteps_const_maxwec'
     # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
-    filename = './images/wec-methods.pdf'
-    plot_wec_methods(filename, save_figs, show_figs)
+    # filename = './images/wec-methods.pdf'
+    # plot_wec_methods(filename, save_figs, show_figs)
 
     # filename = "./images/38turbs_results_hist"
     # plot_optimization_results_38_turbs_hist(filename, save_figs, show_figs)
