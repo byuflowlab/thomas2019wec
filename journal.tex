@@ -26,7 +26,9 @@
 \usepackage{flafter}
 \usepackage{booktabs}
 \usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[flushleft]{threeparttable}
 
+% paths
 \graphicspath{{./final_images/}}
 
 % editing packages
@@ -39,10 +41,10 @@
 \author{J~J~Thomas, S~McOmber, and A~Ning}
 \address{Department of Mechanical Engineering,
 Brigham Young University, Provo, Utah, USA}
-\ead{jaredthomas@byu.net}
+\ead{jaredthomas@byu.edu}
 
 \begin{abstract}
-	This paper presents a process using an approach related to  continuation optimization methods for reducing multi-modality in the wind farm layout optimization problem, referred to as Wake Expansion Continuation (WEC). The reduction in multi-modality is achieved by starting with an increased wake spread, while maintaining normal velocity deficits at the center of the wakes, and then reducing the wake spread for each of a series of optimization runs until the standard wake spread is used. WEC was applied and shown effective with two different wake models. Four optimization case studies were tested with a gradient-based method, a gradient-free method, and a gradient-based method using WEC. Results using WEC show a significant mean optimized annual energy production (AEP) improvement compared to gradient-based optimization without WEC for all test cases. The gradient-free algorithm was also outperformed on average by the gradient-based algorithm with WEC on all cases. WEC was also applied to the gradient-free algorithm for one case study with significantly improved results, but not as significant as the effect of WEC on a gradient-based algorithm.
+	This paper presents a process using an approach related to  continuation optimization methods for reducing multi-modality in the wind farm layout optimization problem, referred to as Wake Expansion Continuation (WEC). The reduction in multi-modality is achieved by starting with an increased wake spread, while maintaining normal velocity deficits at the center of the wakes, and then reducing the wake spread for each of a series of optimization runs until the standard wake spread is used. WEC was applied and shown effective with two different wake models. Four optimization case studies were tested with a gradient-based method, a gradient-free method. Results using WEC show a significant mean optimized annual energy production (AEP) improvement compared to optimization without WEC for all test cases. The gradient-free optimization algorithm was also outperformed on average by the gradient-based algorithm with WEC on all cases. WEC was also applied to the gradient-free algorithm for one case study with significantly improved results, but the improvement was more significant when WEC was applied to a gradient-based algorithm.
 \end{abstract}
 
 \section{Introduction}
@@ -55,15 +57,15 @@ Current methods seek to avoid local optima by searching the existing design spac
 
 The two primary characteristics that simple wake models seek to capture are wake diameter and velocity deficit. These characteristics in turn largely determine the shape of the wind farm layout design space. The fluctuations of wind speed as turbines move in and out of the wakes during optimization are primarily responsible for the multi-modal nature of the WFLO problem. 
 
-During optimization, the spaces between wakes translate to locally optimal locations for turbines. However, it is often the case that there are more optimal turbine locations that are not found by the optimizer because the turbines are effectively stuck in locally optimal locations. Our proposed method seeks to overcome the problem of local optima by temporarily reducing the multi-modality of the design space. We will refer to the new method as Wake Expansion Continuation, or WEC. We presented a preliminary study of the WEC method in \cite{thomas2018-wec}.
+During optimization, the spaces between wakes translate to locally optimal locations for turbines. However, it is often the case that there are more optimal turbine locations that are not found by the optimizer because the turbines are effectively stuck in locally optimal locations. In this paper we propose a method designed to overcome the problem of local optima by temporarily reducing the multi-modality of the design space. We will refer to the new method as Wake Expansion Continuation, or WEC. 
 
 In the following sections we will (1) present an overview of WEC, (2) introduce the simulation models used to study WEC, (3) demonstrate how to apply WEC to existing models, (4) provide a series of case studies for optimization method comparison, (5) give some details on the computational environment used in our studies, (6) discuss how we tuned the various methods for our case studies, (7) present and discuss the results of the case studies, and (8) provide concluding comments.
 
 \section{Introduction to the Wake Expansion Continuation}\label{sec:introwec}
 
-The WEC method is somewhat analogous to Gaussian continuation optimization. In Gaussian continuation optimization, the design space is approximated using a series of Gaussian radial basis functions. When optimization is performed, the standard deviations of the radial basis functions starts at a relatively high value and slowly decreases until the original standard deviation is reached \cite{mobahi2015}. Increasing the standard deviation of the basis functions has the effect of causing the various basis functions to blend in to each other, effectively removing the local optima and providing a relatively convex design space to the optimization algorithm. Slowly returning the standard deviation to the original value allows the optimization algorithm to adjust for any shift in the global optimum due to the blending of the basis functions and avoid any nearby local optima. 
+The WEC method is somewhat analogous to Gaussian continuation optimization. In Gaussian continuation optimization, the design space is approximated using a series of Gaussian radial basis functions. When optimization is performed, the standard deviations of the radial basis functions starts at a relatively high value and slowly decreases until the original standard deviation is reached \cite{mobahi2015}. Increasing the standard deviation of the basis functions has the effect of causing the various basis functions to blend in to each other, effectively removing the local optima and providing a relatively convex design space to the optimization algorithm. Slowly returning the standard deviation to the original value allows the optimization algorithm to adjust for any shift in the global optimum due to the blending of the basis functions and avoid any nearby local optima. We have presented a preliminary study of the WEC method showing significant benefit in \cite{thomas2018-wec} and a follow-on study showing that optimization results using WEC were even more significant when re-calculated using large eddy simulations (LES) in \cite{thomas2019-les-validation}.
 
-WEC works in a manner similar to Gaussian continuation optimization, except that because wind turbine wakes are roughly Gaussian-shaped, the Gaussian basis functions are built in to the model directly rather than used to approximate the model. Other key differences are that the basis function in WEC are not radial, and the changing locations of the Gaussian functions during the WFLO mean that we cannot guarantee convergence to the global optimum. However, the use of the WEC method does significantly improve the optimization results, as will be shown.
+WEC works in a manner similar to Gaussian continuation optimization, except that because wind turbine wakes are roughly Gaussian-shaped, the Gaussian basis functions are built in to the model directly rather than used to approximate the model. Other key differences are that the basis function in WEC are not radial, and the changing locations of the Gaussian functions during the WFLO mean that we cannot guarantee convergence to the global optimum. However, the use of the WEC method does significantly improve the optimization results. 
 
 The WEC method can be explained in three basic steps:
 \begin{enumerate}[label=\arabic*)]
@@ -771,9 +773,9 @@ Because WEC adjusts the design space, it can be applied with any optimization al
 \subsection{WEC with the Jensen Cosine Model}
 As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (3) and the same number of WEC steps (6) as found best for use with WEC as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC with the Jensen cosine model only on case 2 (see \cref{sec:case2}). Further improvements with WEC are likely available if WEC were tuned to this model and case combination.
 
-\section{Results}\label{sec:results}
+\section{Results and Discussion}\label{sec:results}
 
-In the WFLO problem, we  want low wake loss values, tight distributions, and relatively few function calls. The benefit of low wake loss is increased efficiency, leading to a reduced cost of energy. Tight distributions mean results are more consistent and less dependent on the starting layout, mean we need fewer optimizations to be confident of having a good wind farm design. A low number of function calls means that wind farm design optimization can be done more quickly, more variables could be tested, and planning costs could be reduced. WEC generally reduces the variance and value of wake loss while keeping function calls well below the number required for gradient-free optimization. Starting and final wake loss distributions for the case studies are shown in the box plots of \cref{fig:boxplots}. 
+In the WFLO problem, we  want low wake loss values, tight distributions, and relatively few function calls. The benefit of low wake loss is increased efficiency, leading to a reduced cost of energy. Tight distributions mean results are more consistent and less dependent on the starting layout, which in turn means we need fewer optimizations to be confident of having a good wind farm design. A low number of function calls means that wind farm design optimization can be done more quickly, more variables could be tested, and planning costs could be reduced. WEC generally reduces the variance and value of wake loss while keeping function calls well below the number required for gradient-free optimization. Starting and final wake loss distributions for the case studies are shown in the box plots of \cref{fig:boxplots}. 
 %
 \begin{figure}[h!]
 	\centering
@@ -785,9 +787,9 @@ In the WFLO problem, we  want low wake loss values, tight distributions, and rel
 	\end{minipage} 
 \end{figure}
 
-We can see in \cref{fig:boxplots} that all the optimization methods applied were successful as finding fairly good results, but it is clear that WEC has a significant impact, reducing the mean, minimum, and standard deviation of the wake loss distributions for all cases as compared with SNOPT or ALPSO alone, with the exception that ALPSO found the best overall results for case 4. However, SNOPT+WEC  provided the best results on average for all cases. While most of the distributions are fairly normally distributed, the WEC results for case 1 did have some high outliers. It is also clear that WEC improved the results of ALPSO on case 2 on average and in finding a better overall solution. The impact of WEC with ALPSO was less than the impact of WEC with SNOPT. For case 2, the SNOPT+WEC distribution does not even overlap with the SNOPT distribution. The low outliers in the starting location wake loss distributions are the designed layouts depicted in \cref{fig:layout1,fig:layout2and3,fig:layout4}.
+We can see in \cref{fig:boxplots} that all the optimization methods applied were successful at finding fairly good results, but it is clear that WEC has a significant impact, reducing the mean, minimum, and standard deviation of the wake loss distributions for all cases as compared with SNOPT or ALPSO alone, with the exception that ALPSO found the best overall result for case 4. However, SNOPT+WEC  provided the best results on average for all cases. While most of the distributions are fairly normally distributed, the WEC results for case 1 did have some high outliers. It is also clear that WEC improved the results of ALPSO on case 2 on average and in finding a better overall solution. The impact of WEC with ALPSO was less than the impact of WEC with SNOPT. For case 2, the SNOPT+WEC distribution does not even overlap with the SNOPT distribution. The low outliers in the starting location wake loss distributions are the designed layouts depicted in \cref{fig:layout1,fig:layout2and3,fig:layout4}.
 
-While looking at the final wake loss distributions is informative, we are also interested in how the various methods got to those final locations. The convergence history for SNOPT, SNOPT+WEC, and ALPSO for each case study are shown in \cref{fig:case-1-histories,fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories}. The ALPSO runs all terminated with the same number of function calls because function calls was controlled by the number of inner and outer iterations (see \cref{tab:alpsoparams}). The straight lines in the ALPSO histories (from $1\times10^0$ to about $1.5\times10^2$ in \cref{fig:case-1-histories}) represent the first outer iteration because we have only plotted ALPSO and ALPSO+WEC points at the completion of each outer iteration. This pattern is seen in the ALPSO and ALPSO+WEC convergence histories for all of the case studies. Straight lines are can also be seen in the SNOPT and SNOPT+WEC convergence histories in each of the case studies. These are just small steps taken that appear to have no change in the figures. We have adjusted wake loss values to be calculated by the wake models without WEC and with local TI if applicable in all the convergence history figures. This way we can see what is happening in the design space we are interested in, rather than the altered design space used to inform the optimization algorithms. The y-axes in \cref{fig:case-1-histories,fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories} correspond with the y-axis in \cref{fig:boxplots}, but with bounds adjusted as appropriate for visualizing the convergence histories of each case study. We chose to use a log scale for function calls because of the large difference in the number of function calls used for gradient-based methods compared to the number of function calls used for the gradient-free methods. The median number of function calls differed by one to two orders of magnitude (see \cref{tab:case1,tab:case2,tab:case2jensen,tab:case3,tab:case4}).
+While looking at the final wake loss distributions is informative, we are also interested in how the various methods got to those final locations. The convergence history for SNOPT, SNOPT+WEC, and ALPSO for each case study are shown in \cref{fig:case-1-histories,fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories}. The ALPSO runs all terminated with the same number of function calls because function calls was controlled by the number of inner and outer iterations (see \cref{tab:alpsoparams}). The straight lines in the ALPSO histories (from $1\times10^0$ to about $1.5\times10^2$ in \cref{fig:case-1-histories}) represent the first outer iteration because we have only plotted ALPSO and ALPSO+WEC points at the completion of each outer iteration. This pattern is seen in the ALPSO and ALPSO+WEC convergence histories for all of the case studies. Straight lines can also be seen in the SNOPT and SNOPT+WEC convergence histories in each of the case studies. These are just small steps taken that appear to have no change in the figures. We have adjusted wake loss values to be calculated by the wake models without WEC and with local TI if applicable in all the convergence history figures. This way we can see what is happening in the design space we are interested in, rather than the altered design space used to inform the optimization algorithms. The y-axes in \cref{fig:case-1-histories,fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories} correspond with the y-axis in \cref{fig:boxplots}, but with bounds adjusted as appropriate for visualizing the convergence histories of each case study. We chose to use a log scale for function calls because of the large difference in the number of function calls used for gradient-based methods compared to the number of function calls used for the gradient-free methods. The median number of function calls differed by one to two orders of magnitude (see \cref{tab:case1,tab:case2,tab:case2jensen,tab:case3,tab:case4}).
 
 \begin{figure}[h!]
 	\centering
@@ -799,9 +801,9 @@ While looking at the final wake loss distributions is informative, we are also i
 	\end{minipage}
 \end{figure}
 
-The convergence histories for case 1, shown in \cref{fig:case-1-histories}, illustrate the significant drop in wake loss due to using WEC with only a small extra cost in function calls compared to SNOPT alone. The same effect can be seen in \cref{fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories}. While SNOPT+WEC did terminate in fewer function calls than SNOPT in case 4 (\cref{fig:case-4-histories}), the convergence rate was still higher for SNOPT alone. The rate of convergence was much higher for SNOPT than for ALPSO, with or without WEC, with SNOPT alone converging within the same number of function calls required for ALPSO to complete a single outer iteration. The convergence rate is also the most noticeable difference between the Bastankhah and Jensen model results. As can be seen in comparing \cref{fig:case-2-histories} and \cref{fig:case-2j-histories}, SNOPT, with or without WEC, generally converges faster when using the Jensen model than when using the Bastankhah model. However, the convergence rate of ALPSO appears quite similar. The difference in convergencec rate for the gradient-free algorithm is likely due to the simpler and smoother nature of the Jensen model compared with the Bastankhah model.
+The convergence histories for case 1, shown in \cref{fig:case-1-histories}, illustrate the significant drop in wake loss due to using WEC with only a small extra cost in function calls compared to SNOPT alone. The same effect can be seen in the other cases as shown in \cref{fig:case-2-histories,fig:case-2j-histories,fig:case-3-histories,fig:case-4-histories}. While SNOPT+WEC did terminate in fewer function calls than SNOPT in case 4 (\cref{fig:case-4-histories}), the convergence rate was still higher for SNOPT alone. The rate of convergence was much higher for SNOPT than for ALPSO, with or without WEC, with SNOPT alone nearing convergence within the same number of function calls required for ALPSO to complete a single outer iteration. The convergence rate is also the most noticeable difference between the Bastankhah and Jensen model results. As can be seen in comparing \cref{fig:case-2-histories} and \cref{fig:case-2j-histories}, SNOPT, with or without WEC, generally converges faster when using the Jensen model than when using the Bastankhah model. However, the convergence rate of ALPSO appears quite similar. The difference in convergencec rate for the gradient-free algorithm is likely due to the simpler and smoother nature of the Jensen model compared with the Bastankhah model.
 
-Because WEC allows transitions through, and out of, local optima, the wake loss for cases with WEC applied appear to remain at higher levels longer in the convergence histories than without WEC. This is a feature of the method and demonstrates the effectiveness of WEC at allowing optimization algorithms to escape local optima. The different characteristics in the convergence paths with and without WEC, for both SNOPT and ALPSO are very apparent in \cref{fig:case-2-histories}, where both algorithms with WEC stay higher longer and then drop rapidly to be below the results of the algorithms without WEC.
+Because WEC allows transitions through, and out of, local optima, the wake loss for cases with WEC applied appear to remain at higher levels longer in the convergence histories than without WEC. This is a feature of the method and demonstrates the effectiveness of WEC at allowing optimization algorithms to escape local optima. The different characteristics in the convergence paths with and without WEC, for both SNOPT and ALPSO, are very apparent in \cref{fig:case-2-histories}, where both algorithms with WEC stay higher longer and then drop rapidly to be below the results of the algorithms without WEC.
 
 \begin{figure}[h!]
 	\centering
@@ -819,7 +821,7 @@ Because WEC allows transitions through, and out of, local optima, the wake loss 
 	\end{minipage}
 \end{figure}
 
-Cases 3 and 4 showed similar trends as cases 1 and 2, but with smaller gains in wake loss for using WEC over not using WEC. Cases 3 and 4 also had wider spreads in the number of function calls required for SNOPT to converge. There are two likely contributors to this difference. The first is an increase in the number of wind directions and different wind speeds in each wind direction for cases 3 and 4. The second is that case 4 provides more space for the turbines in general, resulting in a flatter design space with more similar local optima. The increased wind resource complexity and flatter design space could both increase the number of function calls required. More benefit may be available from WEC on these cases if WEC were tuned specifically to them. Because we tuned only to case 2, we have missed some potential improvements available through WEC for cases 3 and 4. However, even without tuning to these cases specifically, the SNOPT with WEC results were still significant, and only slightly overlapped, as compared to the SNOPT results without WEC. SNOPT+WEC also resulted in the best average for case 4 and the best overall for case 3, with SNOPT+WEC giving a result nearly equal to the best found by ALPSO on case 4.
+Cases 3 and 4 (\cref{fig:case-3-histories,fig:case-4-histories}) showed similar trends as cases 1 and 2 (\cref{fig:case-1-histories,fig:case-2-histories,fig:case-2j-histories}), but with smaller gains in wake loss for using WEC over not using WEC. Cases 3 and 4 also had wider spreads in the number of function calls required for SNOPT to converge. There are two likely contributors to this difference. The first is an increase in the number of wind directions and different wind speeds in each wind direction for cases 3 and 4. The second is that case 4 provides more space for the turbines in general, resulting in a flatter design space with more similar local optima. The increased wind resource complexity and flatter design space could both increase the number of function calls required. More benefit may also be available from WEC on these cases if WEC were tuned specifically to them. Because we tuned only to case 2, we may have missed some potential improvements available through WEC for cases 1, 3, and 4. However, because wake loss is relative to the energy available, the actual energy gains for using WEC in case 4 are greater than in any of the other cases except case 2 with Bastankhah.  Even without tuning WEC to these cases specifically, the SNOPT with WEC results are significant, and only slightly overlapped, as compared to the SNOPT results without WEC. Using SNOPT+WEC also resulted in the best average for case 4 and the best overall and average for case 3, with SNOPT+WEC giving a result nearly equal to the best found by ALPSO on case 4.
 
 \begin{figure}[h!]
 	\centering
@@ -837,17 +839,18 @@ Cases 3 and 4 showed similar trends as cases 1 and 2, but with smaller gains in 
 	\end{minipage} 
 \end{figure}
 
-We compared wake loss and the number of function calls required for each of the cases discussed previously. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). We also performed a Welch's t-test between the SNOPT and SNOPT+WEC wake loss percentage results, as well as between the ALPSO and ALPSO+WEC wake loss percentage results. The Welch's t-tests showed $p<0.001$ for all cases, indicating that the results are almost definitely not random chance. While the low p-values indicate that WEC had a significant impact on the results for all case studies, we need to understand more than that. The final results of optimizations from the 200 starting points for each optimization method on the case studies presented in \cref{sec:casestudies} are shown in \cref{fig:boxplots,tab:case1,tab:case2,tab:case2jensen,tab:case3,tab:case4}. 
+We compared wake loss and the number of function calls required for each of the cases discussed previously. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). We also performed a Welch's t-test between the SNOPT and SNOPT+WEC wake loss percentage results, as well as between the ALPSO and ALPSO+WEC wake loss percentage results. The Welch's t-tests showed $p<0.001$ for all cases, indicating that the results are almost definitely not random chance. The final statistical results of optimizations from the 200 starting points for each optimization method on the case studies presented in \cref{sec:casestudies} are shown in \cref{tab:case1,tab:case2,tab:case2jensen,tab:case3,tab:case4}. 
 
  While mean and median are both reported for the final wake loss in each case, they were nearly equal for all cases except for case 1 with SNOPT+WEC. In case 1, the SNOPT+WEC results had high outliers that skewed the mean upward. SNOPT+WEC resulted in the lowest average wake loss percentage across all cases. The largest difference was for case 2, where SNOPT+WEC resulted in a reduction in wake loss percentage of 3.058 compared with the results from SNOPT alone.
  
 \begin{table}
 	\centering
-	\caption{Case 1 Results for BPA Model: 16 Turbines, 20 Directions}
+	\caption{Case 1 Results for Bastankhah Model: 16 Turbines, 20 Directions}
 	\label{tab:case1}
+	\begin{threeparttable}
 	\begin{tabular}{lrrrrrrrrr}
 		\toprule
-		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)\tnote{*}} \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &   Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
@@ -856,14 +859,19 @@ We compared wake loss and the number of function calls required for each of the 
 		ALPSO     &          20130 &  20130 &  20130 &        10.951 & 10.940 & 1.094 & 7.479 & 13.523 &            \\
 		\bottomrule
 	\end{tabular}
+	\begin{tablenotes}
+		\item[*]For case 1 with Bastankhah, $1\%$ wake loss represents approximately 0.83 GWh
+	\end{tablenotes}	
+	\end{threeparttable}
 \end{table}
 \begin{table}
 	\centering
-	\caption{Case 2 Results for BPA Model: 38 Turbines, 12 Directions}
+	\caption{Case 2 Results for Bastankhah Model: 38 Turbines, 12 Directions}
 	\label{tab:case2}
+	\begin{threeparttable}
 	\begin{tabular}{lrrrrrrrrr}
 		\toprule
-		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)\tnote{*}} \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
@@ -873,14 +881,19 @@ We compared wake loss and the number of function calls required for each of the 
 		ALPSO+WEC &          26460 &  26460 &  26460 &        14.097 & 14.096 & 0.425 & 12.532 & 15.762 &  $< 0.001$ \\
 		\bottomrule
 	\end{tabular}
+	\begin{tablenotes}
+	\item[*] For case 2 with Bastankhah, $1\%$ wake loss represents approximately 1.898 GWh
+	\end{tablenotes}		
+	\end{threeparttable}
 \end{table}
 \begin{table}
 	\centering
-	\caption{Case 2 Results for JENSEN Model: 38 Turbines, 12 Directions}
+	\caption{Case 2 Results for Jensen Model: 38 Turbines, 12 Directions}
 	\label{tab:case2jensen}
+	\begin{threeparttable}
 	\begin{tabular}{lrrrrrrrrr}
 		\toprule
-		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)\tnote{*}} \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
@@ -889,14 +902,19 @@ We compared wake loss and the number of function calls required for each of the 
 		ALPSO     &          21030 &  21030 &  21030 &        18.811 & 18.848 & 0.291 & 18.069 & 20.016 &            \\
 		\bottomrule
 	\end{tabular}
+	\begin{tablenotes}
+		\item[*] For case 2 with Jensen, $1\%$ wake loss represents approximately 2.158 GWh
+	\end{tablenotes}	
+	\end{threeparttable}
 \end{table}
 \begin{table}
 	\centering
-	\caption{Case 3 Results for BPA Model: 38 Turbines, 36 Directions}
+	\caption{Case 3 Results for Bastankhah Model: 38 Turbines, 36 Directions}
 	\label{tab:case3}
+	\begin{threeparttable}
 	\begin{tabular}{lrrrrrrrrr}
 		\toprule
-		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)\tnote{*}} \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &   Mean &    SD &    Low &   High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
@@ -905,14 +923,19 @@ We compared wake loss and the number of function calls required for each of the 
 		ALPSO     &          20280 &  20280 &  20280 &        22.062 & 22.075 & 0.231 & 21.510 & 22.667 &            \\
 		\bottomrule
 	\end{tabular}
+	\begin{tablenotes}
+		\item[*] For case 3 with Bastankhah, $1\%$ wake loss represents approximately 0.619 GWh
+	\end{tablenotes}
+	\end{threeparttable}
 \end{table}
 \begin{table}
 	\centering
-	\caption{Case 4 Results for BPA Model: 60 Turbines, 72 Directions}
+	\caption{Case 4 Results for Bastankhah Model: 60 Turbines, 72 Directions}
 	\label{tab:case4}
+	\begin{threeparttable}
 	\begin{tabular}{lrrrrrrrrr}
 		\toprule
-		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)} \\
+		{} & \multicolumn{3}{c}{Function Calls} & \multicolumn{6}{c}{Wake Loss (\%)\tnote{*}} \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
 		{} &         Median &    Low &   High &        Median &  Mean &    SD &   Low &  High &          p \\
 		\cmidrule(lr){2-4} \cmidrule(lr){5-10}
@@ -921,25 +944,24 @@ We compared wake loss and the number of function calls required for each of the 
 		ALPSO     &          20430 &  20430 &  20430 &         8.632 & 8.647 & 0.185 & 8.183 & 9.314 &            \\
 		\bottomrule
 	\end{tabular}
+	\begin{tablenotes}
+		\item[*] For case 4 with Bastankhah, $1\%$ wake loss represents approximately 3.992 GWh
+	\end{tablenotes}
+	\end{threeparttable}
 \end{table}
 
-\subsection{Combined Results}
-%\todo{Jared: figure out how to best present these results now that we have 3 models}
+The low average values of wake loss and lower standard deviations of wake loss for SNOPT with WEC, indicate that SNOPT with WEC is more accurate and reliable than SNOPT or ALPSO alone. This improvement in performance does come at the cost of more function calls than SNOPT without WEC. The increase in function calls when using WEC is expected because WEC runs seven optimizations to convergence (one for each value of $\xi$, and a final optimization to account for local turbulence intensity) while SNOPT alone runs only two (with and without local turbulence intensity). Because WEC results have smaller standard deviations than SNOPT alone for all cases and ALPSO for all but one case, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could lead to large overall reductions in the number of function evaluations for design studies performed with WEC as compared to SNOPT or ALPSO alone, while simultaneously achieving more efficient final wind farm layouts.
 
-
-
-The relatively wide spread and moderate results from SNOPT on most cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. That WEC wake loss results were lower and less spread for all test cases, as compared with SNOPT, seems to indicate that the process is at least partially remedying the problem of local optima.
-
-The low values of wake loss and lower standard deviation of wake loss for SNOPT with WEC, indicates that SNOPT with WEC is more accurate and reliable than SNOPT alone. So much so that the probability distributions for SNOPT with and without WEC from case 2 overlap only slightly (see \cref{fig:case-3-wake-loss-no-outliers}). This improvement in performance does come at the cost of more function calls than SNOPT without WEC. The increase in function calls when using WEC is expected because the WEC ran seven optimizations to convergence (one for each value of $\xi$, and a final optimization to account for local turbulence intensity) for every one optimization by SNOPT alone. Because WEC has a smaller probability distribution than SNOPT by itself, fewer runs would be needed to gain the same level of confidence in the results. The reduction in overall runs could mean an overall reduction in the number of function evaluations for WEC as compared to SNOPT alone.
+The relatively wide spread and moderate results from SNOPT on most cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. WEC was designed to help alleviate the problem of local optima in the WFLO problem. That WEC wake loss results, on average, were lower and less spread for all test cases, as compared with SNOPT and ALPSO, seems to indicate that WEC is at least partially overcoming the problem of local optima and providing significant benefits over the other optimization methods.
 
 \section{Conclusion}
-The WEC method proposed in this paper uses characteristics of typical wake models to reduce the multi-modal nature of the design space. We tested three versions of WEC on a simple wind farm and tested the final version of WEC with two wake models and three WFLO problems, one with 16 turbines, one with 38 turbines, and one with 60 turbines. Results for the case studies using WEC show a statistically significant reduction  (p<.001) in optimized wake loss compared to gradient-based optimization without WEC and gradient-free optimization for all test cases.
+The wake expansion continuation (WEC) method proposed in this paper uses inherent characteristics of typical wake models to reduce the multi-modal nature of the wind farm layout optimization (WFLO) design space. We tested WEC with two wake models, two optimization algorithms (one gradient-based and one gradient-free) and four WFLO problems, one with 16 turbines and 20 wind directions, one with 38 turbines and 12 wind directions, one with 38 turbines and 36 wind directions, and one with 60 turbines and 72 wind directions. Results for the case studies using WEC show a statistically significant reduction  ($p<0.001$) in optimized wake loss compared to optimization without WEC for all test cases. These results show WEC to be most effective with a gradient-based optimization algorithm.
 
-Future work should investigate potential improvements and best practices for WEC to reduce the number of function calls required, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization, and validate the results obtained through WEC using a higher-order modeling approach such as Large Eddy Simulation (LES).
+Future work should investigate potential improvements and best practices for WEC to reduce the number of function calls required, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization. It may also be advantageous to consider using WEC with multiple wake models in series because of the rapid convergence of WEC with the simple Jensen Cosine model. In such a study WEC with a gradient-based optimization algorithm would take the place of the gradient-free algorithm in previously studied hybrid gradient-free then gradient-based optimization studies. Studies investigating larger and more complex cases, with both general and specific WEC tuning along with more wake models, would also be informative. While similar methods have been applied on other applications through the use of surrogate models composed of Gaussian-basis functions, future work should also consider various other applications where the WEC approach of directly altering the underlying equations could be applied.
 
 \ack 
-This work was supported by the National Science Foundation under Grant No. 1539384. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
-
+This work was supported in part by a Utah NASA Space Grant Consortium Fellowship. This work was also supported in part by the National Science Foundation under Grant No. 1539384. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
+\pagebreak
 \section*{References}
 \bibliographystyle{iopart-num}
 \bibliography{./references/all_refs}
