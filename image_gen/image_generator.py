@@ -158,8 +158,13 @@ def plot_windrose(direction, values, ticks, minor_ticks=0, tick_angle=-32., unit
 
     minor_tick_distance = (ticks[1] - ticks[0]) / (minor_ticks + 1.)
 
-    for major_tick_count in range(0, len(ticks)):
+    for major_tick_count in np.arange(0, len(ticks)):
         tick_labels.append('%.1f %s' % (ticks[major_tick_count], unit))
+        circle_radius = ticks[major_tick_count]
+        circle = plt.Circle((0.0, 0.0), circle_radius, transform=ax.transData._b,
+                            facecolor=None, edgecolor='k', fill=False, alpha=0.2,
+                            linestyle='-')
+        ax.add_artist(circle)
 
     if minor_ticks > 0 and len(ticks) > 1:
 
@@ -173,19 +178,24 @@ def plot_windrose(direction, values, ticks, minor_ticks=0, tick_angle=-32., unit
                                         linestyle=':')
                     ax.add_artist(circle)
     #
-    ticks.append(plot_radius)
-    tick_labels.append('')
-
-    bars = ax.bar(direction, values, width=width, bottom=bottom, alpha=0.5, color='blue', edgecolor=None)
-
+    # ticks.append(plot_radius)
+    # tick_labels.append('')
+    # ticks.append(5.0)
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
+    bars = ax.bar(direction, values, width=width, bottom=bottom, alpha=0.75, color=colors[1], edgecolor=None)
+    print(ticks)
+    print(tick_labels)
     ax.set_rgrids(ticks, angle=tick_angle)
     ax.yaxis.grid(linestyle='-', alpha=1.0)
-
+    # tick_labels.append("5")
     ax.set_yticklabels(tick_labels)
 
     plt.title(title, y=1.07)
 
+    ax.set_xticks([0, np.pi/4, np.pi/2, np.pi*3/4, np.pi, 5*np.pi/4, 3*np.pi/2, 7*np.pi/4])
     ax.set_xticklabels(['', '', 'N', '', '', '', '', ''])
+
 
     if save:
         plt.savefig(file_name, transparent=True)
@@ -207,6 +217,8 @@ def make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs
         data_file = 'windrose_amalia_directionally_averaged_speeds.txt'
 
     plot_data = np.loadtxt(data_directory + data_file)
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
 
     # parse data
     direction = plot_data[:, 0]
@@ -228,6 +240,7 @@ def make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs
         spacing = 1
         minor_ticks = 4
     ticks = list(np.arange(0, np.ceil(np.max(frequency)*100.0+spacing/2), spacing))
+    
     print(ticks)
     plot_windrose(direction=np.copy(direction) - 0.5*360/dirs, values=frequency * 100., ticks=ticks, tick_angle=-45.0, unit='%', show=show_figs,
                   save=save_figs, file_name="freq"+filename, minor_ticks=minor_ticks)
@@ -4049,7 +4062,8 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, t
 
     # define turbine dimensions
     rotor_diameter = 80.
-
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
     # load data
 
     data_directory = './image_data/layouts/%i_turbs/' % (turbs)
@@ -4083,7 +4097,7 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, t
 
         bmin += 0.5
         bmax -= 0.5
-        plt.plot([bmin, bmin, bmax, bmax, bmin], [bmin, bmax, bmax, bmin, bmin], '--b')
+        plt.plot([bmin, bmin, bmax, bmax, bmin], [bmin, bmax, bmax, bmin, bmin], '--', color=colors[1])
 
     elif turbs == 38:
 
@@ -4095,7 +4109,7 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, t
         # boundary_circle = plt.Circle((boundary_center_x/rotor_diameter, boundary_center_y/rotor_diameter),
         #                              boundary_radius/rotor_diameter, facecolor='none', edgecolor='b', linestyle='-')
         constraint_circle = plt.Circle((boundary_center_x / rotor_diameter, boundary_center_y / rotor_diameter),
-                                     boundary_radius / rotor_diameter - 0.5, facecolor='none', edgecolor='b', linestyle='--')
+                                     boundary_radius / rotor_diameter - 0.5, facecolor='none', edgecolor=colors[1], linestyle='--')
 
         # ax.add_patch(boundary_circle)
         ax.add_patch(constraint_circle)
@@ -4116,7 +4130,7 @@ def plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, t
                 x, y = part.xy
                 ax.plot(x, y, style, color=color, solid_capstyle='round', zorder=1)
 
-        plot_line(ax, constraint, color='b', style="--")
+        plot_line(ax, constraint, color=colors[1], style="--")
         # plot_line(ax, boundary, color='b')
 
         # plt.plot(boundaryVertices[:, 0], boundaryVertices[:, 1], 'r', linestyle=(10, (5, 1)))
@@ -4193,8 +4207,8 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
         data = np.loadtxt("./image_data/smoothing_jensen_WEC-%s.txt" % wec_method)
         if wec_method == "D":
             wec_values = np.array([1, 1.5, 2.0, 2.5, 3.0])
-            xt = [-1.6, -1.35, -2.25]
-            yt = [31.5, 29.5, 28]
+            xt = [-1.6, -1.6, -1.6]
+            yt = [30.85, 29.7, 28]
     else:
         ValueError("Invalid model selection")
 
@@ -4204,7 +4218,10 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
 
     # Change color cycle specifically for `ax2`
     # color.cycle_cmap(len(wec_values), cmap='Blues, ax=ax)
-    colors = plt.cm.winter(np.linspace(0.2, 0.8, 3))
+    # colors = plt.cm.winter(np.linspace(0.2, 0.8, 3))
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
+    
     # colors = ['k', 'b', 'r', 'c', 'g']
 
 
@@ -4213,12 +4230,12 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
     print(plot_vals)
     for i in np.arange(0, len(plot_vals)):
         print(wec_values[plot_vals[i]-1])
-        ax.plot(location, data[:, plot_vals[i]]/1E6, color=colors[i])
+        ax.plot(location, data[:, plot_vals[i]]/1E6, color=colors[i], linestyle=linetypes[i])
         if wec_method == "A":
             text_label = r"$\theta_\xi$ = %.1f" % wec_values[plot_vals[i] - 1]
         else:
             text_label = r"$\xi$ = %.1f" %wec_values[plot_vals[i]-1]
-        plt.text(xt[i], yt[i], text_label, color=colors[i])
+        plt.text(xt[i], yt[i], text_label, color=colors[i], fontsize=14)
     # xi = 1
     # plt.text(-1., data[location==0, 1]/1E6+0.25, "No WEC", color=colors[0])
     # xi = 4
@@ -4228,7 +4245,7 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
     # xi = 7
     # plt.text(-1, data[location==0, 6]/1E6-.25, "High WEC", color=colors[2])
 
-    ax.set_xlabel("Downstream Turbine's \n Crosswind Location ($y/d$)")
+    ax.set_xlabel("Downstream Turbine's \n Cross-wind Offset ($\Delta y/d$)")
     ax.set_ylabel('Annual Energy Production (GWh)')
     if wake_model == "BPA":
         ax.set_ylim([20, 35])
@@ -4236,9 +4253,9 @@ def plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, we
         plt.yticks([20, 35])
         plt.xticks([-4, 0, 4])
     elif wake_model == "JENSEN":
-        ax.set_ylim([25, 35])
+        ax.set_ylim([27, 34])
         ax.set_xlim([-4, 4])
-        plt.yticks([25, 35])
+        plt.yticks([27, 34])
         plt.xticks([-4, 0, 4])
     # ax.legend(ncol=2, loc=2, frameon=False, )  # show plot
     # tick_spacing = 1
@@ -4554,6 +4571,9 @@ def plot_simple_design_space(filename, save_figs, show_figs):
     turbine_x = np.array([-1.0, 1.0, 0.0])
     diameter = 1.0
 
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    linetypes = ["-", "--", ":", "-.", (0, (3, 2, 1, 2, 1, 2)), (0, (3, 2, 3, 2, 1, 2))]
+
     fig, ax = plt.subplots(1, figsize=(5, 6))
 
     # show downstream turbine movement
@@ -4590,7 +4610,7 @@ def plot_simple_design_space(filename, save_figs, show_figs):
         wake = Polygon(np.array([[turbine_x[i]-0.5, turbine_y[i]],
                                  [turbine_x[i]-1.5, turbine_y[i]-9.0],
                                  [turbine_x[i]+1.5, turbine_y[i]-9.0],
-                                 [turbine_x[i]+0.5, turbine_y[i]]]), color='b', alpha=0.05, closed=True)
+                                 [turbine_x[i]+0.5, turbine_y[i]]]), color=colors[1], alpha=0.2, closed=True)
         ax.add_artist(wake)
 
         blade1 = Ellipse((turbine_x[i]+diameter/4, turbine_y[i]), diameter / 2, diameter / 12, facecolor=tc, edgecolor='none', fill=True,
@@ -4793,6 +4813,46 @@ def plot_jensen_diagram(filename, save_figs, show_figs):
         plt.show()
 
     return
+
+def plot_jensen_profiles(filename, save_figs, show_figs):
+
+    jcsdata = np.loadtxt("./image_data/wake-model-visualization-data/model-profile-jensen-CosineFortran.txt")
+    jthdata = np.loadtxt("./image_data/wake-model-visualization-data/model-profile-jensen-TopHat.txt")
+
+    colors = ["#0F2080", "#85C0F9", "#F5793A"]
+    lines = ["-", "--"]
+
+    fig, ax = plt.subplots(1, figsize=(3,5))
+
+    maxspeed = np.max(jcsdata[:,2])
+
+    ax.plot(100*(maxspeed - jthdata[:,2])/maxspeed, jthdata[:,1]/40, linestyle=lines[1], color=colors[1])
+    ax.annotate("Top Hat", (11, 1.4), ha='center', va='center', color=colors[1])
+    
+    ax.plot(100*(maxspeed - jcsdata[:,2])/maxspeed, jcsdata[:,1]/40, linestyle=lines[0], color=colors[0])
+    ax.annotate("Cosine", (5.6, 0.8), ha='center', va='center', color=colors[0])
+
+    ax.set_ylim([-3, 3])
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
+    plt.yticks(np.array([-3, 0, 3]))
+    plt.xticks(np.array([0, 5, 10, 15]))
+
+    plt.ylabel(r"Offset ($\Delta y/D$)")
+    plt.xlabel("Wake Deficit (%)")
+
+    plt.tight_layout()
+
+    if save_figs:
+        plt.savefig(filename, transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    return
+
 
 def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturbs=38, ndirs=12, wakemodel="BPA", logplot=False):
 
@@ -5930,7 +5990,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
+    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -5973,9 +6033,9 @@ if __name__ == "__main__":
     # filename = "16_turb_start.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, turbs=16)
 
-    # dirs = 12
-    # filename = "windrose_%i_dir.pdf" %dirs
-    # make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
+    dirs = 72
+    filename = "windrose_%i_dir.pdf" %dirs
+    make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
 
     # filename = "round_farm_38Turbines_5DSpacing_finish.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='finish',turb_nums=True)
@@ -6036,6 +6096,9 @@ if __name__ == "__main__":
 
     # filename = "./images/jensen_diagram.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
+    
+    # filename = "./images/jensen_profiles.pdf"
+    # plot_jensen_profiles(filename, save_figs, show_figs)
 
     # nturbs = 38
     # ndirs = 12
