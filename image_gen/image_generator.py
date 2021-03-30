@@ -4923,54 +4923,6 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     # initalize plot
     fig1, ax1 = plt.subplots(1)
     # print("initialization complete")
-    # find how many entries are in the longest WEC convergence history
-    f = open(input_file_wec)
-    maxlength = 0
-    rownum = -1
-    for row in f.readlines():
-        if rownum < 0:
-            rownum += 1
-            continue
-        data = np.fromstring(row, sep=" ")
-        if data.size > maxlength:
-            maxlength = data.size
-    f.close()
-
-    # extract WEC convergence histories to a data frame
-    rownum = -1
-    run = 0
-    f = open(input_file_wec)
-    for row in f.readlines():
-        if rownum < 0:
-            rownum += 1
-            continue
-
-        data = np.fromstring(row, sep=" ")
-        if rownum % 2 == 0:
-            s = pd.Series(data, name=rownum)
-        else:
-            s = pd.Series(data, name=rownum)
-            functioncalls = np.arange(1, s.size+1)*2
-            functioncalls[0] = 1
-            if logplot:
-                ax1.semilogx(functioncalls, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
-            else:
-                ax1.plot(functioncalls, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
-            ax1.scatter(s.size*2, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
-            
-            # save key data for file
-            aepinitdata[run] = s.iloc[0]
-            aepfinaldata[run] = s.iloc[-1]
-            fcallsdata[run] = (s.size)*2
-
-            run += 1
-
-        rownum += 1
-    f.close()
-
-    np.savetxt("snopt_wec_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinitdata, aepfinaldata, fcallsdata], header="snopt wec results: id, AEP init (Whr), AEP final (Whr), fcalls total")
-    
-    # print("WEC complete")
 
     # find how many entries are in the longest SNOPT convergence history
     f = open(input_file_snopt)
@@ -5028,6 +4980,56 @@ def plot_convergence_history(filename="", save_figs=False, show_figs=True, nturb
     
 
     # print("snopt complete")
+
+    # find how many entries are in the longest WEC convergence history
+    f = open(input_file_wec)
+    maxlength = 0
+    rownum = -1
+    for row in f.readlines():
+        if rownum < 0:
+            rownum += 1
+            continue
+        data = np.fromstring(row, sep=" ")
+        if data.size > maxlength:
+            maxlength = data.size
+    f.close()
+
+    # extract WEC convergence histories to a data frame
+    rownum = -1
+    run = 0
+    f = open(input_file_wec)
+    for row in f.readlines():
+        if rownum < 0:
+            rownum += 1
+            continue
+
+        data = np.fromstring(row, sep=" ")
+        if rownum % 2 == 0:
+            s = pd.Series(data, name=rownum)
+        else:
+            s = pd.Series(data, name=rownum)
+            functioncalls = np.arange(1, s.size+1)*2
+            functioncalls[0] = 1
+            if logplot:
+                ax1.semilogx(functioncalls, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+            else:
+                ax1.plot(functioncalls, 100*(1-s/aept), alpha=alpha, color=colors[0], zorder=1)
+            ax1.scatter(s.size*2, 100*(1-s.iloc[-1]/aept), marker='o', edgecolor='k', color=colors[0], zorder=10, alpha=markeralpha)
+            
+            # save key data for file
+            aepinitdata[run] = s.iloc[0]
+            aepfinaldata[run] = s.iloc[-1]
+            fcallsdata[run] = (s.size)*2
+
+            run += 1
+
+        rownum += 1
+    f.close()
+
+    # np.savetxt("snopt_wec_results_%smodel_%iturbs_%idirs.txt" %(model, nturbs, ndirs), np.c_[np.arange(0,runs), aepinitdata, aepfinaldata, fcallsdata], header="snopt wec results: id, AEP init (Whr), AEP final (Whr), fcalls total")
+    
+    # print("WEC complete")
+
     
     if wakemodel == "BPA" and ndirs == 12:
         #  find how many entries are in the longest ALPSO+WEC convergence history
@@ -6033,9 +6035,9 @@ if __name__ == "__main__":
     # filename = "16_turb_start.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, turbs=16)
 
-    dirs = 72
-    filename = "windrose_%i_dir.pdf" %dirs
-    make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
+    # dirs = 72
+    # filename = "windrose_%i_dir.pdf" %dirs
+    # make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
 
     # filename = "round_farm_38Turbines_5DSpacing_finish.pdf"
     # plot_farm(filename, save_figs, show_figs, layout='finish',turb_nums=True)
@@ -6100,10 +6102,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_profiles.pdf"
     # plot_jensen_profiles(filename, save_figs, show_figs)
 
-    # nturbs = 38
-    # ndirs = 12
-    # model = "BPA"
-    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
+    nturbs = 38
+    ndirs = 12
+    model = "JENSEN"
+    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
