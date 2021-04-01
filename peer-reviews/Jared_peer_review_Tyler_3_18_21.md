@@ -35,16 +35,16 @@ Notes for Jared:
 √    - End of the page in section 5.4: missing a period at the end.
 √        - On that note, including page numbers will be helpful for future revisions, though I don't know if you should include them or not in your submission
 - 7. 
-  - In 7.1: "The first did not use ... intensity, the second one did." I would change the comma to a semicolon or an m-dash.
-      - Or keep the comma and insert "and" or "but" after the comma
-    - I haven't necessarily paid as much attention since the abstract, but I'm noticing a lot of passive voice again.
-    - In 7.2 you have the number "20000" below Table 2 - in the text like that it may need a comma or be switched to scientific notation for better readability.
-    - In Table 2, your numbers have the form "1E-2" - I know this is how we code scientific notation, but I'm not sure if this is standard for text, or if it would be better to use $1 \times 10^{-2}$ instead.
-    - Figure 22 - the different colors on the two x-axes are a bit confusing. Does the top axis only apply to the orange triangle data? If so, the bottom axis has values cooresponding to one set of data and a label with a color of the other data - does it apply to both? If so, I would make those two sets and the bottom axis all one color (the data can still be distinguished by shape). If both axes apply to all the data, I would get rid of their colors.
-    - end of paragraph above Table 4: "other methods have no more relevance in this discussion." may be ok, but something seems sort of casual about it. Perhaps it could be "other methods no longer have relevance in this discussion."
+√  - In 7.1: "The first did not use ... intensity, the second one did." I would change the comma to a semicolon or an m-dash.
+√      - Or keep the comma and insert "and" or "but" after the comma
+*    - I haven't necessarily paid as much attention since the abstract, but I'm noticing a lot of passive voice again.
+√    - In 7.2 you have the number "20000" below Table 2 - in the text like that it may need a comma or be switched to scientific notation for better readability.
+√    - In Table 2, your numbers have the form "1E-2" - I know this is how we code scientific notation, but I'm not sure if this is standard for text, or if it would be better to use $1 \times 10^{-2}$ instead.
+√    - Figure 22 - the different colors on the two x-axes are a bit confusing. Does the top axis only apply to the orange triangle data? If so, the bottom axis has values cooresponding to one set of data and a label with a color of the other data - does it apply to both? If so, I would make those two sets and the bottom axis all one color (the data can still be distinguished by shape). If both axes apply to all the data, I would get rid of their colors.
+√    - end of paragraph above Table 4: "other methods have no more relevance in this discussion." may be ok, but something seems sort of casual about it. Perhaps it could be "other methods no longer have relevance in this discussion."
 - 8. 
-    - 3rd sentnce uses "mean" twice. I would replace one or both of these.
-    - Figure 24: words need a little more white space in the 1st, 3rd, and 4th columns.
-    - Figures 25+: I prefer this color scheme to the bright red you had before in group meetings
-    - paragraph above figs 26+27: In last sentence, you can drop "to be"
-- 9. My only thought is maybe you don't need to list the number of turbines and wind directions here since they can look that up earlier in the paper. But, maybe that's for those who willonly skim the intro and conclusion in which case it may be fine.
+√    - 3rd sentnce uses "mean" twice. I would replace one or both of these.
+*    - Figure 24: words need a little more white space in the 1st, 3rd, and 4th columns.
+√    - Figures 25+: I prefer this color scheme to the bright red you had before in group meetings
+√    - paragraph above figs 26+27: In last sentence, you can drop "to be"
+√- 9. My only thought is maybe you don't need to list the number of turbines and wind directions here since they can look that up earlier in the paper. But, maybe that's for those who willonly skim the intro and conclusion in which case it may be fine.
