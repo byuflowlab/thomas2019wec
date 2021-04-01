@@ -6,34 +6,34 @@ Notes for Jared:
 √   - "Four optimization case studies were tested with a gradient-based method, a gradient-free method." Were you going to add more here? It's an incomplete sentence and only two of four methods. Oh wait 4 studies using 2 methods perhaps? In which case you just need to replace the comma with "and".
 √  - Line 10, "was outperformed by ..." could be changed to "underperformed"
 *  - On that note, I'm noticing a lot of passive voice. If that's intentional then you can ignore this, but I just remember in all my technical writing I tend to default to passive but I'm consistently told to do active instead.
-- Intro
+√- Intro
 √    - "Gradient-based methods are not widely used for WFLO..." Why is that?
 √    - "result quality comparable" I'm guessing that's a typo.
 √    - maybe add "further" before "improvement" on line 7 of page 2.
 √    - Perhaps it's not a big deal because you'll get to it soon, but I felt like the 2nd-to-last paragraph left me hanging - you describe some specifics of the problem, up to why there are local optima (space between wakes) but then when you offer a solution it's very general. How does WEC reduce multi-modality? If you can describe it succinctly in one or two sentences, I would consider including it in the intro. Or perhaps include the same thing you had in the abstract, something as simple as "temporarily reducing the multi-modality of the design space using Guassian basis functions in our wake models." (I just took that from the next section)
 √    - I like the last paragraph, it's a solid roadmap for the paper.
-- 2.
-    - If I understood right, the first paragraph describes the approach that WEC is based on, and the 2nd paragraph describes how WEC is different. If so, why do you reference WEC preliminary studies at the end of the first paragraph? Should these go after you introduce WEC further?
-    - "basis function" should have "s" at the end? (top of page 3) or "are" should be "is"
-    - I might reword line 2 of page 3, from ", and the changing locations of the . . . mean that we cannot guarantee convergence. . ." to ", and because the Guassian functions change locations during the WFLO, we cannot guarantee convergence. . ."
-    - "Avoiding altering" in step 2) strikes me as not right, but I don't know why or how to change it
-    - "a hybrid of 2 and 3" should that be 1 and 2?
+√- 2.
+√    - If I understood right, the first paragraph describes the approach that WEC is based on, and the 2nd paragraph describes how WEC is different. If so, why do you reference WEC preliminary studies at the end of the first paragraph? Should these go after you introduce WEC further?
+√    - "basis function" should have "s" at the end? (top of page 3) or "are" should be "is"
+√    - I might reword line 2 of page 3, from ", and the changing locations of the . . . mean that we cannot guarantee convergence. . ." to ", and because the Guassian functions change locations during the WFLO, we cannot guarantee convergence. . ."
+√    - "Avoiding altering" in step 2) strikes me as not right, but I don't know why or how to change it
+√    - "a hybrid of 2 and 3" should that be 1 and 2?
 - 3.
 *    - "In equations (2) and (3)" is repeated right after each other sandwiching the sigma equations. This happens for other equations in this section as well. Maybe not a big deal.
 - 4. 
-    - Figures 5 and 6 reference each other - perhaps these could be two subplots of a single figure?
-        - Same goes for figs 7 and 8
-        - Though leaving it as is is good as I think about it more - just another option to consider
-    - Equations (1), (16) and (21) are very similar - they only differ by the denominators in the exponential terms. I don't know anything about the actual math but maybe something to double check to make sure that's correct.
-        - If that's right, maybe it would be helpful to include a sentence highlighting that difference and how applying WEC leads to the same (but simplified) equation or something, whatever the actual significance is. Readers will likely notice they're similar and may try to figure out how they're different, but if you explicitly call their attention to what is similar/different then that will save them some time and effort.
+√    - Figures 5 and 6 reference each other - perhaps these could be two subplots of a single figure?
+√        - Same goes for figs 7 and 8
+√        - Though leaving it as is is good as I think about it more - just another option to consider
+√    - Equations (1), (16) and (21) are very similar - they only differ by the denominators in the exponential terms. I don't know anything about the actual math but maybe something to double check to make sure that's correct.
+√        - If that's right, maybe it would be helpful to include a sentence highlighting that difference and how applying WEC leads to the same (but simplified) equation or something, whatever the actual significance is. Readers will likely notice they're similar and may try to figure out how they're different, but if you explicitly call their attention to what is similar/different then that will save them some time and effort.
   
-Overall so far this is a really great paper! Very impressive!
+√Overall so far this is a really great paper! Very impressive!
 
 - 5.
-    - ", but still fairly simple." at the end of the page in section 5.2: I believe that if what follows the comma isn't a complete clause on its own, you shouldn't have the comma there.
-        - Same goes for the first sentence in section 5.3
-    - End of the page in section 5.4: missing a period at the end.
-        - On that note, including page numbers will be helpful for future revisions, though I don't know if you should include them or not in your submission
+√     - ", but still fairly simple." at the end of the page in section 5.2: I believe that if what follows the comma isn't a complete clause on its own, you shouldn't have the comma there.
+√        - Same goes for the first sentence in section 5.3
+√    - End of the page in section 5.4: missing a period at the end.
+√        - On that note, including page numbers will be helpful for future revisions, though I don't know if you should include them or not in your submission
 - 7. 
   - In 7.1: "The first did not use ... intensity, the second one did." I would change the comma to a semicolon or an m-dash.
       - Or keep the comma and insert "and" or "but" after the comma

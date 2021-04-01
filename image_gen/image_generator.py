@@ -4505,7 +4505,9 @@ def plot_ct_curve(filename, save_figs, show_figs):
 
     fig, ax = plt.subplots(1)
 
-    plt.plot(data[:,0], data[:,1], 'ob', mfc="none")
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+
+    plt.plot(data[:,0], data[:,1], 'o', mfc="none", mec=colors[2])
 
 
     plt.xticks([0, 5, 10, 15, 20])
@@ -4538,7 +4540,9 @@ def plot_cp_curve(filename, save_figs, show_figs):
     data[:,1] *= (1E6) / (0.5 * air_density * data[:, 0] ** 3 * Ar)
     fig, ax = plt.subplots(1)
 
-    plt.plot(data[:,0], data[:,1], 'ob', mfc="none")
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+
+    plt.plot(data[:,0], data[:,1], 'o', mfc="none", mec=colors[2])
 
     plt.xlabel('Wind Speed (m/s)')
     plt.ylabel('Power Coefficient')
@@ -6090,8 +6094,8 @@ if __name__ == "__main__":
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
 
-    # filename = "./images/cp_curve_v80.pdf"
-    # plot_cp_curve(filename, save_figs, show_figs)
+    filename = "./images/cp_curve_v80.pdf"
+    plot_cp_curve(filename, save_figs, show_figs)
 
     # filename = "./images/3turb-design-space.pdf"
     # plot_simple_design_space(filename, save_figs, show_figs)
@@ -6102,10 +6106,10 @@ if __name__ == "__main__":
     # filename = "./images/jensen_profiles.pdf"
     # plot_jensen_profiles(filename, save_figs, show_figs)
 
-    nturbs = 38
-    ndirs = 12
-    model = "JENSEN"
-    filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
-    plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
+    # nturbs = 38
+    # ndirs = 12
+    # model = "JENSEN"
+    # filename = "./images/convergence_history_%smodel_%iturbs_%idirs.pdf" % (model, nturbs, ndirs)
+    # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
