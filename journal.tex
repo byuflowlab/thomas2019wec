@@ -255,7 +255,7 @@ In \cref{eq:wake_loss}, $AEP_0$ represents the optimized AEP found from a given 
 In \cref{eq:aept}, $P_j$ is the power of a single un-waked wind turbine at wind state $j$ calculated using \cref{eq:power}. 
 
 \section{Applying WEC to the  Wake Models} \label{sec:application}
-In this section we apply WEC, step by step as discussed in \cref{sec:introwec}, to the Bastankhah wake model and the Jensen cosine wake model. To test the wake spreading approaches discussed, we implemented each of them in the Bastankhah and Port\'{e}-Agel wake model. We then tested the most effective wake spreading approach with the Jensen cosine model.
+In this section we apply WEC, step by step as discussed in \cref{sec:introwec}, to the Bastankhah wake model and the Jensen cosine wake model. To test the wake spreading approaches discussed, we implemented each of them in the Bastankhah  wake model. We then tested the most effective wake spreading approach with the Jensen cosine model.
 
 \subsection{Applying WEC to the Bastankhah Wake Model}
 
@@ -285,7 +285,7 @@ Increasing $\xi$ widens the wakes without changing the wake center velocity defi
 %	\begin{minipage}[t]{0.47\textwidth}
 %		\centering
 %		\includegraphics[width=\textwidth]{wake_model_visualizations/smoothing_bpa_wec_d}
-%		\caption{The impact of the relaxation factor, $\xi$, for WEC-D on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah and Port\'{e}-Agel wake model. The local optimum between the wakes disappears as the WEC factor increases.}
+%		\caption{The impact of the relaxation factor, $\xi$, for WEC-D on a simple wind farm layout design space with one movable turbine and one wind direction (see \cref{fig:smoothing_locations_bpa}) using the Bastankhah  wake model. The local optimum between the wakes disappears as the WEC factor increases.}
 %		\label{fig:smoothing_bpa_wec_d}
 %	\end{minipage} %\hspace{1pc}
 %\end{figure}
@@ -688,7 +688,7 @@ We used two optimizations for each run with SNOPT when using the Bastankhah mode
 	\label{tab:snopttols}
 	\begin{tabular}{lrrr}
 		\toprule
-		{} & \multicolumn{2}{c}{Bastankhah and Port\'{e}-Agel} & Jensen Cosine \\
+		{} & \multicolumn{2}{c}{Bastankhah } & Jensen Cosine \\
 		\cmidrule(lr){2-3} \cmidrule(lr){4-4}
 		 & Without Local TI & With Local TI &  \\
 		\cmidrule(lr){2-3} 
@@ -754,7 +754,7 @@ While it may be noted that each optimization run with ALPSO is similar to runnin
 
 \subsection{SNOPT+WEC}\label{sec:bpa_wec_comparison}
 
-We compared the performance of WEC-A, WEC-D, and WEC-H with the Bastankhah and Port\'{e}-Agel model by varying both the number of intermediate optimizations (steps) to run and the maximum values of the WEC factor ($\xi$ or $\theta_\xi$) to use. To investigate the WEC methods and parameter selection, we used Case 2 as discussed in \cref{sec:case2}. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. All 200 starting layouts were tested with each parameter set. For comparing the wake expansion methods, the $k^*$ value in \cref{eq:kstar} was not adjusted to the local turbulence intensity during optimization, but was adjusted for calculating the results shown.
+We compared the performance of WEC-A, WEC-D, and WEC-H with the Bastankhah  model by varying both the number of intermediate optimizations (steps) to run and the maximum values of the WEC factor ($\xi$ or $\theta_\xi$) to use. To investigate the WEC methods and parameter selection, we used Case 2 as discussed in \cref{sec:case2}. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. All 200 starting layouts were tested with each parameter set. For comparing the wake expansion methods, the $k^*$ value in \cref{eq:kstar} was not adjusted to the local turbulence intensity during optimization, but was adjusted for calculating the results shown.
 
 The mean wake loss results for the various wake spreading approaches are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC-D results in less wake loss with a WEC value of 3 and using 5 or more steps, while WEC-A has its lowest average wake loss for a maximum WEC angle of $6^\circ$, and WEC-H minimizes average wake loss most with lower WEC values. On average, wake loss minimized using WEC-A or WEC-H does not appear to be impacted by changing the number of steps.
 %
@@ -803,7 +803,7 @@ When optimizing with WEC in the case studies, we adjusted the convergence tolera
 Because WEC adjusts the design space, it can be applied with any optimization algorithm. To see if WEC is helpful for gradient-free algorithms, we tested the impact of WEC with ALPSO in case 2 (see \cref{sec:case2}). For this test we used only WEC-D and used a maximum WEC value of 3 with 6 steps, the same maximum $\xi$ value and number of steps that we found to be best for using WEC with SNOPT. The objective and constraints were all scaled to be between $\pm1$. We chose to use 25 inner iterations, the number of inner iterations that was best for ALPSO without WEC. The WEC steps were applied by dividing the outer iterations by the number of WEC steps plus 1 and rounding up, so each WEC step was run with 5 outer iterations. The WEC steps were run with no local TI, just as for WEC with SNOPT, and a final 5 outer iterations was run with local TI. It is likely that there are more optimal settings for using WEC with ALPSO, such as tuning the number of inner and outer iterations for the changing design spaces at each WEC step. When using WEC with SNOPT, most of the turbine movement tends to occur during the first WEC step. It seems reasonable then that using more outer iterations in the first WEC step with ALPSO may lead to better results because the early part of the optimization is when most of the exploration takes place and the highest WEC value provides the most reduction in local optima. However, this case was only performed as a basic test to see if there was any significant benefit for applying WEC while optimizing with ALPSO and so parameter values were based on what we learned from the preceding tuning studies.
 
 \subsection{WEC with the Jensen Cosine Model}
-As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (3) and the same number of WEC steps (6) as found best for use with WEC as applied to the Bastankhah and Port\'{e}-Agel model in \cref{sec:bpa_wec_comparison}. We tested WEC with the Jensen cosine model only on case 2 (38 turbines and 12 directions. See \cref{sec:case2}). Further improvements with WEC are likely available if WEC were tuned to this model and case combination.
+As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (3) and the same number of WEC steps (6) as found best for use with WEC as applied to the Bastankhah model in \cref{sec:bpa_wec_comparison}. We tested WEC with the Jensen cosine model only on case 2 (38 turbines and 12 directions. See \cref{sec:case2}). Further improvements with WEC are likely available if WEC were tuned to this model and case combination.
 
 \section{Results and Discussion}\label{sec:results}
 
