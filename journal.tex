@@ -45,12 +45,12 @@ Brigham Young University, Provo, Utah, USA}
 \ead{jaredthomas@byu.edu}
 
 \begin{abstract}
-	This paper presents a process using an approach related to  continuation optimization methods for reducing multi-modality in the wind farm layout optimization problem, referred to as Wake Expansion Continuation (WEC). The reduction in multi-modality is achieved by starting with an increased wake spread while maintaining normal velocity deficits at the center of the wakes, and then reducing the wake spread for each of a series of optimization runs until the standard wake spread is used. WEC was applied and shown effective with two different wake models. Four optimization case studies were tested with a gradient-based optimization method and a gradient-free optimization method. Results using WEC show a significant improvement in mean optimized annual energy production (AEP) compared to optimization without WEC for all test cases. The gradient-free optimization algorithm found less optimal results on average for all cases than the gradient-based algorithm with WEC. WEC was also applied to the gradient-free algorithm for one case study with significantly improved results, but the improvement was more significant when WEC was applied to a gradient-based algorithm.
+	In this paper we present a continuation optimization method for reducing multi-modality in the wind farm layout optimization problem that we call Wake Expansion Continuation (WEC). We achieve the reduction in multi-modality by starting with an increased wake spread while maintaining normal velocity deficits at the center of the wakes, and then reducing the wake spread for each of a series of optimization runs until the accurate wake spread is used. We applied and demonstrated the effectiveness of WEC with two different wake models. We tested WEC on four optimization case studies with a gradient-based optimization method and a gradient-free optimization method. We found a significant improvement in the mean, standard deviation, and minimum wake loss for optimization with WEC compared to optimization without WEC for all test cases. We found the gradient-free optimization algorithm resulted in less optimal layouts on average for all cases than the gradient-based algorithm with WEC. We also applied WEC to the gradient-free algorithm for one case study with significantly improved results, but there was more improvement when we applied WEC to a gradient-based algorithm. WEC enables gradient-based algorithms to search the wind farm layout optimization space more globally, and provides more optimal results more consistently than optimization without WEC.
 \end{abstract}
 
 \section{Introduction}
 
-The difficulty of solving the wind farm layout optimization (WFLO) problem is primarily due to the large number of variables and constraints required for realistic problems and the multi-modal nature of the problem's design space. Gradient-free optimization methods are the most common methods used to solve the WFLO problem. However, gradient-free methods have been shown to have reduced performance with high dimensional problems \cite{rios2013-grad-free-comparison}. The WFLO problem scales quickly to high dimensions as the number of turbines is increased. Gradient-based optimization methods are well suited for high dimensional problems. Gradient-based methods are not widely used for WFLO problems because they are highly susceptible to local optima \cite{acero2014}, but they are gaining interest due to their relatively low computational cost and their ability to efficiently handle many variables and constraints. Gradient-based methods have been shown to find good solutions to WFLO problems \cite{fleming2015, guirguis2016, gebraad2017-Maximization-Annual}.  
+The difficulty of solving the wind farm layout optimization (WFLO) problem is primarily due to the large number of variables and constraints required for realistic problems and the multi-modal nature of the problem's design space. Gradient-free optimization methods are the most common methods used to solve the WFLO problem. However, gradient-free methods have been shown to have reduced performance with high dimensional problems \cite{rios2013-grad-free-comparison}. The WFLO problem scales quickly to high dimensions as the number of turbines is increased. Gradient-based optimization methods are well suited for high dimensional problems. Gradient-based methods are not widely used for WFLO problems because they are highly susceptible to local optima \cite{acero2014}, but they are gaining interest due to their relatively low computational cost and their ability to efficiently handle many variables and constraints. Gradient-based methods have been shown to find good solutions to WFLO problems \cite{fleming2015,guirguis2016,gebraad2017-Maximization-Annual}.  
 
 Many techniques have been presented to make the WFLO problem more tractable, including discretization, multi-start, re-parameterization, and hybrid approaches. Discretization techniques, used with gradient-free methods, attempt to simplify the problem by reducing the number of possible solutions \cite{mosetti1994, grady2005}. Through discretization, the number of possible turbine locations within a wind farm can be reduced from infinite to something on the order of hundreds of locations. However, discretization disregards any locations that are not pre-selected, and can thus preclude this approach from finding even a local optimum. It is also possible that constraints on variables other than position may render the discretized optimization problem intractable. Multi-start approaches involve running many optimizations of one problem with different starting points \cite{gonzalez2014}. This approach reduces the sensitivity of gradient-based optimization methods to local optima. Re-parameterization approaches seek to reduce the complexity of the problem by defining the wind farm with just a few variables, such as row spacing, column spacing, grid rotation, etc.~as done in \cite{stanley2020}. Hybrid approaches combine gradient-based and gradient-free algorithms iteratively \cite{rethore2014,graf2016, mittal2017}, and, depending on the problem size, can yield comparable results to multi-start approaches \cite{rethore2014}. While each of these techniques yield improved results, there is still need for further improvement because current methods have a wide spread in the quality of results, are highly dependent on starting locations, artificially limit the design space, and/or cannot be applied in realistic wind farm optimization scenarios. These limitations indicate that there is need for better optimization methods that avoid local optima, whether real or imposed by the approach itself.
 
@@ -66,7 +66,7 @@ In the following sections, we will: present an overview of WEC (\cref{sec:introw
 
 The WEC method is somewhat analogous to Gaussian continuation optimization. In Gaussian continuation optimization, the design space is approximated using a series of Gaussian radial basis functions. When optimization is performed, the standard deviations of the radial basis functions starts at a relatively high value and slowly decreases until the original standard deviation is reached \cite{mobahi2015}. Increasing the standard deviation of the basis functions has the effect of causing the various basis functions to blend in to each other, effectively removing the local optima and providing a relatively convex design space to the optimization algorithm. Slowly returning the standard deviation to the original value allows the optimization algorithm to adjust for any shift in the global optimum due to the blending of the basis functions and avoid local optima. 
 
-WEC works in a manner similar to Gaussian continuation optimization, except that because wind turbine wakes are roughly Gaussian-shaped, the Gaussian basis functions are built in to the model directly rather than used to approximate the model. Other key differences are that the basis functions in WEC are not radial, and that the Gaussian functions in the wind farm model change location during the WFLO. Because of these last two differences, we cannot guarantee that WEC will converge to the global optimum. However, the use of the WEC method does improve WFLO results. We have presented a preliminary study of the WEC method showing significant benefit in \cite{thomas2018-wec} and a follow-on study showing that optimization results using WEC were even more significant when re-calculated using large eddy simulations (LES) in \cite{thomas2019-les-validation}.
+WEC works in a manner similar to Gaussian continuation optimization, except that because wind turbine wakes are roughly Gaussian-shaped, the Gaussian basis functions are built in to the model directly rather than used to approximate the model. Other key differences are that the basis functions in WEC are not radial, and that the Gaussian functions in the wind farm model change location during the WFLO because they are tied to the turbine locations. Because of these last two differences, we cannot guarantee that WEC will converge to the global optimum. However, we will show that the use of the WEC method does improve WFLO results. We have presented a preliminary study of the WEC method showing significant benefit in \cite{thomas2018-wec} and a follow-on study showing that optimization results using WEC were even more significant when re-calculated using large eddy simulations (LES) in \cite{thomas2019-les-validation}.
 
 The WEC method can be explained in three basic steps. The first two steps are preparatory, and need only be performed once for each wake model:
 \begin{enumerate}[label=\arabic*)]
@@ -87,27 +87,27 @@ To apply the wake expansion technique to the wind farm layout optimization probl
 \end{figure}
 
 \section{Simulation Models}\label{sec:models}
-Because of the general nature of the proposed method, it can be applied to any wake models where the wake center deficit and wake spread can be controlled independently. In this study we have applied WEC to the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}, which we will refer to as the Bastankhah model, and the cosine version of the Jensen wake model \cite{jensen1983}, which we will refer to as the Jensen cosine model. We also used various other models necessary for combining wakes and calculating wind farm AEP.
+Because of the general nature of the proposed method, it can be applied to any wake model where the wake center deficit and wake spread can be controlled independently. In this study we have applied WEC to the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}, which we will refer to as the Bastankhah model, and the cosine version of the Jensen wake model \cite{jensen1983}, which we will refer to as the Jensen cosine model. We also used various other models necessary for combining wakes and calculating wind farm AEP.
 
 \subsection{The Bastankhah Wake Model}
 In the Bastankhah wake model, two primary characteristics of the wakes, wake deficit and wake diameter, are particularly easy to isolate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}.
 %
 \begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{y-\delta}{\sigma_y}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\sigma_z}\Big]^2\bigg)}
+	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{\sigma_y}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\sigma_z}\Big]^2\bigg)},
 	 \label{eq:bpa}
 \end{equation}
 %
-Where $\Delta \bar{u} / \bar{u}_{\infty}$ is the normalized wake velocity deficit, $C_T$ is the thrust coefficient, $\gamma$ is the upstream turbine's yaw angle with respect to the inflow direction, $y-\delta$ and $z-z_h$ are the distances of the point of interest from the wake center in the cross-stream horizontal and vertical directions respectively, and $\sigma_y$ and $\sigma_z$ are the standard deviations of the wake deficit in the cross-stream horizontal and vertical directions as defined in \cref{eq:sigmay,eq:sigmaz}.
+where $\Delta \bar{u} / \bar{u}_{\infty}$ is the normalized wake velocity deficit, $C_T$ is the thrust coefficient, $\gamma$ is the upstream turbine's yaw angle with respect to the inflow direction, $\Delta y-\delta$ and $z-z_h$ are the distances of the point of interest from the wake center perpendicular to the wind direction in the horizontal and vertical directions respectively. The standard deviation of the wake deficit in the horizontal direction is defined as
 %
 \begin{equation}\label{eq:sigmay}
-	\sigma_y = k_y [\Delta x - x_0] + \frac{d \cos{(\gamma)}}{\sqrt{8}}
+	\sigma_y = k_y [\Delta x - x_0] + \frac{d \cos{(\gamma)}}{\sqrt{8}},
 \end{equation}
-%
+and the standard deviation of the wake deficit in the vertical directions is defined as
 \begin{equation}\label{eq:sigmaz}
-	\sigma_z = k_z [\Delta x - x_0] + \frac{d}{\sqrt{8}}
+	\sigma_z = k_z [\Delta x - x_0] + \frac{d}{\sqrt{8}},
 \end{equation}
 %
-Where $\Delta x$ is the downstream distance from the turbine generating the wake to the point of interest, $x_0$ is the length of the wake potential core, $d$ is the diameter of the turbine generating the wake, and $k_y$ and $k_z$ are determined as a function of turbulence intensity ($I$) as defined in \cref{eq:kstar}\cite{niayifar2016}.
+where $\Delta x$ is the downstream distance from the turbine generating the wake to the point of interest, $x_0$ is the length of the wake potential core, $d$ is the diameter of the turbine generating the wake, and $k_y$ and $k_z$ are determined as a function of turbulence intensity ($I$) as defined in \cref{eq:kstar}\cite{niayifar2016}.
 %
 \begin{equation}\label{eq:kstar}
 	k^* = 0.3837I + 0.003678
@@ -120,24 +120,24 @@ The Gaussian shape of the Bastankhah wake model is well suited for gradient-base
 We define our near wake model using the location where the original model first begins to be defined, $x_d$, derived in \cite{thomas2019-les-validation} and reproduced in \cref{eq:xd}.
 %
 \begin{equation}\label{eq:xd}
-x_d = x_0 +d \Bigg[ \frac{k_y+k_z\cos{(\gamma)} - \sqrt{[k_y+k_z\cos{(\gamma)}]^2-4k_y k_z[C_T-1]\cos{(\gamma)}}}{2k_y k_z\sqrt{8}}\Bigg]
+x_d = x_0 +d \Bigg[ \frac{k_y+k_z\cos{(\gamma)} - \sqrt{[k_y+k_z\cos{(\gamma)}]^2-4k_y k_z[C_T-1]\cos{(\gamma)}}}{2k_y k_z\sqrt{8}}\Bigg].
 \end{equation}
 %
-We find the standard deviation of the wake at the point $x_d$ as shown in \cref{eq:sigmayd}
+We find the standard deviation of the wake at the point $x_d$ as shown in \cref{eq:sigmayd}.
 %
 \begin{equation}\label{eq:sigmayd}
-\sigma_{yd} = k_y [x_d - x_0] + d\frac{\cos{(\gamma)}}{\sqrt{8}}
+\sigma_{yd} = k_y [x_d - x_0] + d\frac{\cos{(\gamma)}}{\sqrt{8}}.
 \end{equation}
 %
 We then use the definition of the wake spread at the point of discontinuity to provide an estimate for the wake spread and velocity deficit at the rotor hub. With the assumption that $\sigma_{yd}$ is the value of the wake spread at the rotor hub, we can define the slope of the near wake, $k_{y_{\text{NEAR}}}$, as shown in \cref{eq:kynear}.
 %
 \begin{equation}\label{eq:kynear}
-k_{y_{\text{NEAR}}} = \frac{\sigma_{yo}-\sigma_{yd}}{x_0}
+k_{y_{\text{NEAR}}} = \frac{\sigma_{yo}-\sigma_{yd}}{x_0}.
 \end{equation}
 For more details on near wake approximation of the Bastankhah wake model used in this study, please see \cite{thomas2019-les-validation}.
 
 \subsection{The Jensen Cosine Wake Model}
-The Jensen cosine wake model is a variant of the popular ``top hat" model often referred to as the Jensen model. The cosine version simply multiplies the top hat shape with a factor that changes the cross wake deficit shape to follow a cosine curve (see \cref{fig:JensenProfiles} for a comparison of the top hat and cosine variants of the Jensen model). We used the Jensen cosine wake model as defined in \cref{eq:JensenVelocityDeficit}, along with the Katic wake combination model \cite{katic1986}.
+The Jensen cosine wake model is a variant of the popular ``top hat" model often referred to as the Jensen model. The cosine version simply multiplies the top hat shape with a factor that changes the wake deficit shape to follow a cosine curve (see \cref{fig:JensenProfiles} for a comparison of the top hat and cosine variants of the Jensen model). We used the Jensen cosine wake model as defined in \cref{eq:JensenVelocityDeficit}, along with the Katic wake combination model \cite{katic1986}.
 
 % Equation for the Jensen Cosine velocity deficit.
 \begin{equation}
@@ -145,19 +145,19 @@ The Jensen cosine wake model is a variant of the popular ``top hat" model often 
 \label{eq:JensenVelocityDeficit}
 \end{equation}
 %
-In \cref{eq:JensenVelocityDeficit}, $\bar{u}$ represents the wind velocity at a distance $\Delta x$ downstream of the waking turbine, $\bar{u}_\infty$ represents the free-stream wind velocity, $r_0$ represents the radius of the wind turbine, $\alpha$ represents the wake entrainment constant \cite{jensen1983}, $a$ represents the axial induction (for which we assumed an ideal value of $a = 1/3$), and $f_\theta$ is the cosine factor defined in \cref{eq:JensenCosineAdjustment}.
+In \cref{eq:JensenVelocityDeficit}, $\bar{u}$ represents the wind velocity at a distance $\Delta x$ downstream of the waking turbine, $\bar{u}_\infty$ represents the free-stream wind velocity, $r_0$ represents the radius of the wind turbine, $\alpha$ represents the wake entrainment constant \cite{jensen1983}, $a$ represents the axial induction (for which we assumed an ideal value of $a = 1/3$), and $f_\theta$ is the cosine factor defined as
 %
 % Enter the Cosine Adjustment Equation to Jensen's Wake Model.
 \begin{equation}
-f_\theta = \frac{1 + \cos{(n\theta)}}{2}
+f_\theta = \frac{1 + \cos{(n\theta)}}{2},
 \label{eq:JensenCosineAdjustment}
 \end{equation}
 %
-In \cref{eq:JensenCosineAdjustment},  $\theta$ is the angle from the wake center line to the point of interest measured from the wake vertex (a distance $z$ upstream of the wind turbine as shown in \cref{fig:JensenDiagrams}), and $n$ is a factor derived from the wake spreading angle, $\beta$. The value of $n$ can be calculated as shown in \cref{eq:nFactor}, where $\beta$ is in radians. 
+where $\theta$ is the angle from the wake center line to the point of interest measured from the wake vertex (a distance $z$ upstream of the wind turbine as shown in \cref{fig:JensenDiagrams}), and $n$ is a factor derived from the wake spreading angle, $\beta$. The value of $n$ can be calculated as
 %
 % Equation to determine the factor n in the Jensen Cosine factor.
 \begin{equation}
-n = \frac{\pi}{\beta}
+n = \frac{\pi}{\beta}.
 \label{eq:nFactor}
 \end{equation}
 %
@@ -182,7 +182,7 @@ We used the same wake spreading angle as Jensen, $\beta = 20 \degree$  \cite{jen
 \end{figure}
 
 \subsection{Turbine Model}
-We based our turbines on the Vestas V-80 2MW wind turbine for all studies in this paper. The values of $C_P$ and $C_T$ were based on a linear interpolation of the power and thrust coefficient curves presented in \cite{niayifar2016} and shown in \cref{fig:cp,fig:ct}. The other turbine specifications are provide in \cref{tab:v80}. The $C_T$ curve was only used with the Bastankhah wake model. We used a constant axial induction value of 1/3 when using the Jensen cosine wake model.
+We based our turbines on the Vestas V-80 2MW wind turbine for all studies in this paper. The values of $C_P$ and $C_T$ were based on a linear interpolation of the power and thrust coefficient curves presented in \cite{niayifar2016} and shown in \cref{fig:cp,fig:ct}. The other turbine specifications are provide in \cref{tab:v80}. The $C_T$ curve was only used with the Bastankhah wake model. We used a constant axial induction ($a$) of 1/3 and set $\alpha$ to 0.1 when using the Jensen cosine wake model.
 %
 \begin{figure}[h!]
 	\centering
@@ -221,38 +221,38 @@ We based our turbines on the Vestas V-80 2MW wind turbine for all studies in thi
 We combined the wake deficits using a linear combination method as discussed in \cite{niayifar2016} with the Bastankhah wake model, and a sum of squares method with the Jensen wake model as discussed in \cite{katic1986}. We used a reference height of 80 m for all wind speed measurements and adjusted to different heights with a power law and a wind shear exponent of 0.31 as shown in \cref{eq:shear}. 
 %
 \begin{equation} \label{eq:shear}
-u = u_r\bigg[\frac{z}{z_r}\bigg]^\psi
+u = u_r\bigg[\frac{z}{z_r}\bigg]^\psi,
 \end{equation}
 %
-In \Cref{eq:shear}, $u_r$ is the reference wind speed, $z$ is the height of interest, $z_r$ is the height at which $u_r$ was measured, and $\psi$ is the shear exponent.
+where $u_r$ is the reference wind speed, $z$ is the height of interest, $z_r$ is the height at which $u_r$ was measured, and $\psi$ is the shear exponent.
 
-To save computation time, the inflow wind speed at each turbine was approximated using a single sample at the wind turbine hub location. Individual turbine inflow wind velocities, $U_i$, were solved consecutively from upstream to downstream for each wind state (direction and speed combination) for the Bastankhah wake model, but in no particular order for the Jensen cosine model. The power output of each turbine was then calculated based on \cref{eq:power}
+To save computation time, the inflow wind speed at each turbine was approximated using a single point at the wind turbine hub location. Individual turbine inflow wind velocities, $U_i$, were solved consecutively from upstream to downstream for each wind state (direction and speed combination) for the Bastankhah wake model, but in no particular order for the Jensen cosine model. The power output of each turbine was then calculated as
 %
 \begin{equation}\label{eq:power}
-P_i = \frac{1}{2}\rho A_{ri}C_P U_i^3
+P_i = \frac{1}{2}\rho A_{ri}C_P U_i^3,
 \end{equation}
 %
-where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i$, and $C_P$ is the power coefficient. We calculated annual energy production (AEP) as shown in \cref{eq:aep}.
+where $\rho$ is the air density, $A_{r,i}$ is the rotor-swept area of turbine $i$, and $C_P$ is the power coefficient. We calculated annual energy production (AEP) as
 
 \begin{equation} \label{eq:aep}
-AEP = [24][365]\sum_{j=1}^{n_s} \sum_{i=1}^{n_t} p_j P_{ij}  
+AEP = [24][365]\sum_{j=1}^{n_s} \sum_{i=1}^{n_t} p_j P_{ij},
 \end{equation}
 %
- In \cref{eq:aep}, $n_s$ is the number of wind states (direction and speed combination), $p_j$ is the probability of a given wind state, $n_t$ is the number of wind turbines, and $P_{ij}$ is the power produced by turbine $i$ given wind state $j$.
+ where $n_s$ is the number of wind states (direction and speed combination), $p_j$ is the probability of a given wind state, $n_t$ is the number of wind turbines, and $P_{ij}$ is the power produced by turbine $i$ given wind state $j$.
 
-To achieve an unbiased baseline for results comparisons, we calculated wake loss (energy lost due to wake effects) across all the optimization results as shown in \cref{eq:wake_loss}.
+To achieve an unbiased baseline for results comparisons, we calculated wake loss (energy lost due to wake effects) across all the optimization results as
 %
 \begin{equation} \label{eq:wake_loss}
-	L = 100 \bigg[ 1 - \frac{AEP_0}{AEP_t} \bigg]
+	L = 100 \bigg[ 1 - \frac{AEP_0}{AEP_t} \bigg],
 \end{equation}
 %
-In \cref{eq:wake_loss}, $AEP_0$ represents the optimized AEP found from a given starting layout and $AEP_t$ is the theoretical maximum AEP calculated as shown in \cref{eq:aept}. 
+where $AEP_0$ represents the optimized AEP found from a given starting layout and $AEP_t$ is the theoretical maximum AEP calculated as shown in \cref{eq:aept}. 
 %
 \begin{equation} \label{eq:aept}
-	AEP_t = [24][365]\sum_{j=1}^{n_s}p_j P_j
+	AEP_t = [24][365]\sum_{j=1}^{n_s}p_j P_j,
 \end{equation}
 %
-In \cref{eq:aept}, $P_j$ is the power of a single un-waked wind turbine at wind state $j$ calculated using \cref{eq:power}. 
+where $P_j$ is the power of a single un-waked wind turbine at wind state $j$ calculated using \cref{eq:power}. 
 
 \section{Applying WEC to the  Wake Models} \label{sec:application}
 In this section we apply WEC, step by step as discussed in \cref{sec:introwec}, to the Bastankhah wake model and the Jensen cosine wake model. To test the wake spreading approaches discussed, we implemented each of them in the Bastankhah  wake model. We then tested the most effective wake spreading approach with the Jensen cosine model.
@@ -269,7 +269,7 @@ In the diameter spreading method (WEC-D), independent control of the wake diamet
 % 	 \label{eq:bpa_relax}
 % \end{equation}
 \begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{y-\delta}{\xi \sigma_y}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\xi \sigma_z}\Big]^2\bigg)}
+	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{\xi \sigma_y}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\xi \sigma_z}\Big]^2\bigg)}
 	\label{eq:bpa_relax}
 \end{equation}
 Increasing $\xi$ widens the wakes without changing the wake center velocity deficit. Widened wakes mix and smooth out the local optima, as shown in \cref{fig:wec_bpa_wec_d}. 
@@ -313,22 +313,22 @@ To gain direct control of the wake spreading angle, we arranged the equations in
 To gain direct control of the wake spreading angle, we calculate the wake spreading slope that would correspond to the desired spreading angle ($\theta_\xi$) and compare  it against the original spreading angle $k_{y_{\text{NEAR}}}$ (\cref{eq:kynear}) to obtain
 %
 \begin{equation}
-	k_{y_{\xi}} = \max(\tan{(\theta_\xi)}, k_{y_{\text{NEAR}}})
+	k_{y_{\xi}} = \max(\tan{(\theta_\xi)}, k_{y_{\text{NEAR}}}).
 \end{equation}
 %
-We then use $k_{y_{\xi}}$ to re-define the wake spread at the point of far wake onset, $\sigma_{y_{0A}}$, as shown in \cref{eq:sigmay0xi}.
+We then use $k_{y_{\xi}}$ to re-define the wake spread at the point of far wake onset as
 %
 \begin{equation}\label{eq:sigmay0xi}
-	\sigma_{y_{0\text{A}}} = k_{y_{\xi}}x_0+\sigma_{yd}
+	\sigma_{y_{0\text{A}}} = k_{y_{\xi}}x_0+\sigma_{yd}.
 \end{equation}
 %
 The definition for $\sigma_{y_{0\text{A}}}$ allows us to define the general form of the wake spread for all wake regions as shown in \cref{eq:sigmayxi}. 
 %
 \begin{equation}\label{eq:sigmayxi}
 	\sigma_{y_{\text{A}}} =
-	\begin{cases} k_y [x-x_0]+\sigma_{y_{0\text{A}}} & x >= x_0, k_y >= k_{y_{\xi}} \\
-		k_{y_{\xi}} [x-x_0]+\sigma_{y_{0\text{A}}} & x >= x_0, k_y < k_{y_{\xi}} \\
-		k_{y_{\xi}}x+\sigma_{yd} & x < x_0 \\
+	\begin{cases} k_y [\Delta x-x_0]+\sigma_{y_{0\text{A}}} & \Delta x >= x_0, k_y >= k_{y_{\xi}} \\
+		k_{y_{\xi}} [\Delta x-x_0]+\sigma_{y_{0\text{A}}} & \Delta x >= x_0, k_y < k_{y_{\xi}} \\
+		k_{y_{\xi}}\Delta x+\sigma_{yd} & \Delta x < x_0. \\
 	\end{cases}
 \end{equation}
 %
@@ -336,7 +336,7 @@ We used the same process to obtain $\sigma_{z_{\text{A}}}$.
 
 Now that we have direct control of the wake spreading angle, for angles greater than the default angle, we can apply the results directly to the exponential terms of \cref{eq:bpa} to obtain a model that allows the user to specify a spreading angle without impacting the velocity deficit in the wake center as shown in \cref{eq:bpa_angle}. The only change from \cref{eq:bpa} to \cref{eq:bpa_angle} is replacing $\sigma_y$ and $\sigma_z$ in the exponential terms with $\sigma_{y_{\text{A}}}$ and $\sigma_{z_{\text{A}}}$ respectively.
 \begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{y-\delta}{\sigma_{y_{\text{A}}}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\sigma_{z_{\text{A}}}}\Big]^2\bigg)}
+	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{\sigma_{y_{\text{A}}}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\sigma_{z_{\text{A}}}}\Big]^2\bigg)}
 	\label{eq:bpa_angle}
 \end{equation}
 %
@@ -350,14 +350,14 @@ The third approach, WEC-H, is a hybrid of WEC-D and WEC-A. The wake diameter is 
 	\sigma_{y_H} = &
 	\begin{cases}
 		\xi \sigma_y & x > x_0 \\
-		\xi \big[\frac{x}{x_0}[\sigma_{y_0} - \sigma_{y_d}] + \sigma_{y_d} \big]& x \le x_0 \\
+		\xi \big[\frac{\Delta x}{x_0}[\sigma_{y_0} - \sigma_{y_d}] + \sigma_{y_d} \big]& \Delta x \le x_0, \\
 	\end{cases}
 \end{align}
 %
-Where $\sigma_{y_0}$ is the original wake spread at $x_0$, and $\sigma_{y_H}$ is the horizontal wake standard deviation to be used in the exponential terms of the Bastankhah model as shown in \cref{eq:wechapplied}. A similar approach can be used to find $\sigma_{z_H}$. The Bastankhah model with WEC-H applied is shown in \cref{eq:sigywech}. The only change from \cref{eq:bpa} to \cref{eq:wechapplied} is replacing $\sigma_y$ and $\sigma_z$ in the exponential terms with $\sigma_{y_{H}}$ and $\sigma_{z_{H}}$ respectively.
+where $\sigma_{y_0}$ is the original wake spread at $x_0$, and $\sigma_{y_H}$ is the horizontal wake standard deviation to be used in the exponential terms of the Bastankhah model as shown in \cref{eq:wechapplied}. A similar approach can be used to find $\sigma_{z_H}$. The Bastankhah model with WEC-H applied is shown in \cref{eq:sigywech}. The only change from \cref{eq:bpa} to \cref{eq:wechapplied} is replacing $\sigma_y$ and $\sigma_z$ in the exponential terms with $\sigma_{y_{H}}$ and $\sigma_{z_{H}}$ respectively.
 
 \begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[]1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{y-\delta}{ \sigma_{y_H}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{ \sigma_{z_H}}\Big]^2\bigg)}
+	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[]1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{ \sigma_{y_H}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{ \sigma_{z_H}}\Big]^2\bigg)}
 	\label{eq:wechapplied}
 \end{equation}
 
@@ -374,39 +374,39 @@ In this section we apply WEC-D to the Jensen cosine wake model. A diagram displa
 
 The cosine factor, $f_\theta$, in \cref{eq:JensenVelocityDeficit} controls the wake spread for the Jensen cosine wake model. By breaking down the cosine factor into its constituent parameters, it is possible to adjust the wake spread without impacting the velocity deficit in the center of the wake.
 
-As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line and the downwind turbine's location as measured from the wake vertex (a distance $z$ along the wake center line upstream of the wind turbine). This angle $\theta$ can be determined using \cref{eq:Theta}.
+As can be seen in \cref{eq:JensenCosineAdjustment}, $f_\theta$ is a function of $\theta$, which represents the angle between the wake's center line and the downwind turbine's location as measured from the wake vertex (a distance $z$ along the wake center line upstream of the wind turbine). This angle $\theta$ can be calculated as
 
 % Equation for calculating theta, the angle between the wake's vertex and the point of interest
 \begin{equation}
-	\theta = \arctan\Big( \frac{\Delta y}{\Delta x + z} \Big)
+	\theta = \arctan\Big( \frac{\Delta y}{\Delta x + z} \Big),
 	\label{eq:Theta}
 \end{equation}
-
-In \cref{eq:Theta}, $\Delta x$ and $\Delta y$ represent the downwind and crosswind spacing, respectively, between the upwind turbine and the downwind location of interest. The variable $z$ represents the distance between the wake's vertex and the upwind turbine. By adjusting the value of $z$, we are able to increase or decrease the wake's spread. An expression for $z$ based on the initial wake diameter can be found below in \cref{eq:vertexdistance}.
+%
+where $\Delta x$ and $\Delta y$ represent the spacing in the wind direction and perpendicular to the wind direction, respectively, between the upwind turbine and the location of interest. The variable $z$ represents the distance between the wake's vertex and the upwind turbine. By adjusting the value of $z$, we are able to increase or decrease the wake's spread. The expression for $z$ based on the initial wake diameter is
 
 \begin{equation}
-	z = \frac{r_0}{\tan(\beta)}
+	z = \frac{r_0}{\tan(\beta)}.
 	\label{eq:vertexdistance}
 \end{equation} 
 
 
 \subsubsection{Jensen Cosine WEC Step (2)}
-We can directly adjust the wake spread without impacting the magnitude of the deficit in the center of the wake by applying a relaxation factor, $\xi$, to the rotor radius, $r_0$, in \cref{eq:vertexdistance}, as seen below in \cref{eq:WECvertexcistance}.
+We can directly adjust the wake spread without impacting the magnitude of the deficit in the center of the wake by applying a factor, $\xi$, to the rotor radius, $r_0$, in \cref{eq:vertexdistance}, as seen below in \cref{eq:WECvertexcistance}.
 
 \begin{equation}
 	z = \frac{\xi r_0}{\tan(\beta)}
 	\label{eq:WECvertexcistance}
 \end{equation}
 
-Through a series of substitutions, this new vertex distance, \cref{eq:WECvertexcistance}, may be combined with the Jensen cosine wake model to obtain \cref{eq:JensenVelocityDeficitCombined}.
+Through a series of substitutions we can combine the new vertex distance, \cref{eq:WECvertexcistance}, with the Jensen cosine wake model to obtain
 
 % Insert equation: final equation displaying the direct relationship between the velocity deficit and the relaxation factor, xi.
 \begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_\infty} = 1 - a \bigg[\frac{r_0}{r_0 + \alpha x} \bigg]^2 \Bigg[1 + \cos{\Bigg(\frac{\pi}{\beta} \arctan{\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{\tan(\beta)}}} \Bigg) \Bigg)} \Bigg]
+	\frac{\bar{u}}{\bar{u}_\infty} = 1 - a \bigg[\frac{r_0}{r_0 + \alpha x} \bigg]^2 \Bigg[1 + \cos{\Bigg(\frac{\pi}{\beta} \arctan{\Bigg(\frac{\Delta y}{\Delta x + \frac{\xi r_0}{\tan(\beta)}}} \Bigg) \Bigg)} \Bigg].
 	\label{eq:JensenVelocityDeficitCombined}
 \end{equation}
 
-Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the relaxation factor is found in \cref{eq:JensenVelocityDeficitCombined}, this means that the velocity deficit will be constant with respect to $\xi$ at the wake center. This behavior is shown in \cref{fig:wec_jensen_wec_d}, which also shows that local optima can be smoothed out through WEC for the Jensen cosine model.
+Because we have inserted the WEC factor, $\xi$, into \cref{eq:JensenVelocityDeficitCombined}, we may adjust the wake spread without changing the velocity deficit in the center of the wake. Note that this is true because when $\Delta y = 0$, the term inside the inverse tangent in \cref{eq:JensenVelocityDeficitCombined} goes to zero, regardless of the value of $\xi$. Because this is the only place where the WEC factor is found in \cref{eq:JensenVelocityDeficitCombined}, the velocity deficit will be constant with respect to $\xi$ at the wake center. This behavior is shown in \cref{fig:wec_jensen_wec_d}, which also shows that local optima can be smoothed out through WEC for the Jensen cosine model.
 
 % Figure describing setup for aep vs crosswind position tests for Jensen
 %\begin{figure}[ht]
@@ -448,107 +448,13 @@ Because we have inserted the relaxation factor, $\xi$, into \cref{eq:JensenVeloc
 
 The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models.
 
-%\subsection{Testing WEC with ALPSO}
-%
-%Beside knowing if WEC works with different wake models, it is also of interest to know if WEC can improve the results of gradient-free algorithm. To test this we ran the same case shown in \cref{fig:round_case,fig:nantucket12dirs} using ALPSO with and without WEC. The results of this test are shown in \cref{
-%
-%\begin{figure}[h!]  
-%	\centering
-%	\begin{minipage}[t]{18pc}    
-%		\centering
-%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_percent_wake_loss.pdf}
-%		\caption{Wake loss percentage for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
-%		\label{fig:jensen-38-wake-loss}
-%	\end{minipage}\hspace{1pc}
-%	\begin{minipage}[t]{18pc}    
-%		\centering
-%		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}]{final_images/results/38turbs_results_jensen_fcalls.pdf}
-%		\caption{Function calls for 200 optimizations using the Jensen model with and without WEC. These optimizations were performed on the 38 turbine wind farm and 12 direction wind rose shown in \cref{fig:method_study_layout,fig:nantucket12dirs}.}
-%		\label{fig:jensen-38-wake-fcalls}
-%	\end{minipage}
-%\end{figure}
-
-%\subsection{Applying WEC to the FLORIS Wake Model}
-%In this section we apply WEC, step by step, as presented in \cref{sec:dsrop} to the FLORIS wake model.  
-%
-%%\todo{need to get better figure. remember to update caption once new figure inserted.}
-%%\begin{figure}[h]
-%%    \centering
-%%    \includegraphics[width=0.3\linewidth]{FLORISDiagram1}
-%%    \caption{Diagram displaying the three wake zones in the FLORIS turbine wake model. A higher quality diagram would have been constructed if there had been sufficient time. The black outer lines represent the outermost wake zone (mixing zone) which expands from the wind turbine as the air travels downstream. The blue lines represent the middle wake zone (far zone) which retains nearly the same width with distance from the turbine. Finally, the green lines represent the innermost wake zone (near wake) which converges to a point some distance from the turbine. The velocity deficit associated with each wake zone increases from the outermost wake zone to the innermost wake zone.}
-%%    \label{fig:FLORISDiagram}
-%%\end{figure}
-%
-%\subsubsection{FLORIS WEC Step (1)}
-%%\textbf{Identify where the magnitude and spread of the wake are within the FLORISSE equation.}
-%
-%We began by determining where in the FLORIS wake model to apply the relaxation factor. Similar to the Jensen cosine wake model, we decided to apply the relaxation factor to the original wake diameter in the FLORIS wake model. Because the increased wakes would result in larger wake overlaps, we decided that our implementation of WEC would need to occur before any area overlap calculations took place. Based on Figure 3 of Gebraad et. al's paper \cite{gebraad2014}, we decided that the most intuitive option would be to implement the relaxation factor in the wake diameter equation (\cref{eq:FLORISWakeWidth}).
-%
-%\begin{equation}
-%    D_{w,i,q} = D_i + 2k_em_{e,q}(x - X_i)
-%    \label{eq:FLORISWakeWidth}
-%\end{equation}
-%
-%In \cref{eq:FLORISWakeWidth}, $D_{w,i,q}$ represents the diameter of the wake for the turbine of index $i$ within the wake-zone $q$, $D_i$ represents the rotor-diameter of turbine $i$, $k_e$ and $m_{e,q}$ represent wake expansion coefficients, $x$ represents the distance downwind from the wake-generating turbine to turbine $i$, and $X_i$ represents the x-coordinate of turbine $i$. In this equation, $k_e$ and $m_{e,q}$ determine the rate of expansion while $D_i$ represents an initial wake width.
-%
-%\subsubsection{FLORIS WEC Step (2)}
-%%\textbf{Apply relaxation factor to the FLORIS equation. Show the aep vs crosswind position plot to demonstrate the velocity deficit is unchanged in the center of the wake and that the wakes are capable of being spread out. Briefly describe this plot and how the wec factor affects it.}
-%
-%If we applied the relaxation factor to $k_e$ or $m_{e,q}$ in \cref{eq:FLORISWakeWidth}, the rate of wake expansion would be affected, which violates the conditions for WEC described at the start of the Methods section. On the other hand, applying the relaxation factor to $D_i$ would expand the wake without affecting the rate of wake expansion. Therefore, we decided to apply the relaxation factor to $D_i$ in \cref{eq:FLORISWakeWidth} to obtain \cref{eq:FLORISWECWakeWidth}.
-%
-%\begin{equation}
-%    D_{w,i,q}' = D_i' + 2k_em_{e,q}(x - X_i)
-%    \label{eq:FLORISWECWakeWidth}
-%\end{equation}
-%
-%Where $D_{w,i,q}'$ represents the adjusted wake width from applying WEC and $D_i'$ represents the adjusted initial wake diameter from applying WEC. We applied a relaxation factor to all wake zones within the FLORIS wake model. The resulting equations controlling the wake diameters for various wake zones in the FLORIS model are displayed below in \cref{eq:FLORISWECWakeDiameterPiecewise}. In this equation, $q$ represents the wake zone being used (i.e., $q = 1$ for the innermost wake zone, $q = 2$ for the middle wake zone, and $q = 3$ for the outermost wake zone).
-%
-%%\begin{equation}
-%%    D_i' = \xi D_i
-%%    \label{eq:FLORISWECWakeDiameter}
-%%\end{equation}
-%
-%% Initial results from applying the above equations prompted us to adjust our methods. First, we decided to implement a cosine factor to smooth the results, as done by Thomas and Ning in \cite{Thomas2017}. Second, we noticed that the preliminary results from FLORIS indicated that the velocity deficit in the wake's center was not constant for all values of $\xi$. We determined that the cause of this error was the increase in wake width of the innermost wake-zone. By increasing this wake diameter, we were allowing the innermost wake-zone to propagate much farther downwind than it would without a relaxation factor. Thus, turbines near the center of the wake would experience the effects of the innermost wake-zone for high values of $\xi$ but not for lower values of $\xi$. This caused the velocity deficit in the center of the wake to differ with $\xi$.
-%
-%% Originally, we resolved this issue by only applying the WEC relaxation factor to the middle and outermost wake zones. By doing so, we kept the innermost zone from propagating too far downstream and thereby ensured that the velocity deficit at the wake-center would be the same for all $\xi$. After more testing, however, we determined that failing to apply the relaxation factor to the innermost wake zone actually promoted the creation of a local optimum between two upwind turbines, which defeats WEC's purpose in smoothing out local optima. While the velocity deficit in the center of the wake is not preserved as well when applying WEC to the innermost wake zone, FLORIS performs better with WEC as a result of this change.
-%
-%\begin{equation}
-%	D_{w, i, q}' = \xi D_i + 2k_em_{e, q} (x - X_i), q = 1, 2, 3
-%	\label{eq:FLORISWECWakeDiameterPiecewise}
-%\end{equation}
-%
-%When we applied \cref{eq:FLORISWECWakeDiameterPiecewise} to the FLORIS wake model, we tested how well WEC performed by traversing a turbine through the wakes of two fixed upwind wind turbines, similar to what was done with the Jensen cosine wake model in \cref{fig:smoothing_locations_Jensen,fig:JensenLocalOptSmoothed}. Our results are displayed in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed} below. We expected that the local optimum would be progressively smoothed out as the relaxation factor increased, similar to what is seen in \cref{fig:JensenLocalOptSmoothed}; however, as seen in \cref{fig:smoothing_locations_FLORIS,fig:FLORISLocalOptSmoothed}, WEC enabled the FLORIS model to smooth out the local optimum with only a small increase in the relaxation factor.
-%
-%% Figure describing setup for aep vs crosswind position tests for FLORIS
-%\begin{figure}[ht]
-%	\centering
-%	\begin{minipage}[t]{0.43\textwidth}
-%		\centering
-%		\includegraphics[width=\textwidth, trim={2cm 0cm 2cm 0cm}, clip]{smoothing_locations}
-%		\caption{Simple design space used to demonstrate the effects of the relaxation factor, $\xi$, on the wind farm layout design space (see \cref{fig:FLORISLocalOptSmoothed}).}
-%		\label{fig:smoothing_locations_FLORIS}
-%	\end{minipage}\hspace{1pc}
-%% Figure displaying results from aep vs crosswind position tests for FLORIS
-%	\begin{minipage}[t]{0.52\textwidth}
-%		\centering
-%		\includegraphics[width=\textwidth]{FLORISWECMultipleTurbinesAEP}
-%		\caption{AEP plotted against crosswind position of the turbine seen in \cref{fig:smoothing_locations_FLORIS}. Drops in AEP occur where wakes are present. Note the local optimum between the two wakes that is smoothed out as the WEC factor increases.}
-%		\label{fig:FLORISLocalOptSmoothed}
-%	\end{minipage}
-%\end{figure}
-%
-%\subsubsection{FLORIS WEC Step (3)}
-%%\textbf{Describe how the optimization would actually use WEC (e.g., multiple wec factors decreasing from some value to 1, at which point the model is normal again. Warm start new optimizations with previous optimization's results). Report which values for wec factor were used.}
-%
-%The optimization for the FLORIS model with WEC is simple in concept. A reasonably large relaxation factor is chosen for the first optimization, which results in an optimized wind farm layout where all local optima have been smoothed out. A new, lower relaxation factor is chosen, and the results from the previous optimization are used as a warm start for the new optimization. This process repeats until the relaxation factor is equal to one, at which point the optimization being solved is identical to optimizing the original FLORIS model without WEC. In this way, WEC allows the optimization to escape local optima in the first few optimizations, but the FLORIS model becomes more accurate as the relaxation factor is decreased closer to one. Through trial and error, we decided to use the following relaxation factors: $\xi = [3, 2.75, 2.5, 2.25, 2, 1.75, 1.5, 1.25, 1]$. The selection of relaxation factors should be the topic of future research.
-
 \section{Case Studies}\label{sec:casestudies}
 To demonstrate the effectiveness of WEC on a range of problems, we present three wind farm optimization case studies. For each case, we used the Vestas V-80 2MW wind turbine. The cases were chosen to represent a range in size, complexity, and difficulty of the optimization problem.
 
 We created 199 pseudo-random starting wind farm layouts and one planned layout for each case for a total of 200. Each of the starting layouts had all the turbines inside the wind farm boundary constraint and did not have any turbines spaced less than one rotor diameter apart.
 
 \subsection{Case 1: 16 Turbines and 20 Wind Directions}
-Case 1 was carefully selected to provide a meaningful problem that would be tractable for nearly any optimization method. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with a five rotor diameter spacing between rows and columns (see \cref{fig:layout1}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
+We selected case 1 to provide a meaningful problem that would be tractable for nearly any optimization method. We defined a wind farm with 16 wind turbines and a square boundary with enough space for four rows and columns of wind turbines with a five rotor diameter spacing between rows and columns (see \cref{fig:layout1}). We used a simple wind rose composed of a double Gaussian distribution binned into 20 directions and a constant wind speed of 10 m/s in all directions (see \cref{fig:directional}).
 \begin{figure}[h!]
 \centering
 \begin{minipage}[t]{18pc}
@@ -566,24 +472,24 @@ Case 1 was carefully selected to provide a meaningful problem that would be trac
 \end{figure}
 %
 
-For case 1, the optimization problem was formulated as shown in \cref{eqn:opt1}
+For case 1, the optimization problem was formulated as
 %
 \begin{equation}
 	\label{eqn:opt1}
 	\begin{aligned} [b]
-	\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...16\\
-	\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...16,~~i \neq j\\
-	 & x_{min} \leq x_i \leq x_{max}~~i=1...16\\
-     & y_{min} \leq y_i \leq y_{max}~~i=1...16
+	\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...16,\\
+	\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...16,~~i \neq j,\\
+	 & x_{min} \leq x_i \leq x_{max}~~i=1...16,\\
+     & y_{min} \leq y_i \leq y_{max}~~i=1...16,
 	\end{aligned}
 \end{equation}
 %
 %
-In \cref{eqn:opt1}, $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, and $x_{max/min}$ and $y_{max/min}$ represent the boundaries of the wind farm. This case has a total of 32 variables and 120 constraints.
+where $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the separation distance between each pair of turbines $i$ and $j$, and $x_{max/min}$ and $y_{max/min}$ represent the boundaries of the wind farm. This case has a total of 32 variables and 120 constraints.
 
 \subsection{Case 2: 38 Turbines and 12 Wind Directions}\label{sec:case2}
 
-  Case 2 was created to be significantly more challenging than case 1 while remaining simple enough to be reasonably simulated using LES as done in \cite{thomas2019-les-validation}. We defined a wind farm with 38 wind turbines and a circular boundary as shown in \cref{fig:layout2and3}. The size of the boundary allowed for at least a five-diameter spacing between turbines. We used the Nantucket wind rose binned into 12 directions with the wind speed for each direction set to 8 m/s as shown in \cref{fig:freqwindrose_12dir}.
+  We created case 2 to be significantly more challenging than case 1 while remaining simple enough to be reasonably simulated using LES as done in \cite{thomas2019-les-validation}. We defined a wind farm with 38 wind turbines and a circular boundary as shown in \cref{fig:layout2and3}. The size of the boundary allowed for at least a five-diameter spacing between turbines. We used the Nantucket wind rose binned into 12 directions with the wind speed for each direction set to 8 m/s as shown in \cref{fig:freqwindrose_12dir}.
 %
 \begin{figure}[h!]
 	\centering
@@ -605,13 +511,13 @@ The optimization problem for case 2 was formulated as
 %
 \begin{equation}\label{eq:case2}
 	\begin{aligned} [b]
-	\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...38\\
-	\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...38~~i \neq j\\
-	 & [x_c-x_i]^2+[y_c-y_i]^2 \leq r_{b}^2~~i=1...38
+	\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...38,\\
+	\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...38~~i \neq j,\\
+	 & [x_c-x_i]^2+[y_c-y_i]^2 \leq r_{b}^2~~i=1...38,
 	\end{aligned}
 \end{equation}
 %
-In \cref{eq:case2}, $(x_c,y_c)$ is the location of the center of the wind farm, and $r_b$ is the radius of the wind farm boundary. Case 2 has a total of 76 variables and 741 constraints.
+where $(x_c,y_c)$ is the location of the center of the wind farm, and $r_b$ is the radius of the wind farm boundary. Case 2 has a total of 76 variables and 741 constraints.
 
 \subsection{Case 3: 38 Turbines and 36 Wind Directions}
 %
@@ -634,13 +540,13 @@ Case 3 is the same as case 2 but with more wind directions and different wind sp
 \end{figure}
 
 \subsection{Case 4: 60 Turbines and 72 Wind Directions}
-Case 4, based on the Princess Amalia Wind Park, was selected to provide a larger and somewhat more realistic problem. The Amalia wind farm has 60 wind turbines. We used the convex hull of the existing turbine locations to create the boundary \cref{fig:layout4}. We binned wind data into 72 wind directions with wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_72dir,fig:freqwindrose_72dir}.
+We selected case 4, based on the Princess Amalia Wind Park, to provide a larger and somewhat more realistic problem. The Amalia wind farm has 60 wind turbines. We used the convex hull of the existing turbine locations to create the boundary \cref{fig:layout4}. We used wind data binned into 72 wind directions with the wind speed for each direction determined as the average of all samples in that sector as shown in \cref{fig:speedwindrose_72dir,fig:freqwindrose_72dir}.
 \begin{figure}[h!]
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
 		\includegraphics[width=1.\textwidth, trim={1.0cm, 0cm, 1.0cm, 0cm}, clip]{final_images/layouts/60_turb_start.pdf}
-		\caption{Baseline wind farm layout for case 4. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
+		\caption{Baseline wind farm layout for case 4 with 60 wind turbines. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 		\label{fig:layout4}
 	\end{minipage}\hspace{1pc}%
 \end{figure}
@@ -661,26 +567,26 @@ Case 4, based on the Princess Amalia Wind Park, was selected to provide a larger
 	\end{minipage}
 \end{figure}
 %
-For case 4, the optimization problem was formulated as shown in \cref{eqn:opt3}
+For case 4, the optimization problem was formulated as
 %
 \begin{equation}
 \label{eqn:opt3}
 \begin{aligned} [b]
-\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...60\\
-\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...60,~~i \neq j\\
-& b_{ik} \geq 0 ~~ i=1...60, k=1...14
+\underset{x_i,y_i}{\textrm{maximize}} \quad & AEP(x_i,y_i)~~i=1...60,\\
+\textrm{subject to} \quad & s_{ij} \geq 2\*d~~i,j=1...60,~~i \neq j,\\
+& b_{ik} \geq 0 ~~ i=1...60, k=1...14,
 \end{aligned}
 \end{equation}
 %
-Where $b_{i,k}$ represents the distance of each turbine $i$ from each boundary $k$. Case 4 has a total of 120 variables and 2610 constraints.
+where $b_{i,k}$ represents the distance of each turbine $i$ from each boundary $k$. Case 4 has a total of 120 variables and 2610 constraints.
 
 \section{Implementation Details and Optimization Algorithms}\label{sec:computation}
-The code for each wake model was written in Fortran and wrapped in python. In this work, optimization problems were set up and solved in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, the gradient-based Sparse Nonlinear OPTimizer (SNOPT)  \cite{gill2005} and the gradient-free Augmented Lagrangian Particle Swarm Optimizer (ALPSO) \cite{jansen2011_alpso}. Both algorithms were used through pyOptSparse \cite{perez2012a}. We obtained exact gradients for both wake models using algorithmic differentiation provided by Tapenade \cite{tapenade2013}.
+We implemented the code for each wake model in Fortran and wrapped it with python. We set up and solved the optimization problems in OpenMDAO \cite{gray2010_OpenMDAO} using two optimization algorithms, the gradient-based Sparse Nonlinear OPTimizer (SNOPT)  \cite{gill2005} and the gradient-free Augmented Lagrangian Particle Swarm Optimizer (ALPSO) \cite{jansen2011_alpso}. We used both algorithms were through pyOptSparse \cite{perez2012a}. We obtained exact gradients for both wake models using algorithmic differentiation provided by Tapenade \cite{tapenade2013}. Other gradients were obtained by hand. 
 
 \section{Tuning the Optimization Methods}\label{sec:tuning}
 
 \subsection{SNOPT}
-We used two optimizations for each run with SNOPT when using the Bastankhah model. The first run did not use local turbulence intensity; the second one did. SNOPT was run with different convergence tolerances for each case. Tolerances were determined based on the tolerance required to achieve the majority of the improvement in several test runs without unnecessarily delaying termination. Convergence tolerances used in each case are presented in \cref{tab:snopttols}. The objective and constraint derivatives for all cases were scaled to be between $\pm1$. The objective function was formulated in kWh and was subsequently scaled by $1\times10^{-4}$ for optimization with SNOPT.
+We used two optimizations for each run with SNOPT when using the Bastankhah model. The first run did not use local turbulence intensity; the second one did. We ran SNOPT with different convergence tolerances for each case. We determined tolerances based on the tolerance required to achieve the majority of the improvement in several test runs without unnecessarily delaying termination. Convergence tolerances used in each case are presented in \cref{tab:snopttols}. We scaled the objective and constraint derivatives for all cases to be between $\pm1$. We formulated the objective function in kWh and then scaled it by $1\times10^{-4}$ for optimization with SNOPT.
 %
 \begin{table}[h!]
 	\centering
@@ -701,7 +607,8 @@ We used two optimizations for each run with SNOPT when using the Bastankhah mode
 \end{table}
 
 \subsection{ALPSO} 
-ALPSO was run using the default parameters provided in pyOptSparse \cite{wu2020} with a few exceptions. First, the craziness velocity was set to be $1\times10^{-2}$ as this value resulted in increased optimized AEP compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about $2\times 10^4$ as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts and a random seed for the final case study results. The number of outer iterations was determined based on the number inner iterations and desired function call cap for each case. The ALPSO convergence history for each case study with varied inner iteration counts is shown in \cref{fig:alpso-ii-16-20,fig:alpso-ii-38-12,fig:alpso-ii-38-36,fig:alpso-ii-60-72}. The objective and design variables were all scaled to be between -1 and 1.  All optimization runs using ALPSO had a population size of 30. The adjusted meta-parameters used for the various ALPSO runs are shown in \cref{tab:alpsoparams}.
+We ran ALPSO using the default parameters provided in pyOptSparse \cite{wu2020} with a few exceptions.
+We set the craziness velocity to be $1\times10^{-2}$ as this value resulted in increased optimized AEP compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about $2\times 10^4$ as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts and a random seed for the final case study results. The number of outer iterations was based on the number inner iterations and desired function call cap for each case. The ALPSO convergence history for each case study with varied inner iteration counts is shown in \cref{fig:alpso-ii-16-20,fig:alpso-ii-38-12,fig:alpso-ii-38-36,fig:alpso-ii-60-72}. We scaled the objective and design variables to be between $\pm1$.  All optimization runs using ALPSO had a population size of 30. The adjusted meta-parameters we used for the various ALPSO runs are shown in \cref{tab:alpsoparams}.
 
 \begin{figure}[htp]
 	\centering
@@ -750,11 +657,11 @@ ALPSO was run using the default parameters provided in pyOptSparse \cite{wu2020}
 	\end{tabular}
 \end{table}
 
-While it may be noted that each optimization run with ALPSO is similar to running 30 optimizations using a gradient-based algorithm in population size, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, playing a similar role as the gradients do in gradient-based optimization. We considered a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm. This approach also enables a direct comparison of function calls and the optimization objective.
+While it may be noted that each optimization run with ALPSO is similar to running 30 optimizations using a gradient-based algorithm in population size, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, playing a similar role as the gradients do in gradient-based optimization. We considered a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm. This approach also enabled a direct comparison of function calls and the optimization objective.
 
 \subsection{SNOPT+WEC}\label{sec:bpa_wec_comparison}
 
-We compared the performance of WEC-A, WEC-D, and WEC-H with the Bastankhah  model by varying both the number of intermediate optimizations (steps) to run and the maximum values of the WEC factor ($\xi$ or $\theta_\xi$) to use. To investigate the WEC methods and parameter selection, we used Case 2 as discussed in \cref{sec:case2}. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. All 200 starting layouts were tested with each parameter set. For comparing the wake expansion methods, the $k^*$ value in \cref{eq:kstar} was not adjusted to the local turbulence intensity during optimization, but was adjusted for calculating the results shown.
+We compared the performance of WEC-A, WEC-D, and WEC-H with the Bastankhah  model by varying both the number of intermediate optimizations (steps) to run and the maximum values of the WEC factor ($\xi$ or $\theta_\xi$) to use. To investigate the WEC methods and parameter selection, we used Case 2 as discussed in \cref{sec:case2}. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. We tested all 200 starting layouts with each parameter set. For comparing the wake expansion methods, we did not adjust the $k^*$ value in \cref{eq:kstar} to the local turbulence intensity during optimization, but we did  adjusted it for calculating the results shown.
 
 The mean wake loss results for the various wake spreading approaches are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC-D results in less wake loss with a WEC value of 3 and using 5 or more steps, while WEC-A has its lowest average wake loss for a maximum WEC angle of $6^\circ$, and WEC-H minimizes average wake loss most with lower WEC values. On average, wake loss minimized using WEC-A or WEC-H does not appear to be impacted by changing the number of steps.
 %
@@ -781,7 +688,7 @@ The lowest standard deviations occur when the WEC angle is $5^\circ$ for WEC-A, 
 
 We determined that the WEC-D method is the best wake spreading method we investigated as it had the lowest minimum, mean, and standard deviation of wake loss. We decided to use WEC-D with 6 steps and a maximum $\xi$ value of three for the case studies. The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}. In the balance of this paper we will refer to WEC-D as WEC because the other variants are not relevant in the remainder of this discussion. 
 
-When optimizing with WEC in the case studies, we adjusted the convergence tolerances because the WEC steps are primarily for exploration and escaping local optima. The corresponding convergence tolerances and WEC values used at each step with SNOPT+WEC are shown in \cref{tab:wectols}. 
+When optimizing with WEC in the case studies, we adjusted the convergence tolerances because the WEC steps are primarily for exploring the design space and escaping local optima. The corresponding convergence tolerances and WEC values used at each step with SNOPT+WEC are shown in \cref{tab:wectols}. 
 
 \begin{table}[h!]
 	\centering
@@ -800,7 +707,7 @@ When optimizing with WEC in the case studies, we adjusted the convergence tolera
 \end{table}
 
 \subsection{ALPSO+WEC}
-Because WEC adjusts the design space, it can be applied with any optimization algorithm. To see if WEC is helpful for gradient-free algorithms, we tested the impact of WEC with ALPSO in case 2 (see \cref{sec:case2}). For this test we used only WEC-D and used a maximum WEC value of 3 with 6 steps, the same maximum $\xi$ value and number of steps that we found to be best for using WEC with SNOPT. The objective and constraints were all scaled to be between $\pm1$. We chose to use 25 inner iterations, the number of inner iterations that was best for ALPSO without WEC. The WEC steps were applied by dividing the outer iterations by the number of WEC steps plus 1 and rounding up, so each WEC step was run with 5 outer iterations. The WEC steps were run with no local TI, just as for WEC with SNOPT, and a final 5 outer iterations was run with local TI. It is likely that there are more optimal settings for using WEC with ALPSO, such as tuning the number of inner and outer iterations for the changing design spaces at each WEC step. When using WEC with SNOPT, most of the turbine movement tends to occur during the first WEC step. It seems reasonable then that using more outer iterations in the first WEC step with ALPSO may lead to better results because the early part of the optimization is when most of the exploration takes place and the highest WEC value provides the most reduction in local optima. However, this case was only performed as a basic test to see if there was any significant benefit for applying WEC while optimizing with ALPSO and so parameter values were based on what we learned from the preceding tuning studies.
+Because WEC adjusts the design space, it can be applied with any optimization algorithm. To see if WEC is helpful for gradient-free algorithms, we tested the impact of WEC with ALPSO in case 2 (see \cref{sec:case2}). For this test we used only WEC-D and used a maximum WEC value of 3 with 6 steps, the same maximum $\xi$ value and number of steps that we found to be best for using WEC with SNOPT. The objective and constraints were all scaled to be between $\pm1$. We chose to use 25 inner iterations, the number of inner iterations that was best for ALPSO without WEC for this case. The WEC steps were applied by dividing the outer iterations by the number of WEC steps plus 1 and rounding up, so each WEC step was run with 5 outer iterations. The WEC steps were run with no local TI, just as for WEC with SNOPT, and a final 5 outer iterations was run with local TI. It is likely that there are more optimal settings for using WEC with ALPSO, that may be found by tuning the number of inner and outer iterations for the changing design spaces at each WEC step. When using WEC with SNOPT, most of the turbine movement tends to occur during the first WEC step. It seems reasonable then that using more outer iterations in the first WEC step with ALPSO may lead to better results because the early part of the optimization is when most of the exploration takes place and the highest WEC value provides the most reduction in local optima. However, this case was only performed as a basic test to see if there was any significant benefit for applying WEC while optimizing with ALPSO and so parameter values were based on what we learned from the preceding tuning studies.
 
 \subsection{WEC with the Jensen Cosine Model}
 As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (3) and the same number of WEC steps (6) as found best for use with WEC as applied to the Bastankhah model in \cref{sec:bpa_wec_comparison}. We tested WEC with the Jensen cosine model only on case 2 (38 turbines and 12 directions. See \cref{sec:case2}). Further improvements with WEC are likely available if WEC were tuned to this model and case combination.
@@ -814,7 +721,7 @@ In the WFLO problem, we  want low wake loss values, tight distributions, and rel
 	\begin{minipage}[t]{\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{final_images/results/dist_boxpercentwakeloss.pdf}  
-		\caption{Results distributions of all case studies.}
+		\caption{Results distributions of all case studies. BPA refers to the Bastankhah Model. Jensen refers to the Jensen cosine model.}
 		\label{fig:boxplots}
 	\end{minipage} 
 \end{figure}
@@ -987,7 +894,7 @@ The low average values of wake loss and lower standard deviations of wake loss f
 The relatively wide spread and moderate results from SNOPT on most cases demonstrate one of the weaknesses of gradient-based algorithms. While gradient-based algorithms tend to need fewer function calls, and thus typically less time, they are highly susceptible to local optima. WEC was designed to help alleviate the problem of local optima in the WFLO problem. That WEC wake loss results, on average, were lower and less spread for all test cases, as compared with SNOPT and ALPSO, seems to indicate that WEC is at least partially overcoming the problem of local optima and providing significant benefits over the other optimization methods.
 
 \section{Conclusion}\label{sec:conclusion}
-The wake expansion continuation (WEC) method proposed in this paper uses inherent characteristics of typical wake models to reduce the multi-modal nature of the wind farm layout optimization (WFLO) design space. We tested WEC with two wake models, two optimization algorithms (one gradient-based and one gradient-free) and four WFLO problems, one with 16 turbines and 20 wind directions, one with 38 turbines and 12 wind directions, one with 38 turbines and 36 wind directions, and one with 60 turbines and 72 wind directions. Results for the case studies using WEC show a statistically significant reduction  ($p<0.001$) in optimized wake loss compared to optimization without WEC for all test cases. These results show WEC to be most effective with a gradient-based optimization algorithm.
+The wake expansion continuation (WEC) method we proposed in this paper uses inherent characteristics of typical wake models to reduce the multi-modal nature of the wind farm layout optimization (WFLO) design space. WEC can help gradient-based optimization algorithms solve the global WFLO problem and also improve the results of gradient-free algorithms. We tested WEC with two wake models, two optimization algorithms (one gradient-based and one gradient-free) and four WFLO problems, one with 16 turbines and 20 wind directions, one with 38 turbines and 12 wind directions, one with 38 turbines and 36 wind directions, and one with 60 turbines and 72 wind directions. We found a statistically significant reduction ($p<0.001$) in optimized wake loss using WEC compared to optimization without WEC for all test cases. We found that WEC reduced the average, minimum, and standard deviation of the wake loss for all cases. We found more improvement using WEC with the gradient-based optimization algorithm than with the gradient-free algorithm. While we still recommend using multiple optimization runs when using WEC, because of the lower standard deviation fewer runs should be needed to get results at least as good as those without WEC. Alternatively, because of the improved average, you can expect better results if you use the same number of runs.
 
 Future work should investigate potential improvements and best practices for WEC to reduce the number of function calls required, provide a more complete comparison to gradient-free wind farm layout optimization including discrete parameterization. It may also be advantageous to consider using WEC with multiple wake models in series because of the rapid convergence of WEC with the simple Jensen cosine model. In such a study WEC with a gradient-based optimization algorithm would take the place of the gradient-free algorithm in previously studied hybrid gradient-free then gradient-based optimization studies. Studies investigating larger and more complex cases, with both general and specific WEC tuning along with more wake models, would also be informative. While similar methods have been applied on other applications through the use of surrogate models composed of Gaussian-basis functions, future work should also consider various other applications where the WEC approach of directly altering the underlying equations could be applied.
 

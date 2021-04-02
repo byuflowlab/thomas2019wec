@@ -4636,7 +4636,7 @@ def plot_simple_design_space(filename, save_figs, show_figs):
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(True)
-    plt.xlabel("$y/d$")
+    plt.xlabel("$\Delta y/d$")
 
     plt.xticks([-4.0, 0.0, 4.0])
     plt.yticks([])
@@ -4785,9 +4785,10 @@ def plot_jensen_diagram(filename, save_figs, show_figs):
 
 
     # add dimensions
-    annotate_dim2(ax, [-z, 0.0], [0.0, 0.5], "z")
+    annotate_dim2(ax, [-z, 0.0], [0.0, 0.5], "$z$")
     annotate_dim2(ax, [0.0, 0.5], [dx, 0.5], "$\Delta x$", cap_on=[True, False])
-    annotate_dim2(ax, [dx, 0.0], [dx, r], "r", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.05)
+    annotate_dim2(ax, [dx, 0.0], [dx, r], "$r$", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.05)
+    annotate_dim2(ax, [0.0, 0.0], [0.0, r0], "$r_0$", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.05)
     annotate_dim2(ax, [dx, 0.0], [dx, dy], r"$\Delta y$", dir_type='y', cap_on=[False, True], line_buffer=0.1, cap_buffer=0.1)
     annotate_dim2(ax, [-z, 0.0], [theta*180.0/np.pi, 0.0], r"$\theta$", dir_type='angle', arc_radius=2.0, text_buffer=0.0)
     annotate_dim2(ax, [-z, 0.0], [0.0, beta*180.0/np.pi], r"$\beta$", dir_type='angle', arc_radius=1.5, text_buffer=0.2)
@@ -4844,7 +4845,7 @@ def plot_jensen_profiles(filename, save_figs, show_figs):
     plt.yticks(np.array([-3, 0, 3]))
     plt.xticks(np.array([0, 5, 10, 15]))
 
-    plt.ylabel(r"Offset ($\Delta y/D$)")
+    plt.ylabel(r"Offset ($\Delta y/d$)")
     plt.xlabel("Wake Deficit (%)")
 
     plt.tight_layout()
@@ -5887,12 +5888,14 @@ def plot_distributions(fnamstart="", save_figs=False, show_figs=True, nturbs=38,
     # label y axis
     ax.set_ylabel('Wake Loss (%)')
 
-    # identify groups of box plots           
-    ax.annotate("Case 1\nBPA Model\n16 Turbines\n20 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[0]), (1.35, 25), color='k', ma='left') # 16 turbs, 20 dirs, BPA model
-    ax.annotate("Case 2\nBPA Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[1]), (6, 25), color='k', ma='left') # 38 turbs, 12 dirs, BPA model
-    ax.annotate("Case 3\nBPA Model\n38 Turbines\n36 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[2]), (10.35, 25), color='k', ma='left') # 38 turbs, 36 dirs, BPA model
-    ax.annotate("Case 4\nBPA Model\n60 Turbines\n72 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[3]), (14.35, 25), color='k', ma='left') # 60 turbs, 72 dirs, BPA model
-    ax.annotate("Case 2\nJensen Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[4]), (18.35, 25), color='k', ma='left') # 38 turbs, 12 dirs, Jensen model
+    # identify groups of box plots       
+    font_size = 14    
+    shift = 0.1
+    ax.annotate("Case 1\nBPA Model\n16 Turbines\n20 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[0]), (1.35+shift, 25), color='k', ma='left', size=font_size) # 16 turbs, 20 dirs, BPA model
+    ax.annotate("Case 2\nBPA Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[1]), (6+shift, 25), color='k', ma='left', size=font_size) # 38 turbs, 12 dirs, BPA model
+    ax.annotate("Case 3\nBPA Model\n38 Turbines\n36 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[2]), (10.35+shift, 25), color='k', ma='left', size=font_size) # 38 turbs, 36 dirs, BPA model
+    ax.annotate("Case 4\nBPA Model\n60 Turbines\n72 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[3]), (14.35+shift, 25), color='k', ma='left', size=font_size) # 60 turbs, 72 dirs, BPA model
+    ax.annotate("Case 2\nJensen Model\n38 Turbines\n12 Directions\n"+r"$1\%\approx$"+"%.3f GWh" %(onepcaept[4]), (18.35+shift, 25), color='k', ma='left', size=font_size) # 38 turbs, 12 dirs, Jensen model
 
     # ax.set_ylim([0.0, np.max(impdata)+1])
     # ax.legend(ncol=1, loc=2, frameon=False, )  # show plot
@@ -5996,7 +5999,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
+    plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -6020,10 +6023,10 @@ if __name__ == "__main__":
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = 'maxwec_const_nsteps6'
-    plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = 'nsteps_const_maxwec'
-    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = 'maxwec_const_nsteps6'
+    # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = 'nsteps_const_maxwec'
+    # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
     # plot_wec_methods(filename, save_figs, show_figs)
