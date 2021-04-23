@@ -388,7 +388,7 @@ def run_opt(layout_number, wec_method_number, wake_model, opt_alg_number, max_we
 
     wake_model_options = {'nSamples': 0,
                           'nRotorPoints': nRotorPoints,
-                          'use_ct_curve': True,
+                          'use_ct_curve': False,
                           'ct_curve_ct': ct_curve_ct,
                           'ct_curve_wind_speed': ct_curve_wind_speed,
                           'interp_type': 1,
