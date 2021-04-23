@@ -183,26 +183,28 @@ X These are just small steps taken that appear to have no change in the figures.
 
 X We have adjusted wake loss values to be calculated by - Wake loss values are calculated by
 
-- the convergence rate was still higher for SNOPT alone. - that isn’t clear to me
+X the convergence rate was still higher for SNOPT alone. - that isn’t clear to me
+    -- true, that was an old idea that came out despite new results. I've corrected.
 
-- The difference in convergence rate for the gradient-free algorithm is likely due - don’t 
+X The difference in convergence rate for the gradient-free algorithm is likely due - don’t 
     you mean gradient-based?
 
- - This is a feature of the method and demonstrates the effectiveness of WEC at allowing 
+X This is a feature of the method and demonstrates the effectiveness of WEC at allowing 
     optimization algorithms to escape local optima. - does that necessarily mean one is 
     escaping a local optima because the function value stays flatter?  seems like the 
     opposite could just as easily happen
 
- - and only slightly overlapped, as compared to the SNOPT results without WEC (reference 
+X and only slightly overlapped, as compared to the SNOPT results without WEC (reference 
     the figure here)
 
- -  that the results are not a product of random chance - add something like: , but rather 
+X  that the results are not a product of random chance - add something like: , but rather 
     demonstrate actual improvement in the wake loss.
 
- - the SNOPT+WEC results had high outliers that skewed the mean upward. - but the mean is 
+X the SNOPT+WEC results had high outliers that skewed the mean upward. - but the mean is 
     lower than the median...
+    -- looks like I read the wrong line during interpretation
 
- - of 3.058 [percentage points] compared
+ X of 3.058 [percentage points] compared
 
  - while SNOPT alone runs only two - should explain that most of those 7 optimizations are 
     very quick as you are warm starting.  should probably also give some summary indication 
@@ -212,7 +214,7 @@ X We have adjusted wake loss values to be calculated by - Wake loss values are c
  - Because WEC results have smaller standard deviations - This should then become an Also 
     to make it clear that it may require less time overall  - or even just explicitly say that.
 
-- not sure we should mention the NSF funding anymore.  That was now so long ago, and all 
+X not sure we should mention the NSF funding anymore.  That was now so long ago, and all 
     associated reports are closed, so that there is no real benefit to included it.  
     Plus you haven’t been funded under that for a long time.
 
