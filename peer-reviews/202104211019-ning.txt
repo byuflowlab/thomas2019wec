@@ -68,6 +68,8 @@ X a hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at a
         positive. I really wish more papers did show them because people may have the same 
         idea and could be saved a lot of time by knowing it had already been tested and
         did not work, or why others thought it did not work.
+    -- ok, I think I'm on board because no one is going to implement them since they did not
+        work. If they want details, they can go to my dissertation.
 
 X We also used various other models necessary for combining wakes and calculating wind farm AEP. - vague.
 
@@ -99,11 +101,14 @@ X Fig 3: why are these functions of wind speed?  power coefficient and thrust co
     aning  5:28 PM
     You could at least say something like for a given rotation speed schedule.
 
-- don’t really need eq 11.  standard, can just say you used a power law with exponent x and 
+X don’t really need eq 11.  standard, can just say you used a power law with exponent x and 
     referrence height/speed of x and x.
+    -- I'm keeping this because I found "power law" in other papers to be vague and require
+        extra effort on my part to nail down specifically.
 
-- 13 is standard, as is 12.  not sure they are needed.  I guess might be helpful in the 
+X 13 is standard, as is 12.  not sure they are needed.  I guess might be helpful in the 
     context of describing wake loss.
+    -- leaving as I think they are helpful.
 
 X are coupled...however..are expressed in separate terms, it is possible to adjust one 
     without impacting the other - don’t quite follow.  if coupled how do you adjust separately?
@@ -210,15 +215,16 @@ X the SNOPT+WEC results had high outliers that skewed the mean upward. - but the
     very quick as you are warm starting.  should probably also give some summary indication 
     of how much more cost.  e.g., these results take 10-20% more function evaluations or 
     whatever it is
+    -- I'll need to do some more work here.
 
- - Because WEC results have smaller standard deviations - This should then become an Also 
+X Because WEC results have smaller standard deviations - This should then become an Also 
     to make it clear that it may require less time overall  - or even just explicitly say that.
 
 X not sure we should mention the NSF funding anymore.  That was now so long ago, and all 
     associated reports are closed, so that there is no real benefit to included it.  
     Plus you haven’t been funded under that for a long time.
 
-- one other thought, if you are removing some other WEC alternatives I would spend a little 
+X one other thought, if you are removing some other WEC alternatives I would spend a little 
     more time discussing the parameters you tune in WEC.  That part felt a bit rushed to me and 
     hard to digest (they aren’t at the top of my head as I’m sure they are for you)
 

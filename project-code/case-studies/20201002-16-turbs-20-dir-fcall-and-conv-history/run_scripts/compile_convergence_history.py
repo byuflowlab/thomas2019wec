@@ -32,14 +32,23 @@ def get_alpso_history(filepath):
     # print(fcalls, obj)
     return fcalls, obj
 
+get_conv = False
+get_steps = True 
+
 # Define output location
 output_directory_wec = "../output_files/snopt_wec_diam_max_wec_3_nsteps_6.000/"
 output_directory_snopt = "../output_files/snopt/"
 output_directory_ps = "../output_files/ps/"
-# Specify output file name
-output_file_wec = output_directory_wec + "convergence_histories.txt"
-output_file_snopt = output_directory_snopt + "convergence_histories.txt"
-output_file_ps = output_directory_ps + "convergence_histories.txt"
+if get_conv:
+    # Specify conv output file name 
+    output_file_wec = output_directory_wec + "convergence_histories.txt"
+    output_file_snopt = output_directory_snopt + "convergence_histories.txt"
+    output_file_ps = output_directory_ps + "convergence_histories.txt"
+if get_steps:
+    # Specify conv output file name 
+    step_output_file_wec = output_directory_wec + "step_breakdown.txt"
+    step_output_file_snopt = output_directory_snopt + "step_breakdown.txt"
+    step_output_file_ps = output_directory_ps + "step_breakdown.txt"
 
 # indicate how many optimization runs are to be compiled
 runs = 10
