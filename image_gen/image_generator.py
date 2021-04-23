@@ -5973,6 +5973,11 @@ def plot_alpso_tests(filename="", save_figs=False, show_figs=True):
 
     return
 
+def generate_figures_for_wes_submission()
+
+    # wec approaches
+    
+
 if __name__ == "__main__":
 
     show_figs = True

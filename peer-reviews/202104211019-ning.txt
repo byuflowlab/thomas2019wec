@@ -1,0 +1,226 @@
+I’ve gone through the first half so far (up to case studies).  
+This is good work, though the main critique I’d have is that the level of explicitness is 
+excellent for a dissertation, but not necessarily right for a journal paper.
+
+X first paragraph: three sentences started with Gradient-based.  Could probably be reworded.
+
+X Gradient-based optimization methods are well suited for high dimensional problems, [
+    particularly if numerically exact derivatives are provided]
+
+X because they are highly susceptible to local optima - sort of true.  can use a 
+globalization strategy, e.g., multistart though I guess you address that later.
+
+X could probably reference some of our multistart work also.
+
+X your bib is missing almost all titles 
+    -- just the format - should be fixed when reformatted
+
+X simple wake models seek to capture are wake diameter and velocity deficit - what about 
+spread angle?  Is that what you mean by diameter?
+
+X some sections in this intro are rather wordy.  could be more concise and would likely be 
+    clearer at the same time.  For example. these two sentences say basically the same thing: 
+    “During optimization, the spaces between wakes translate to locally optimal locations for 
+    turbines. However, it is often the case that there are more optimal turbine locations that 
+    are not found by the optimizer because the turbines are effectively stuck in locally optimal 
+    locations.”  And both the sentence prior (The fluctuations of wind speed as turbines move 
+    in and out of the wakes during optimization are primarily responsible for the multi-modal 
+    nature of the WFLO problem.) and the sentence after say pretty much the same thing 
+    (designed to overcome the problem of local optima caused by wind speed fluctuations as 
+    wind turbines move in and out of the wakes)
+
+X a relatively convex design - unimodal.  convex is even more stringent than unimodal
+
+X optimization results using WEC were even more significant when re-calculated using LES - 
+    the phrasing of this doesn’t sound correct to me.  not clear what you are trying to say.
+
+X Wake spread is analogous - this is confusing because you say there are two things (both in 
+    intro and at beginning of 2): diameter and deficit, but now you are introducing spread.
+
+X what is leading coefficient?
+
+X same in 3 you change from wake diameter to wake spread
+
+X The wakes create bumps in the design space. Gradient-based algorithms cannot get over the 
+    bumps on their own because they only like to go downhill. By spreading and combining the 
+    wakes (or bumps) the little bumps are covered up by the larger ones, reducing the number 
+    of individual bumps. A gradient-based optimization algorithm can then follow the slope of 
+    the conglomerate bump, over local optima in the real design space, and proceed to a better 
+    solution. - I’d get rid of all of this.  Too colloquial for a paper, it doesn’t flow from 
+    previous parts, and is not necessarily accurate in high dimension space - what is a bump?  
+    Also not true that gradient-based can’t go over “bumps” also.  Depends on scale of the 
+    bumps, what happens in the line search, etc.
+
+X through the Jacobian - which Jacobian?  are you thinking of the Hessian?  or even just 
+    gradients themselves?  Jacobian has to do with the constraints.
+
+X a hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at an estimated 
+    point of far wake onset and allowing the wake to follow an angled line from the initial 
+    wake diameter to the expanded far wake diameter - not the clearest.
+
+- also do we even need to talk about the other methods if they don’t end up being useful.  
+    Can say you looked at them and leave this paragraph, but not sure it’s worth taking up 
+    results on them.  You had a good intuitive explanation for why the diameter was 
+    effective - I think based on the ideas of gaussian continuation.  Could just explain 
+    that, and explain that you explored these in detail, but I’d save those results for a 
+    dissertation not a journal paper where you really want to focus on what works well.
+    -- I'm not sold on this concept. I think it is important to show results that were not 
+        positive. I really wish more papers did show them because people may have the same 
+        idea and could be saved a lot of time by knowing it had already been tested and
+        did not work, or why others thought it did not work.
+
+X We also used various other models necessary for combining wakes and calculating wind farm AEP. - vague.
+
+X eq 10 doesn’t need its own line.  Just do it inline.
+
+X could probably cut out the figure and much of the description of Jensen as it is pretty 
+    standard.  I suppose some of it is helpful for your later discussion (though it means f
+    lipping back and forth).
+    -- I'll reviewed, but I dissagree. The Jensen paper leaves some things fairly vague that
+        take some time to figure out. The vague things are related WEC and the
+        exact location of the cosine factor.
+
+X Fig 3: why are these functions of wind speed?  power coefficient and thrust coefficient 
+    are functions of tip-speed ratio.  Alternatively I suppose you could use power and 
+    thrust, but using one dimensional and one not is strange.
+    -- using Ct and Cp as functions of wind speed is a pretty common simplificcation 
+        when using simple wake models. We've done it this way in every paper I've been 
+        involved in. I know they are actually functions of tip-speed ratio, but they are 
+        often provided and used as functions of wind speed. This is even done in the IEA 37
+        plant ontology.
+        (https://en.wikipedia.org/wiki/Wind-turbine_aerodynamics, 
+        https://github.com/IEAWindTask37/ontology/blob/master/plant/plant_energy_turbine.yaml)
+
+    aning  5:27 PM 20210422
+    Yeah I know people do that. But it’s not necessarily good practice to perpetuate. 
+    Makes things less transferable. It’s a controls mindset not a fluids one.
+    You could at least say something like for a given rotation speed schedule.
+
+    aning  5:28 PM
+    You could at least say something like for a given rotation speed schedule.
+
+- don’t really need eq 11.  standard, can just say you used a power law with exponent x and 
+    referrence height/speed of x and x.
+
+- 13 is standard, as is 12.  not sure they are needed.  I guess might be helpful in the 
+    context of describing wake loss.
+
+X are coupled...however..are expressed in separate terms, it is possible to adjust one 
+    without impacting the other - don’t quite follow.  if coupled how do you adjust separately?
+
+X 4.1.5 doesn’t really say anything new.  same with 4.2.3
+
+X why is section 6 separate.  Its one paragraph - shouldn’t be an entire major section of the paper. (edited) 
+
+aning  4:59 PM
+had a moment to read a bit more (up to 7.3)
+
+X For each case, we used the Vestas V-80 2MW wind turbine. - already said
+
+X We created 199 pseudo-random starting wind farm layouts - not clear why.  I know what you 
+    are referring to - a multistart strategy, but that is never said.  You talk about 
+    optimization way later, so this seems out of place.
+
+X why do you maximize AEP instead of minimize wake loss.  I know its mathematically the 
+    same (though certainly not the same from a scaling perspective, I suspect wake loss is 
+    much better scaled), but it is confusing since you introduced wake loss.
+    -- I formulated everything in AEP originally and ran results that way. Then I learned
+        about comparison using wake loss and deccided to present my results that way 
+        because it provided a nice baseline with no problems like those that happen if 
+        comparing to a base layout. I'll clarify in the paper.
+
+X might add justification for why a circle - the make it easier for the LES
+
+X why is section 6 separate.  Its one paragraph - shouldn’t be an entire major section of 
+    the paper.  Here’s where you should talk about multistart.  Should also does combine 
+    sections 6 and 7.
+
+X Python should be capitalized
+
+X table 2 says and scaling, but I don’t think there is any scaling.  This is tolerance in 
+    what?  infinity norm of Lagrangian?  These are relatively large though I guess that’s 
+    ok if comparing to alpso.
+
+- why do you show all the alpso convergence histories, but not snopt.  
+    All of these necessary?  What specifically are you trying to show from each?
+
+X While it may be noted that each optimization run with ALPSO is similar to running 30 
+    optimizations using a gradient-based algorithm in population size - needs rewording.  
+    also not quite true that it is the same, but I know what you’re getting at.
+
+aning  4:35 PM
+rest of paper:
+- 7.3: could probably remove this from the paper and put in your dissertation instead.  
+    There are a lot of details here that don’t really matter for the journal paper, and in 
+    general journal papers are less interested in the methods that didn’t end up being 
+    fruitful. Those details are however excellent to include in a dissertation.  This 
+    combined with earlier explanation would shorten by a couple pages.  I’d probably 
+    leave a short explanation of the three approaches and the conclusions that the minimum,
+    mean, and standard deviation of wake loss was lowest for WEC-D.
+
+X a thought going back to 7.2 but I’d make it clear that when explaining that you are doing 
+    a full set of 200 optimizations of alpso that this is a benefit for alpso (don’t want 
+    someone to take away the impression that it would penalize it with function calls or 
+    something)
+
+- could combine 7.3-7.5 to WEC tuning as they all end up basically the same parameters, just 
+    additional explanation as to why.
+
+X does not even overlap - obvious from graph, but put in to words that SNOPT+WEC is better
+
+X 1 \times 10^0 should be just 1 or 10^0 if you really want.
+
+X what is outer iteration again?
+    -- ALPSO introduces a new parameter, inner iterations, that is not found in a typical 
+    particle swarm method. The inner iteration parameter controls how many times 
+    the unconstrained problem formulation is run before the Lagrange multipliers and 
+    penalty factors (used to enforce the constraints) are updated. The outer iteration 
+    count is then used to represent how many sets of inner iterations are run.
+
+X These are just small steps taken that appear to have no change in the figures.  - what does that mean?
+    -- I think my explanation was incorrect. I'm not sure what is correct, but not critical
+        for this paper, so I removed it.
+
+X We have adjusted wake loss values to be calculated by - Wake loss values are calculated by
+
+- the convergence rate was still higher for SNOPT alone. - that isn’t clear to me
+
+- The difference in convergence rate for the gradient-free algorithm is likely due - don’t 
+    you mean gradient-based?
+
+ - This is a feature of the method and demonstrates the effectiveness of WEC at allowing 
+    optimization algorithms to escape local optima. - does that necessarily mean one is 
+    escaping a local optima because the function value stays flatter?  seems like the 
+    opposite could just as easily happen
+
+ - and only slightly overlapped, as compared to the SNOPT results without WEC (reference 
+    the figure here)
+
+ -  that the results are not a product of random chance - add something like: , but rather 
+    demonstrate actual improvement in the wake loss.
+
+ - the SNOPT+WEC results had high outliers that skewed the mean upward. - but the mean is 
+    lower than the median...
+
+ - of 3.058 [percentage points] compared
+
+ - while SNOPT alone runs only two - should explain that most of those 7 optimizations are 
+    very quick as you are warm starting.  should probably also give some summary indication 
+    of how much more cost.  e.g., these results take 10-20% more function evaluations or 
+    whatever it is
+
+ - Because WEC results have smaller standard deviations - This should then become an Also 
+    to make it clear that it may require less time overall  - or even just explicitly say that.
+
+- not sure we should mention the NSF funding anymore.  That was now so long ago, and all 
+    associated reports are closed, so that there is no real benefit to included it.  
+    Plus you haven’t been funded under that for a long time.
+
+- one other thought, if you are removing some other WEC alternatives I would spend a little 
+    more time discussing the parameters you tune in WEC.  That part felt a bit rushed to me and 
+    hard to digest (they aren’t at the top of my head as I’m sure they are for you)
+
+4:36
+Great work.  Results are nicely presented.  Mainly just wording at this point.    
+Based on my reading I think there is enough that is cuttable that you’ll probably fall 
+within normal word count limits. (edited) 
