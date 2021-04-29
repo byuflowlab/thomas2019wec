@@ -211,11 +211,12 @@ X the SNOPT+WEC results had high outliers that skewed the mean upward. - but the
 
  X of 3.058 [percentage points] compared
 
- - while SNOPT alone runs only two - should explain that most of those 7 optimizations are 
+ X while SNOPT alone runs only two - should explain that most of those 7 optimizations are 
     very quick as you are warm starting.  should probably also give some summary indication 
     of how much more cost.  e.g., these results take 10-20% more function evaluations or 
     whatever it is
     -- I'll need to do some more work here.
+    -- added more results, discussion, and clarification to the paper regarding function calls 
 
 X Because WEC results have smaller standard deviations - This should then become an Also 
     to make it clear that it may require less time overall  - or even just explicitly say that.
