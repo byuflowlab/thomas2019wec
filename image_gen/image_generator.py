@@ -5973,9 +5973,235 @@ def plot_alpso_tests(filename="", save_figs=False, show_figs=True):
 
     return
 
-def generate_figures_for_wes_submission()
+def analyze_fcalls_per_step(filename="", save_figs=False, show_figs=True):
 
-    # wec approaches
+    # load data
+    case_1_data_path = "./image_data/opt_results/20201002-wec-steps/16turbs-20dirs/"
+    case1_snopt_data = np.loadtxt(case_1_data_path + "snopt/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+    case1_wec_data = np.loadtxt(case_1_data_path + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_16turbs_directionalWindRose_20dirs_BPA_all.txt")
+
+    case_2_data_path = "./image_data/opt_results/20201002-wec-steps/38turbs-12dirs/"
+    case2_snopt_data = np.loadtxt(case_2_data_path + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+    case2_wec_data = np.loadtxt(case_2_data_path + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_BPA_all.txt")
+
+    case_3_data_path = "./image_data/opt_results/20201002-wec-steps/38turbs-36dirs/"
+    case3_snopt_data = np.loadtxt(case_3_data_path + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+    case3_wec_data = np.loadtxt(case_3_data_path + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_36dirs_BPA_all.txt")
+
+    case_4_data_path = "./image_data/opt_results/20201002-wec-steps/60turbs-72dirs/"
+    case4_snopt_data = np.loadtxt(case_4_data_path + "snopt/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+    case4_wec_data = np.loadtxt(case_4_data_path + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_60turbs_amaliaWindRose_72dirs_BPA_all.txt")
+
+    case2_jensen_data_path ="./image_data/opt_results/20201110-jensen-38-turbs-12-dir-fcal-and-conv-history/"
+    case2_jensen_snopt_data = np.loadtxt(case2_jensen_data_path + "snopt/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
+    case2_jensen_wec_data = np.loadtxt(case2_jensen_data_path + "snopt_wec_diam_max_wec_3_nsteps_6.000/snopt_multistart_rundata_38turbs_nantucketWindRose_12dirs_JENSEN_all.txt")
+
+    # print(np.shape(case2_jensen_snopt_data))
+    
+    snopt_data = [case1_snopt_data, case2_snopt_data, case3_snopt_data, case4_snopt_data, case2_jensen_snopt_data]
+    wec_data = [case1_wec_data, case2_wec_data, case3_wec_data, case4_wec_data, case2_jensen_wec_data]
+
+    nruns = 200
+    ncases = len(snopt_data)
+
+    # # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW), run time (s), obj func calls, sens func calls
+    # # run number, ti calc, ti opt, aep init calc (kW), aep init opt (kW), aep run calc (kW), aep run opt (kW), run time (s), obj func calls, sens func calls
+    sdata = np.zeros((ncases, nruns, 4))
+    wdata = np.zeros((ncases, nruns, 9))
+
+    for c in np.arange(0, ncases):
+        for i in np.arange(0, nruns):
+        
+            # get non-wec data
+            case_data = snopt_data[c][snopt_data[c][:,0]==i, :]
+            fcalls_noti = case_data[case_data[:,2]==0,8] + case_data[case_data[:,2]==0,9]
+            fcalls_ti = case_data[case_data[:,2]==5,8] + case_data[case_data[:,2]==5,9]
+            fcalls_total = fcalls_noti + fcalls_ti
+
+            # save non-wec data
+            sdata[c,i,0] = i
+            sdata[c,i,1] = 100*fcalls_noti/fcalls_total
+            sdata[c,i,2] = 100*fcalls_ti/fcalls_total
+            sdata[c,i,3] = 100*fcalls_total/fcalls_total
+
+            # get wec data
+            case_data = wec_data[c][wec_data[c][:,0]==i, :]
+            fcalls_step1 = case_data[case_data[:,1]==3.0,9] + case_data[case_data[:,1]==3.0,10]
+            fcalls_step2 = case_data[case_data[:,1]==2.6,9] + case_data[case_data[:,1]==2.6,10]
+            fcalls_step3 = case_data[case_data[:,1]==2.2,9] + case_data[case_data[:,1]==2.2,10]
+            fcalls_step4 = case_data[case_data[:,1]==1.8,9] + case_data[case_data[:,1]==1.8,10]
+            fcalls_step5 = case_data[case_data[:,1]==1.4,9] + case_data[case_data[:,1]==1.4,10]
+            case_data_wec_1 = case_data[case_data[:,1]==1.0, :]
+            fcalls_step6 = case_data_wec_1[case_data_wec_1[:,3]==0.0,9] + case_data_wec_1[case_data_wec_1[:,3]==0.0,10]
+            fcalls_stepTI = case_data[case_data[:,3]==5.0,9] + case_data[case_data[:,3]==5.0,10]
+            fcalls_total = fcalls_step1 + fcalls_step2 + fcalls_step3 + fcalls_step4 + fcalls_step5 + fcalls_step6 + fcalls_stepTI
+            
+            # save wec data
+            wdata[c,i,0] = i
+            try:
+                wdata[c,i,1] = 100*fcalls_step1/fcalls_total
+            except:
+                wdata[c,i,1] = np.nan
+            try:
+                wdata[c,i,2] = 100*fcalls_step2/fcalls_total
+            except:
+                wdata[c,i,2] = np.nan
+            try:
+                wdata[c,i,3] = 100*fcalls_step3/fcalls_total
+            except:
+                wdata[c,i,3] = np.nan
+            try:
+                wdata[c,i,4] = 100*fcalls_step4/fcalls_total
+            except:
+                wdata[c,i,4] = np.nan
+            try:
+                wdata[c,i,5] = 100*fcalls_step5/fcalls_total
+            except:
+                wdata[c,i,5] = np.nan
+            try:
+                wdata[c,i,6] = 100*fcalls_step6/fcalls_total
+            except:
+                wdata[c,i,6] = np.nan
+            try:
+                wdata[c,i,7] = 100*fcalls_stepTI/fcalls_total
+            except:
+                wdata[c,i,7] = np.nan
+            try:
+                wdata[c,i,8] = 100*fcalls_total/fcalls_total
+            except:
+                wdata[c,i,8] = np.nan
+
+    # make data frames
+    # sdata = np.zeros((4, nruns, 4))
+    c1sdf = pd.DataFrame(sdata[0])
+    c1wdf = pd.DataFrame(wdata[0])
+
+    c2sdf = pd.DataFrame(sdata[1])
+    c2wdf = pd.DataFrame(wdata[1])
+
+    c3sdf = pd.DataFrame(sdata[2])
+    c3wdf = pd.DataFrame(wdata[2])
+
+    c4sdf = pd.DataFrame(sdata[3])
+    c4wdf = pd.DataFrame(wdata[3])
+
+    c2jsdf = pd.DataFrame(sdata[4])
+    c2jwdf = pd.DataFrame(wdata[4])  
+
+    # if save_figs:
+    #     plt.tight_layout()
+    #     filename = "./images/alpso_test_%iturbs_%idirs.pdf" %(nturbs[i], ndirs[i])
+    #     plt.savefig(filename, transparent=True)
+
+    c1wdf.columns = ['run', '1', '2', '3', '4', '5', '6', '7', 'Total']
+    c2wdf.columns = ['run', '1', '2', '3', '4', '5', '6', '7', 'Total']
+    c3wdf.columns = ['run', '1', '2', '3', '4', '5', '6', '7', 'Total']
+    c4wdf.columns = ['run', '1', '2', '3', '4', '5', '6', '7', 'Total']
+    c2jwdf.columns = ['run', '1', '2', '3', '4', '5', '6', '7', 'Total']
+
+    c1sdf.columns = ['run', '1', '2', 'Total']
+    c2sdf.columns = ['run', '1', '2', 'Total']
+    c3sdf.columns = ['run', '1', '2', 'Total']
+    c4sdf.columns = ['run', '1', '2', 'Total']
+    c2jsdf.columns = ['run', '1', '2', 'Total']
+
+    c1wdf.set_index('run', inplace=True)
+    c2wdf.set_index('run', inplace=True)
+    c3wdf.set_index('run', inplace=True)
+    c4wdf.set_index('run', inplace=True)
+    c2jwdf.set_index('run', inplace=True)
+
+    c1sdf.set_index('run', inplace=True)
+    c2sdf.set_index('run', inplace=True)
+    c3sdf.set_index('run', inplace=True)
+    c4sdf.set_index('run', inplace=True)
+    c2jsdf.set_index('run', inplace=True)
+
+    c1wdf.dropna(inplace=True)
+    c2wdf.dropna(inplace=True)
+    c3wdf.dropna(inplace=True)
+    c4wdf.dropna(inplace=True)
+    c2jwdf.dropna(inplace=True)
+
+    c1sdf.dropna(inplace=True)
+    c2sdf.dropna(inplace=True)
+    c3sdf.dropna(inplace=True)
+    c4sdf.dropna(inplace=True)
+    c2jsdf.dropna(inplace=True)
+
+    # colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    # # df2 = pd.concat([c1wdf, c2wdf, c3wdf, c4wdf, c2jwdf],ignore_index=True)
+    # # df2.columns = ['Case 1 (BPA)', 'Case 2 (BPA)', 'Case 3 (BPA)', 'Case 4 (BPA)', 'Case 2 (Jensen)']
+    # c1wdf.plot.box()
+    # plt.show() 
+
+    mwdf1 = pd.DataFrame(c1wdf.mean())
+    mwdf2 = pd.DataFrame(c2wdf.mean())
+    mwdf3 = pd.DataFrame(c3wdf.mean())
+    mwdf4 = pd.DataFrame(c4wdf.mean())
+    mwdf2j = pd.DataFrame(c2jwdf.mean())
+
+    # whigh = [c1wdf.max(), c2wdf.max(), c3wdf.max(), c4wdf.max(), c2jwdf.max()]
+    # wlow = [c1wdf.min(), c2wdf.min(), c3wdf.min(), c4wdf.min(), c2jwdf.min()]
+
+    msdf1 = pd.DataFrame(c1sdf.mean())
+    msdf2 = pd.DataFrame(c2sdf.mean())
+    msdf3 = pd.DataFrame(c3sdf.mean())
+    msdf4 = pd.DataFrame(c4sdf.mean())
+    msdf2j = pd.DataFrame(c2jsdf.mean())
+
+    # shigh = [c1sdf.max(), c2sdf.max(), c3sdf.max(), c4sdf.max(), c2jsdf.max()]
+    # slow = [c1sdf.min(), c2sdf.min(), c3sdf.min(), c4sdf.min(), c2jsdf.min()]
+    # print(shigh[0][0])
+
+    colors = ["#BDB8AD",  "#85C0F9", "#0F2080", "#F5793A", "#A95AA1", "#382119"]
+    df = pd.concat([mwdf1.T, mwdf2.T, mwdf3.T, mwdf4.T, mwdf2j.T],ignore_index=True).T
+    df.columns = ['Case 1 (BPA)', 'Case 2 (BPA)', 'Case 3 (BPA)', 'Case 4 (BPA)', 'Case 2 (Jensen)']
+    df.drop(index=['Total'], inplace=True)
+    ax = df.plot.bar(color=colors, width=0.7, legend=False)#, yerr=(wlow, whigh))
+    ax.set_ylabel("Mean Function Call Percentage")
+    ax.set_xlabel("Optimization")
+    plt.xticks(rotation=None)
+    # plt.legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.set_ylim([0,50])
+    plt.tight_layout()
+    
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+        
+    if save_figs:
+        plt.savefig(filename+"-with-wec.pdf", transparent=True)
+
+    if show_figs:
+        plt.show()
+
+    df = pd.concat([msdf1.T, msdf2.T, msdf3.T, msdf4.T, msdf2j.T],ignore_index=True).T
+    df.columns = ['Case 1 (BPA)', 'Case 2 (BPA)', 'Case 3 (BPA)', 'Case 4 (BPA)', 'Case 2 (Jensen)']
+    df.drop(index=['Total'], inplace=True)
+    ax = df.plot.bar(color=colors)#, yerr=(slow, shigh))
+    ax.set_ylabel("Mean Function Call Percentage")
+    ax.set_xlabel("Optimization")
+    ax.set_ylim([0,80])
+    plt.xticks(rotation=None)
+    plt.legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+    
+    if save_figs:
+        plt.savefig(filename+"-without-wec.pdf", transparent=True)
+
+    if show_figs:
+        plt.show()
+        
+
+    return
+
     
 
 if __name__ == "__main__":
@@ -6004,7 +6230,7 @@ if __name__ == "__main__":
 
     # get_statistics_38_turbs()
     # get_statistics_case_studies(turbs=16, dirs=36, lt0=False)
-    plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
+    # plot_distributions(fnamstart="./images/dist_", save_figs=True, show_figs=True, plotcorrelations=False, makelatextable=True)
 
     # filename = "./images/16turbs_results_alpso"
     # plot_optimization_results(filename, save_figs, show_figs, nturbs=16, ps_wec=False)
@@ -6121,3 +6347,6 @@ if __name__ == "__main__":
     # plot_convergence_history(filename, save_figs=save_figs, show_figs=show_figs, nturbs=nturbs, ndirs=ndirs, wakemodel=model, logplot=True)
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
+
+    filename = "./images/fcall-bar-plot"
+    analyze_fcalls_per_step(filename, save_figs, show_figs)

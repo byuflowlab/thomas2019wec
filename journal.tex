@@ -1,5 +1,7 @@
 \documentclass{jpconf}
 
+%\usepackage{multicol}
+
 % graphics packages
 \usepackage{graphicx}
 \usepackage{stackengine}
@@ -35,7 +37,17 @@
 % editing packages
 \usepackage{todonotes}
 
+\usepackage[utf8]{inputenc}
+\pagestyle{plain}
+\pagenumbering{arabic}
+
+\usepackage{calc}
+\setlength{\footskip}{\paperheight
+	-(1in+\voffset+\topmargin+\headheight+\headsep+\textheight)
+	-0.75in}
+
 \begin{document}
+\setcounter{page}{1}
 
 \title{Wake Expansion Continuation: \large{Multi-modality reduction in the wind farm layout optimization problem}}
 
@@ -47,6 +59,7 @@ Brigham Young University, Provo, Utah, USA}
 \begin{abstract}
 	In this paper we present a continuation optimization method for reducing multi-modality in the wind farm layout optimization problem that we call Wake Expansion Continuation (WEC). We achieve the reduction in multi-modality by starting with an increased wake diameter while maintaining normal velocity deficits at the center of the wakes, and then reducing the wake diameter for each of a series of optimization runs until the accurate wake diameter is used. We applied and demonstrated the effectiveness of WEC with two different wake models. We tested WEC on four optimization case studies with a gradient-based optimization method and a gradient-free optimization method. We found a significant improvement in the mean, standard deviation, and minimum wake loss for optimization with WEC compared to optimization without WEC for all test cases. We found the gradient-free optimization algorithm resulted in less optimal layouts on average for all cases than the gradient-based algorithm with WEC. We also applied WEC to the gradient-free algorithm for one case study with significantly improved results, but there was more improvement when we applied WEC to a gradient-based algorithm. WEC enables gradient-based algorithms to search the wind farm layout optimization space more globally, and provides more optimal results more consistently than optimization without WEC.
 \end{abstract}
+
 
 \section{Introduction}
 
@@ -779,6 +792,24 @@ Cases 3 and 4 (\cref{fig:case-3-histories,fig:case-4-histories}) showed similar 
 	\end{minipage} 
 \end{figure}
 
+The percentages of function calls used for each optimization step with and without WEC are shown in \cref{fig:fcallbarsnowec,fig:fcallbarswec}. When not using WEC, the function calls were fairly evenly split between the first optimization (looser convergence tolerance and no local turbulence intensity) and the final optimization (tighter convergence tolerance and including local turbulence intensity if applicable). The fairly even split between the two optimizations in each set can be attributed to the tighter tolerance for the second optimization. When we applied WEC, the function calls for most cases were weighted towards the first and last optimizations, with the exception of case 4 where the final WEC step used the most function calls and the number of function calls tended to increase for each step. It is not clear why case 4 followed a different pattern in function call distribution than the other cases, though it may be related to the greater average turbine spacing available in case 4. We expected the first optimization to typically be responsible for most of the turbine movement (and by extension, function calls). Some distribution of function calls among the other steps is expected because the design space is changing for each optimization. The seventh step includes both turbulence intensity (if applicable) and a tighter convergence tolerance, so we expect a significant number of function calls for that step as well. 
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}[t]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{final_images/results/fcall-bar-plot-without-wec.pdf}  
+		\caption{Mean function call percentage by optimization when not using WEC. The second step is a final optimization using a finer convergence tolerance and including local turbulence intensity (if applicable).}
+		\label{fig:fcallbarsnowec}
+	\end{minipage} \hspace{1pc}
+	\begin{minipage}[t]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{final_images/results/fcall-bar-plot-with-wec.pdf}  
+		\caption{Mean function call percentage by optimization using WEC. The first 6 steps are the WEC steps. The seventh step is a final optimization using a finer convergence tolerance and including local turbulence intensity (if applicable). The legend for this figure is provided in \cref{fig:fcallbarsnowec}}
+		\label{fig:fcallbarswec}
+	\end{minipage} 
+\end{figure}
+
 We compared wake loss and the number of function calls required for each of the cases discussed previously. We used function calls as a surrogate for time. We did not report wall time because we did not maintain enough consistency in the computational resources used for each optimization run (cores, processor types, computational isolation, etc). We also performed a Welch's t-test between the SNOPT and SNOPT+WEC wake loss percentage results, as well as between the ALPSO and ALPSO+WEC wake loss percentage results. The Welch's t-tests showed $p<0.001$ for all cases, indicating a high confidence that the results are not a product of random chance but rather demonstrate actual improvement in the wake loss due to using WEC. The final statistical results of optimizations from the 200 starting points for each optimization method on the case studies presented in \cref{sec:casestudies} are shown in \cref{tab:case1,tab:case2,tab:case2jensen,tab:case3,tab:case4}. 
 
  While mean and median are both reported for the final wake loss in each case, they were nearly equal for all cases. SNOPT+WEC resulted in the lowest average wake loss across all cases. The largest difference was for case 2, where SNOPT+WEC resulted in a reduction in wake loss percentage of 3.058 percentage points compared with the results from SNOPT alone.
@@ -904,7 +935,7 @@ This work was supported in part by a Utah NASA Space Grant Consortium Fellowship
 
 \pagebreak
 \section*{References}
-\bibliographystyle{iopart-num}
+\bibliographystyle{unsrt}
 \bibliography{./references/all_refs}
 
 \end{document}
