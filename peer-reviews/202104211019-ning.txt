@@ -58,7 +58,7 @@ X a hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at a
     point of far wake onset and allowing the wake to follow an angled line from the initial 
     wake diameter to the expanded far wake diameter - not the clearest.
 
-- also do we even need to talk about the other methods if they don’t end up being useful.  
+X also do we even need to talk about the other methods if they don’t end up being useful.  
     Can say you looked at them and leave this paragraph, but not sure it’s worth taking up 
     results on them.  You had a good intuitive explanation for why the diameter was 
     effective - I think based on the ideas of gaussian continuation.  Could just explain 
@@ -70,6 +70,7 @@ X a hybrid of 2 and 3 that is accomplished by multiplying the wake diameter at a
         did not work, or why others thought it did not work.
     -- ok, I think I'm on board because no one is going to implement them since they did not
         work. If they want details, they can go to my dissertation.
+    -- did as suggested, and removed other methods from tuning plots.
 
 X We also used various other models necessary for combining wakes and calculating wind farm AEP. - vague.
 
@@ -146,8 +147,9 @@ X table 2 says and scaling, but I don’t think there is any scaling.  This is t
     what?  infinity norm of Lagrangian?  These are relatively large though I guess that’s 
     ok if comparing to alpso.
 
-- why do you show all the alpso convergence histories, but not snopt.  
+X why do you show all the alpso convergence histories, but not snopt.  
     All of these necessary?  What specifically are you trying to show from each?
+    - removed from journal version
 
 X While it may be noted that each optimization run with ALPSO is similar to running 30 
     optimizations using a gradient-based algorithm in population size - needs rewording.  
@@ -155,7 +157,7 @@ X While it may be noted that each optimization run with ALPSO is similar to runn
 
 aning  4:35 PM
 rest of paper:
-- 7.3: could probably remove this from the paper and put in your dissertation instead.  
+X 7.3: could probably remove this from the paper and put in your dissertation instead.  
     There are a lot of details here that don’t really matter for the journal paper, and in 
     general journal papers are less interested in the methods that didn’t end up being 
     fruitful. Those details are however excellent to include in a dissertation.  This 
@@ -168,7 +170,7 @@ X a thought going back to 7.2 but I’d make it clear that when explaining that 
     someone to take away the impression that it would penalize it with function calls or 
     something)
 
-- could combine 7.3-7.5 to WEC tuning as they all end up basically the same parameters, just 
+X could combine 7.3-7.5 to WEC tuning as they all end up basically the same parameters, just 
     additional explanation as to why.
 
 X does not even overlap - obvious from graph, but put in to words that SNOPT+WEC is better

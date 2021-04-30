@@ -630,7 +630,7 @@ def get_statistics_case_studies(turbs, dirs=None, fnamstart="", save_figs=False,
         plt.show()
 
 
-def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38, from_convergence_history=True):
+def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38, from_convergence_history=True, wecdonly=True):
 
     if nturbs == 38:
 
@@ -838,7 +838,10 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38, 
 
     ax1.set_ylabel("Minimum Wake Loss (%)")
 
-    labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
+    if wecdonly:
+        labels = ["WEC-A", "SNOPT+WEC", "WEC-H", 'ALPSO', 'SNOPT']
+    else:
+        labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
 
     aplt, = ax2.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
     dplt, = ax1.plot(wec_step_ranges[1], min_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
@@ -863,31 +866,56 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38, 
 
     # set up plots
     plt.gcf().clear()
-    fig, ax1 = plt.subplots()
-    ax2 = ax1.twiny()
+    
 
-    ax1.set_xlabel('Max WEC Value', color=colors[1])
-    ax1.tick_params(axis='x', labelcolor=colors[1])
+    if wecdonly:
+        fig, ax1 = plt.subplots(figsize=(6,3))
 
-    ax1.set_ylabel("Mean Wake Loss (%)")
+        ax1.set_xlabel('Max WEC Value', color='k')
+        ax1.tick_params(axis='x', labelcolor='k')
 
-    ax2.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
-    ax2.tick_params(axis='x', labelcolor=colors[0])
+        ax1.set_ylabel("Mean Wake Loss (%)")
 
-    aplt, = ax2.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    dplt, = ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    hplt, = ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[1], markerfacecolor="none")
-    pplt, = ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3], color=colors[3])
-    splt, = ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4], color=colors[2])
-    # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
-    plt.ylim([13, 20])
-    # ax1.spines['top'].set_visible(False)
-    ax1.spines['right'].set_visible(False)
-    ax2.spines['right'].set_visible(False)
-    ax1.yaxis.set_ticks_position('left')
-    ax2.yaxis.set_ticks_position('left')
-    plt.tight_layout()
+        pplt, = ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3], color=colors[3])
+        splt, = ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4], color=colors[2])
+        dplt, = ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+        # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+        ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[pplt, splt, dplt], frameon=False)
+        plt.ylim([13, 17])
+        plt.xlim([1.6, 10.4])
+        plt.xticks([2,4,6,8,10])
+        # ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax1.spines['top'].set_visible(False)
+        ax1.yaxis.set_ticks_position('left')
+        plt.tight_layout()
+
+    else:
+        fig, ax1 = plt.subplots()
+        ax2 = ax1.twiny()
+
+        ax1.set_xlabel('Max WEC Value', color=colors[1])
+        ax1.tick_params(axis='x', labelcolor=colors[1])
+
+        ax1.set_ylabel("Mean Wake Loss (%)")
+
+        ax2.set_xlabel('Max WEC Angle (deg.)', color=colors[0])
+        ax2.tick_params(axis='x', labelcolor=colors[0])
+
+        aplt, = ax2.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+        dplt, = ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+        hplt, = ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[1], markerfacecolor="none")
+        pplt, = ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--k', label=labels[3], color=colors[3])
+        splt, = ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':k', label=labels[4], color=colors[2])
+        # ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+        ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[aplt, dplt, hplt, pplt, splt], frameon=False)
+        plt.ylim([13, 20])
+        # ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        ax1.yaxis.set_ticks_position('left')
+        ax2.yaxis.set_ticks_position('left')
+        plt.tight_layout()
 
     if save_figs:
         plt.savefig(filename+'_mean.pdf', transparent=True)
@@ -1037,7 +1065,7 @@ def plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38, 
 
     return
 
-def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38, from_convergence_history=True):
+def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38, from_convergence_history=True, wecdonly=True):
 
     if nturbs == 38:
 
@@ -1237,7 +1265,11 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38, from_c
     ax1.set_xlabel('Number of WEC Steps', color='k')
     ax1.set_ylabel("Minimum Wake Loss (%)")
 
-    labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
+    if wecdonly:
+        labels = ["WEC-A", "SNOPT+WEC", "WEC-H", 'ALPSO', 'SNOPT']
+    else:
+        labels = ["WEC-A", "WEC-D", "WEC-H", 'ALPSO', 'SNOPT']
+    
     wechms = 6
 
     ax1.plot(wec_step_ranges[0], min_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
@@ -1260,19 +1292,32 @@ def plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38, from_c
 
     # set up plots
     plt.gcf().clear()
-    fig, ax1 = plt.subplots()
 
-    ax1.set_xlabel('Number of WEC Steps', color='k')
-    ax1.set_ylabel("Mean Wake Loss (%)")
+    if wecdonly:
+        fig, ax1 = plt.subplots(figsize=(6,3))
 
-    ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
-    ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
-    ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[1], markerfacecolor="none", markersize=wechms)
-    ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--', label=labels[3], color=colors[3])
-    ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':', label=labels[4], color=colors[2])
+        ax1.set_xlabel('Number of WEC Steps', color='k')
+        ax1.set_ylabel("Mean Wake Loss (%)")
+        ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--', label=labels[3], color=colors[3])
+        ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':', label=labels[4], color=colors[2])
+        ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+        ax1.set_ylim([13, 17])
+        plt.xticks([2,4,6,8,10])
+    else:
+        fig, ax1 = plt.subplots()
+
+        ax1.set_xlabel('Number of WEC Steps', color='k')
+        ax1.set_ylabel("Mean Wake Loss (%)")
+
+        ax1.plot(wec_step_ranges[0], mean_aepi[0], '^', label=labels[0], color=colors[0], markerfacecolor="none")
+        ax1.plot(wec_step_ranges[1], mean_aepi[1], 'o', label=labels[1], color=colors[1], markerfacecolor="none")
+        ax1.plot(wec_step_ranges[2], mean_aepi[2], 'x', label=labels[2], color=colors[1], markerfacecolor="none", markersize=wechms)
+        ax1.plot([2,10], [ps_mean_wake_loss, ps_mean_wake_loss], '--', label=labels[3], color=colors[3])
+        ax1.plot([2,10], [snw_mean_wake_loss, snw_mean_wake_loss], ':', label=labels[4], color=colors[2])
+        ax1.set_ylim([13, 17])
     handles1, labels1 = ax1.get_legend_handles_labels()
     ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=handles1, frameon=False)
-    ax1.set_ylim([13, 17])
+    
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
     plt.tight_layout()
@@ -6254,10 +6299,10 @@ if __name__ == "__main__":
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    # filename = 'maxwec_const_nsteps6'
-    # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    # filename = 'nsteps_const_maxwec'
-    # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    filename = './images/maxwec_const_nsteps6'
+    plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    filename = './images/nsteps_const_maxwec'
+    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
     # plot_wec_methods(filename, save_figs, show_figs)

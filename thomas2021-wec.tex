@@ -89,15 +89,15 @@ To apply the wake expansion technique to the wind farm layout optimization probl
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.6\textwidth,trim={0, 0, 0, 2.0}]{wec-methods}
+	\includegraphics[width=0.6\textwidth,trim={0, 0, 0, 2.0}]{wake_model_visualizations/wec-methods}
 	\caption{The impact on wake shape of expanding the wake by increasing the spreading angle (WEC-A), the diameter (WEC-D), or a downstream diameter that also changes the near wake spreading angle (WEC-H). The relative amount of expansion in the figure is for convenience in comparing the WEC methods. The actual amount of expansion is variable for all methods.}
 	\label{fig:wec-methods}
 \end{figure}
 
-\section{Simulation Models}\label{sec:models}
-Because of the general nature of the proposed method, it can be applied to any wake model where the wake center deficit and wake diameter can be controlled independently. In this study we have applied WEC to the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}, which we will refer to as the Bastankhah model, and the cosine version of the Jensen wake model \cite{jensen1983}, which we will refer to as the Jensen cosine model. 
+To test the wake expansion approaches discussed, we implemented each of them in the Bastankhah and Port\'e-Agel wake model and compared them in detail. We found that of the wake expansion methods we investigated, the WEC-D method is the best as it consistently had the lowest minimum, mean, and standard deviation of wake loss. The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}. In the balance of this paper we will refer to WEC-D as WEC because the other variants are not relevant in the remainder of this discussion. For further details on the other wake expansion methods you can refer to \cite{thomas2021-dissertation}.
 
-The wake models are only part of the overall simulation system. Following our discussion of the wake models we will describe the other models in the system.
+\section{Simulation Models}\label{sec:models}
+Because of the general nature of the proposed method, it can be applied to any wake model where the wake center deficit and wake diameter can be controlled independently. In this study we have applied WEC to the 2016 version of the Bastankhah and Port\'e-Agel wake model \cite{bastankhah2016}, which we will refer to as the Bastankhah model, and the cosine version of the Jensen wake model \cite{jensen1983}, which we will refer to as the Jensen cosine model. Following our discussion of the wake models we will describe the turbine and other models that we used for this work.
 
 \subsection{The Bastankhah Wake Model}
 In the Bastankhah wake model, two primary characteristics of the wakes, wake deficit and wake diameter, are particularly easy to isolate. This, along with the smoothness and differentiability of the model, make it a good example for demonstrating WEC. We used the Bastankhah wake model, as defined in \cref{eq:bpa} \cite{bastankhah2016}, along with the Niayifar and Port\'e-Agel wind farm model \cite{niayifar2016}.
@@ -260,17 +260,15 @@ where $P_j$ is the power of a single un-waked wind turbine at wind state $j$ cal
 
 
 \section{Applying WEC to the  Wake Models} \label{sec:application}
-In this section we apply WEC, step by step as discussed in \cref{sec:introwec}, to the Bastankhah wake model and the Jensen cosine wake model. To test the wake expansion approaches discussed, we implemented each of them in the Bastankhah  wake model. We then tested the most effective wake expansion approach with the Jensen cosine model.
-
-We present how to apply the first two steps of the WEC method to each wake model. The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models.
+In this section we apply WEC, step by step as discussed in \cref{sec:introwec}, to the Bastankhah wake model and the Jensen cosine wake model. We present how to apply the first two steps of the WEC method to each wake model. The final step of the WEC method is the same for all models, with the exception that different WEC factors and number of WEC steps may be optimal for different wake models.
 
 \subsection{Applying WEC to the Bastankhah Wake Model}
 
 \subsubsection{Bastankhah WEC Step (1)}
 The first parenthetical term of \cref{eq:bpa} defines the magnitude of the velocity deficit. The exponential terms determine the wake diameters in the horizontal and vertical directions. The wake diameters and velocity deficit are coupled through $\sigma_y$ and $\sigma_z$. However, because the diameters and deficit are expressed in separate terms, it is possible to adjust the diameters without impacting the deficit by adjusting the $\sigma_y$ and $\sigma_z$ values in only the diameter part of the equation. 
 
-\subsubsection{Bastankhah WEC Step (2) - WEC-D}
-In the diameter spreading method (WEC-D), independent control of the wake diameter is obtained by introducing a factor, $\xi$, to $\sigma_y$ and $\sigma_z$ in the exponential terms of \cref{eq:bpa}, as shown in \cref{eq:bpa_relax}. The only change from \cref{eq:bpa} to \cref{eq:bpa_relax} is the addition of the WEC factor, $\xi$.
+\subsubsection{Bastankhah WEC Step (2)}
+Independent control of the wake diameter is obtained by introducing a factor, $\xi$, to $\sigma_y$ and $\sigma_z$ in the exponential terms of \cref{eq:bpa}, as shown in \cref{eq:bpa_relax}. The only change from \cref{eq:bpa} to \cref{eq:bpa_relax} is the addition of the WEC factor, $\xi$.
 % \begin{equation}
 % 	\frac{\Delta U}{U_{\infty}} = \Bigg(1-\sqrt{1-\frac{C_T}{8\sigma^2/d_0^2}}~\Bigg) \exp{\Bigg(-\frac{1}{2}\bigg(\frac{z-z_h}{\xi\sigma}\bigg)^2\Bigg)}\exp{\Bigg(-\frac{1}{2}\bigg(\frac{y-\delta}{\xi\sigma}\bigg)^2\Bigg)}
 % 	 \label{eq:bpa_relax}
@@ -313,65 +311,6 @@ Increasing $\xi$ widens the wakes without changing the wake center velocity defi
 	\caption{The impact of the WEC factor, $\xi$, for WEC-D using the Bastankhah wake model. A simple wind farm with one movable turbine and one wind direction is shown from above in \cref{fig:smoothing_locations_bpa}. Wind is from the top. Increasing the WEC factor removes the local optima between the wakes of the two front turbines, as demonstrated in \cref{fig:smoothing_bpa_wec_d}.}
 	\label{fig:wec_bpa_wec_d}
 \end{figure}
-
-\subsubsection{Bastankhah WEC Step (2) - WEC-A}
-To gain direct control of the wake spreading angle, we arranged the equations in such a way that the user specifies the wake spreading angle, rather than using a multiple of the default angle. 
-
-To gain direct control of the wake spreading angle, we calculate the wake spreading slope that would correspond to the desired spreading angle ($\theta_\xi$) and compare  it against the original spreading angle $k_{y_{\text{NEAR}}}$ (\cref{eq:kynear}) to obtain
-%
-\begin{equation}
-	k_{y_{\xi}} = \max(\tan{(\theta_\xi)}, k_{y_{\text{NEAR}}}).
-\end{equation}
-%
-We then use $k_{y_{\xi}}$ to re-define the wake diameter at the point of far wake onset as
-%
-\begin{equation}\label{eq:sigmay0xi}
-	\sigma_{y_{0\text{A}}} = k_{y_{\xi}}x_0+\sigma_{yd}.
-\end{equation}
-%
-The definition for $\sigma_{y_{0\text{A}}}$ allows us to define the general form of the wake diameter for all wake regions as shown in \cref{eq:sigmayxi}. 
-%
-\begin{equation}\label{eq:sigmayxi}
-	\sigma_{y_{\text{A}}} =
-	\begin{cases} k_y [\Delta x-x_0]+\sigma_{y_{0\text{A}}} & \Delta x >= x_0, k_y >= k_{y_{\xi}} \\
-		k_{y_{\xi}} [\Delta x-x_0]+\sigma_{y_{0\text{A}}} & \Delta x >= x_0, k_y < k_{y_{\xi}} \\
-		k_{y_{\xi}}\Delta x+\sigma_{yd} & \Delta x < x_0. \\
-	\end{cases}
-\end{equation}
-%
-We used the same process to obtain $\sigma_{z_{\text{A}}}$. 
-
-Now that we have direct control of the wake spreading angle, for angles greater than the default angle, we can apply the results directly to the exponential terms of \cref{eq:bpa} to obtain a model that allows the user to specify a spreading angle without impacting the velocity deficit in the wake center as shown in \cref{eq:bpa_angle}. The only change from \cref{eq:bpa} to \cref{eq:bpa_angle} is replacing $\sigma_y$ and $\sigma_z$ in the exponential terms with $\sigma_{y_{\text{A}}}$ and $\sigma_{z_{\text{A}}}$ respectively.
-\begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{\sigma_{y_{\text{A}}}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{\sigma_{z_{\text{A}}}}\Big]^2\bigg)}
-	\label{eq:bpa_angle}
-\end{equation}
-%
-For WEC-A, The impact of $\theta_\xi$ is much more pronounced for turbines that are further upstream due to the increased wake growth rate, but are otherwise similar to the effects shown for WEC-D in \cref{fig:smoothing_bpa_wec_d}.
-
-\subsubsection{Bastankhah WEC Step (2) - WEC-H}
-
-The third approach, WEC-H, is a hybrid of WEC-D and WEC-A. The wake diameter is multiplied in the far wake, but the near wake expands linearly until the point where the wake diameter multiplier is applied as shown in \cref{eq:sigywech}.
-%
-\begin{align}\label{eq:sigywech}
-	\sigma_{y_H} = &
-	\begin{cases}
-		\xi \sigma_y & x > x_0 \\
-		\xi \big[\frac{\Delta x}{x_0}[\sigma_{y_0} - \sigma_{y_d}] + \sigma_{y_d} \big]& \Delta x \le x_0, \\
-	\end{cases}
-\end{align}
-%
-where $\sigma_{y_0}$ is the original wake diameter at $x_0$, and $\sigma_{y_H}$ is the horizontal wake standard deviation to be used in the exponential terms of the Bastankhah model as shown in \cref{eq:wechapplied}. A similar approach can be used to find $\sigma_{z_H}$. The Bastankhah model with WEC-H applied is shown in \cref{eq:sigywech}. The only change from \cref{eq:bpa} to \cref{eq:wechapplied} is replacing $\sigma_y$ and $\sigma_z$ in the exponential terms with $\sigma_{y_{H}}$ and $\sigma_{z_{H}}$ respectively.
-
-\begin{equation}
-	\frac{\Delta \bar{u}}{\bar{u}_{\infty}} = \Bigg[]1-\sqrt{1-\frac{C_T \cos{(\gamma)}}{8 \sigma_y \sigma_z/d^2}}~\Bigg] \exp{\bigg(-0.5\Big[\frac{\Delta y-\delta}{ \sigma_{y_H}}\Big]^2\bigg)}\exp{\bigg(-0.5\Big[\frac{z-z_h}{ \sigma_{z_H}}\Big]^2\bigg)}
-	\label{eq:wechapplied}
-\end{equation}
-
-Note that the $\sigma_{y_H}$ term is only applied to the wake width terms and the original model values are used in calculating the magnitude of the center-line wake deficit. As in WEC-A and WEC-D, increasing the value of the WEC factor, $\xi$, allows us to widen the wake without changing the magnitude of the velocity deficit in the center of the wake. As the wakes widen, they mix and smooth out the local optima. The effects are similar to those shown for WEC-D in \cref{fig:smoothing_bpa_wec_d}.
-
-%\subsubsection{Bastankhah WEC Step (3)}
-%To gain the benefits of WEC without losing the accuracy of the wake model, the optimization must be run multiple times, in a continuation approach, with values of $\xi$ or $\theta_\xi$ decreasing to 1 or 0 respectively. The results from optimizing with each value of $\xi$ or $\theta_\xi$ can then be used to warm start the next optimization. In this way, the gradient-based optimization can intelligently explore the design space and then refine the model to find a final, more accurate, result. The iterative optimizations are generally fairly fast due to starting from the previous optimized solution. In \cref{sec:tuning}, we will show how we determined which WEC method to use and the corresponding values of $\xi$ or $\theta_\xi$ to use in practice.
 
 \subsection{Applying WEC to the Jensen Cosine Wake Model}
 In this section we apply WEC-D to the Jensen cosine wake model. A diagram displaying the Jensen cosine wake model from an overhead perspective is shown in \cref{fig:JensenDiagrams}. The diagram will give context to the variables and parameters discussed in this section.
@@ -591,9 +530,9 @@ We implemented the code for each wake model in Fortran and wrapped it with Pytho
 
 To statistically compare results between the optimization methods, we created 199 pseudo-random starting wind farm layouts and one planned layout for each case, for a total of 200 different starting layouts for each case (basically a multi-start approach). Each of the starting layouts had all the turbines inside the wind farm boundary and did not have any turbines spaced less than one rotor diameter apart. The same sets of starting layouts were used for all optimization methods.  
 
-In the following subsections we present how we tuned SNOPT, ALPSO, and WEC to enable fair comparisons between the methods.
+In the following subsections we present how we tuned and used SNOPT, ALPSO, and WEC to enable fair comparisons between the methods.
 
-\subsection{Tuning SNOPT}
+\subsection{SNOPT}
 We used two optimizations for each run with SNOPT when using the Bastankhah model. The first run did not use local turbulence intensity; the second one did. We ran SNOPT with different convergence tolerances for each case. We determined tolerances based on the tolerance required to achieve the majority of the improvement in several test runs without unnecessarily delaying termination. Convergence tolerances used in each case are presented in \cref{tab:snopttols}. We scaled the objective and constraint derivatives for all cases to be between $\pm1$. We formulated the objective function in kWh and then scaled it by $1\times10^{-4}$ for optimization with SNOPT.
 %
 \begin{table}[h!]
@@ -614,40 +553,9 @@ We used two optimizations for each run with SNOPT when using the Bastankhah mode
 	\end{tabular}
 \end{table}
 
-\subsection{Tuning ALPSO} 
+\subsection{ALPSO} 
 We ran ALPSO using the default parameters provided in pyOptSparse \cite{wu2020} with a few exceptions.
-We set the craziness velocity to be $1\times10^{-2}$ as this value resulted in increased optimized AEP compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results. ALPSO introduces a new parameter, inner iterations, that is not found in a typical particle swarm method. The inner iteration parameter controls how many times the unconstrained problem formulation is run before the Lagrange multipliers and penalty factors (used to enforce the constraints) are updated. The outer iteration count is then used to represent how many sets of inner iterations are run. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about $2\times 10^4$ as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts and a random seed for the final case study results. The number of outer iterations was based on the number inner iterations and desired function call cap for each case. The ALPSO convergence history for each case study with varied inner iteration counts is shown in \cref{fig:alpso-ii-16-20,fig:alpso-ii-38-12,fig:alpso-ii-38-36,fig:alpso-ii-60-72}. We scaled the objective and design variables to be between $\pm1$.  All optimization runs using ALPSO had a population size of 30. The adjusted meta-parameters we used for the various ALPSO runs are shown in \cref{tab:alpsoparams}.
-
-\begin{figure}[htp]
-	\centering
-	\begin{minipage}[t]{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{tests/alpso_test_16turbs_20dirs.pdf}
-		\caption{Comparing ALPSO convergence history for 16 turbines, 20 directions, and varying numbers of inner iterations.}
-		\label{fig:alpso-ii-16-20}
-	\end{minipage}\hspace{1pc}%
-	\begin{minipage}[t]{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{tests/alpso_test_38turbs_12dirs.pdf}
-		\caption{Comparing ALPSO convergence history for 38 turbines, 12 directions, and varying numbers of inner iterations.}
-		\label{fig:alpso-ii-38-12}
-	\end{minipage} 
-\end{figure}
-\begin{figure}[htp]
-	\centering
-	\begin{minipage}[t]{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{tests/alpso_test_38turbs_36dirs.pdf}
-		\caption{Comparing ALPSO convergence history for 38 turbines, 36 directions, and varying numbers of inner iterations.}
-		\label{fig:alpso-ii-38-36}
-	\end{minipage}\hspace{1pc}%
-	\begin{minipage}[t]{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{tests/alpso_test_60turbs_72dirs.pdf}
-		\caption{Comparing ALPSO convergence history for 60 turbines, 72 directions, and varying numbers of inner iterations.}
-		\label{fig:alpso-ii-60-72}
-	\end{minipage} 
-\end{figure}
+We set the craziness velocity to be $1\times10^{-2}$ as this value resulted in increased optimized AEP compared to the default value across all the cases we tested. We tried adjusting the initial particle velocity, but found no difference in results. ALPSO introduces a new parameter, inner iterations, that is not found in a typical particle swarm method. The inner iteration parameter controls how many times the unconstrained problem formulation is run before the Lagrange multipliers and penalty factors (used to enforce the constraints) are updated. The outer iteration count is then used to represent how many sets of inner iterations are run. As demonstrated in \cite{jansen2011_alpso}, we tested a series of values for inner iteration number and found that the inner iteration count had a large impact on the end results and convergence rates for all cases tested. We used different inner iteration counts for each case study, but held the number of function calls relatively constant at about $2\times 10^4$ as all cases appeared converged after this many function calls regardless of the number of inner iterations. We used a constant population seed of 1.0 while testing inner iteration counts and a random seed for the final case study results. The number of outer iterations was based on the number of inner iterations and desired function call cap for each case. We scaled the objective and design variables to be between $\pm1$.  All optimization runs using ALPSO had a population size of 30. The adjusted meta-parameters we used for the various ALPSO runs are shown in \cref{tab:alpsoparams}.
 
 \begin{table}[h!]
 	\centering
@@ -667,38 +575,30 @@ We set the craziness velocity to be $1\times10^{-2}$ as this value resulted in i
 
 While it may be noted that each optimization run with ALPSO is similar in population size to running 30 optimizations using a gradient-based algorithm, we decided to run a full set of 200 optimizations for each test, just as was done for SNOPT. Using the same number of optimizations for ALPSO as for SNOPT is a benefit to ALPSO in terms of comparison because ALPSO is already designed to search the space broadly and should not need as many different starts to find a good result. This decision was to reflect how optimizations are often performed in practice, with many optimizations being run regardless of the algorithm being used, as well as to simplify comparison. While ALPSO and other population-based algorithms do carry many samples of the design space concurrently, they are used to inform one another and drive to a single final solution, playing a similar role as the gradients do in gradient-based optimization. We considered a direct comparison between full optimizations, rather than population members, to be more informative in how results would look in practice using each algorithm. This approach also enabled a direct comparison of function calls and the optimization objective.
 
-\subsection{Tuning SNOPT+WEC}\label{sec:bpa_wec_comparison}
+\subsection{SNOPT+WEC}\label{sec:bpa_wec_comparison}
 
-We compared the performance of WEC-A, WEC-D, and WEC-H with the Bastankhah  model by varying both the number of intermediate optimizations (steps) to run and the maximum values of the WEC factor ($\xi$ or $\theta_\xi$) to use. To investigate the WEC methods and parameter selection, we used Case 2 as discussed in \cref{sec:case2}. 
+There are two parameters that need to be tuned for WEC: the WEC factor, and the number of steps. For tuning WEC, we used the following approach. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\xi=3$. We tested all 200 starting layouts with each parameter set. We did not adjust the $k^*$ value in \cref{eq:kstar} to the local turbulence intensity during optimization, but we did  adjusted it for calculating the results shown. We used Case 2 (discussed in \cref{sec:case2}) for tuning. 
 
-There are two parameters that need to be tuned for WEC: the WEC factor, and the number of steps. For tuning WEC, we used the following approach. When the maximum WEC factor value was varied, the number of steps was held at six. When the number of steps was varied, the maximum WEC factor was held at $\theta_\xi = 9 ^\circ$, $\xi=3$, and $\xi=3$, for WEC-A, WEC-D, and WEC-H respectively. We tested all 200 starting layouts with each parameter set. For comparing the wake expansion methods, we did not adjust the $k^*$ value in \cref{eq:kstar} to the local turbulence intensity during optimization, but we did  adjusted it for calculating the results shown.
-
-The mean wake loss results for the various wake expansion approaches are provided in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC-D results in less wake loss with a WEC value of 3 and using 5 or more steps, while WEC-A has its lowest average wake loss for a maximum WEC angle of $6^\circ$, and WEC-H minimizes average wake loss most with lower WEC values. On average, wake loss minimized using WEC-A or WEC-H does not appear to be impacted by changing the number of steps.
+The mean wake loss results for tuning WEC are shown in \cref{fig:aepmean-wm,fig:aepmean-ws}. Here we see that, on average, WEC results in less wake loss with a WEC factor of 3 and using 5 or more steps. The lowest standard deviations also occurred when the WEC factor was 3. We found it best to use at least 4 or 5 steps to achieve a small standard deviation (meaning more consistent results). Based on these results, we decided to use 6 steps and a maximum $\xi$ value of three for the case studies.
 %
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{tests/maxwec_const_nsteps6_mean}
-		\caption{Mean wake loss results for varying the maximum WEC expansion parameter while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points. Note: the WEC value and WEC angle axes are not directly comparable.}
+		\caption{Mean wake loss results for varying the maximum WEC expansion factor while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepmean-wm}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{tests/nsteps_const_maxwec_mean}
-		\caption{Mean wake loss results for varying the number of WEC steps while holding the expansion parameter constant at three. Each data point represents 200 separate optimizations with different starting points.}
+		\caption{Mean wake loss results for varying the number of WEC steps while holding the expansion factor constant at three. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepmean-ws}
 	\end{minipage}
 \end{figure}
 
-We found that the minimum wake loss is achieved when the maximum WEC angle is $9^\circ$ for WEC-A and when the maximum WEC value is 3 for WEC-D and WEC-H. There does not appear to be a clear relationship between minimum wake loss and number of steps for WEC-A or WEC-H. WEC step numbers greater than or equal to 3 achieve approximately equal minimum wake loss for WEC-D and WEC-H individually, but on average WEC-D performs much better than either WEC-A or WEC-H.
-
-The lowest standard deviations occur when the WEC angle is $5^\circ$ for WEC-A, the WEC value is 3 for WEC-D, and when the WEC value is 2 for WEC-H. There is no clear relationship between number of steps and the standard deviation for WEC-A and WEC-H, but we found it best to use at least 4 or 5 steps with WEC-D to achieve a small standard deviation (meaning more consistent results).
-
-We determined that the WEC-D method is the best wake expansion method we investigated as it had the lowest minimum, mean, and standard deviation of wake loss. We decided to use WEC-D with 6 steps and a maximum $\xi$ value of three for the case studies. The better performance of WEC-D over WEC-A and WEC-H can be explained by the fact that both WEC-A and WEC-H alter the wake shape, while WEC-D only multiplies the standard deviation of the basis functions in a manner consistent with Gaussian continuation optimization theory as discussed in \cite{mobahi2015}. In the balance of this paper we will refer to WEC-D as WEC because the other variants are not relevant in the remainder of this discussion. 
-
-When optimizing with WEC in the case studies, we adjusted the convergence tolerances because the WEC steps are primarily for exploring the design space and escaping local optima. The corresponding convergence tolerances and WEC values used at each step with SNOPT+WEC are shown in \cref{tab:wectols}. 
+When optimizing with WEC in the case studies, we adjusted the convergence tolerances because the WEC steps are primarily for exploring the design space and escaping local optima. The corresponding convergence tolerances and WEC factors used at each step with SNOPT+WEC are shown in \cref{tab:wectols}. 
 
 \begin{table}[h!]
 	\centering
@@ -708,7 +608,7 @@ When optimizing with WEC in the case studies, we adjusted the convergence tolera
 		\toprule		
 	WEC step & 1 & 2 & 3 & 4 & 5 & 6 & Final \\
 	\cmidrule{2-8}
-	WEC Value ($\xi$) & 3.0 & 2.6 & 2.2 & 1.8 & 1.4 & 1.0 & 1.0 \\
+	WEC Factor ($\xi$) & 3.0 & 2.6 & 2.2 & 1.8 & 1.4 & 1.0 & 1.0 \\
 	Local TI & No & No & No & No & No & No & Yes \\
 	Case 1 &	$1\times10^{-2}$ & $1\times10^{-2}$ & $1\times10^{-2}$ & $1\times10^{-2}$ & $1\times10^{-2}$ & $1\times10^{-2}$ & $1\times10^{-3}$ \\
 	Cases 2-4 &	$9\times10^{-3}$ & $9\times10^{-3}$ & $9\times10^{-3}$ & $9\times10^{-3}$ & $9\times10^{-3}$ & $9\times10^{-3}$ & $1\times10^{-3}$ \\
@@ -716,8 +616,10 @@ When optimizing with WEC in the case studies, we adjusted the convergence tolera
 	\end{tabular}
 \end{table}
 
-\subsection{Tuning ALPSO+WEC}
-Because WEC adjusts the design space, it can be applied with any optimization algorithm. To see if WEC is helpful for gradient-free algorithms, we tested the impact of WEC with ALPSO in case 2 (see \cref{sec:case2}). For this test we used only WEC-D and used a maximum WEC value of 3 with 6 steps, the same maximum $\xi$ value and number of steps that we found to be best for using WEC with SNOPT. The objective and constraints were all scaled to be between $\pm1$. We chose to use 25 inner iterations, the number of inner iterations that was best for ALPSO without WEC for this case. The WEC steps were applied by dividing the outer iterations by the number of WEC steps plus 1 and rounding up, so each WEC step was run with 5 outer iterations. The WEC steps were run with no local TI, just as for WEC with SNOPT, and a final 5 outer iterations was run with local TI. It is likely that there are more optimal settings for using WEC with ALPSO, that may be found by tuning the number of inner and outer iterations for the changing design spaces at each WEC step. When using WEC with SNOPT, most of the turbine movement tends to occur during the first WEC step. It seems reasonable then that using more outer iterations in the first WEC step with ALPSO may lead to better results because the early part of the optimization is when most of the exploration takes place and the highest WEC value provides the most reduction in local optima. However, this case was only performed as a basic test to see if there was any significant benefit for applying WEC while optimizing with ALPSO and so parameter values were based on what we learned from the preceding tuning studies.
+\subsection{ALPSO+WEC}
+Because WEC alters the design space, it can be applied with any optimization algorithm. To see if WEC may be helpful for gradient-free algorithms, we tested the impact of WEC with ALPSO in case 2 (see \cref{sec:case2}). For this test we used a maximum WEC factor of 3 with 6 steps, the same maximum $\xi$ value and number of steps that we found to be best for using WEC with SNOPT. The objective and constraints were all scaled to be between $\pm1$. We chose to use 25 inner iterations, the number of inner iterations that was best for ALPSO without WEC for this case. The WEC steps were applied by dividing the outer iterations by the number of WEC steps plus 1 and rounding up, so each WEC step was run with 5 outer iterations. The WEC steps were run with no local TI, just as for WEC with SNOPT, and a final 5 outer iterations was run with local TI. 
+
+It is likely that there are more optimal settings for using WEC with ALPSO, that may be found by tuning the number of inner and outer iterations for the changing design spaces at each WEC step. When using WEC with SNOPT, most of the turbine movement tends to occur during the first WEC step. It seems reasonable then that using more outer iterations in the first WEC step with ALPSO may lead to better results because the early part of the optimization is when most of the exploration takes place and the highest WEC factor provides the most reduction in local optima. However, this case was only performed as a basic test to see if there was any significant benefit for applying WEC while optimizing with ALPSO and so parameter values were based on what we learned from the preceding tuning studies.
 
 \subsection{WEC with the Jensen Cosine Model}
 As a proof of concept in applying WEC to other wake models, we implemented WEC with the Jensen cosine model using the same maximum value of $\xi$ (3) and the same number of WEC steps (6) as found best for use with WEC as applied to the Bastankhah model in \cref{sec:bpa_wec_comparison}. We tested WEC with the Jensen cosine model only on case 2 (38 turbines and 12 directions. See \cref{sec:case2}). Further improvements with WEC are likely available if WEC were tuned to this model and case combination.
@@ -792,7 +694,7 @@ Cases 3 and 4 (\cref{fig:case-3-histories,fig:case-4-histories}) showed similar 
 	\end{minipage} 
 \end{figure}
 
-The percentages of function calls used for each optimization step with and without WEC are shown in \cref{fig:fcallbarsnowec,fig:fcallbarswec}. When not using WEC, the function calls were fairly evenly split between the first optimization (looser convergence tolerance and no local turbulence intensity) and the final optimization (tighter convergence tolerance and including local turbulence intensity if applicable). The fairly even split between the two optimizations in each set can be attributed to the tighter tolerance for the second optimization. When we applied WEC, the function calls for most cases were weighted towards the first and last optimizations, with the exception of case 4 where the final WEC step used the most function calls and the number of function calls tended to increase for each step. It is not clear why case 4 followed a different pattern in function call distribution than the other cases, though it may be related to the greater average turbine spacing available in case 4. We expected the first optimization to typically be responsible for most of the turbine movement (and by extension, function calls). Some distribution of function calls among the other steps is expected because the design space is changing for each optimization. The seventh step includes both turbulence intensity (if applicable) and a tighter convergence tolerance, so we expect a significant number of function calls for that step as well. The individual WEC step optimizations use relatively few function calls compared to the individual steps for SNOPT alone, due to warm starting.
+The percentages of function calls used for each optimization step with and without WEC are shown in \cref{fig:fcallbarsnowec,fig:fcallbarswec}. When not using WEC, the function calls were fairly evenly split between the first optimization (looser convergence tolerance and no local turbulence intensity) and the final optimization (tighter convergence tolerance and including local turbulence intensity if applicable). The fairly even split between the two optimizations for most sets can be partly attributed to the tighter tolerance for the second optimization and partly to the addition of local turbulence intensity. When we applied WEC, the function calls for most cases were weighted towards the first and last optimizations, with the exception of case 3 where the final WEC step used the most function calls and the number of function calls tended to increase for each step. It is not clear why case 3 followed a different pattern in function call distribution than the other cases. We expected the first optimization to typically be responsible for most of the turbine movement (and by extension, function calls). Some distribution of function calls among the other steps was expected because the design space is changing for each optimization. The seventh step includes both turbulence intensity (if applicable) and a tighter convergence tolerance, so we expect a significant number of function calls for that step as well. The individual WEC step optimizations use relatively few function calls compared to the individual steps for SNOPT alone due to warm starting.
 
 \begin{figure}[h!]
 	\centering

@@ -1,0 +1,5 @@
+This work presents a new method, wake expansion continuation (WEC), for wind farm layout optimization. 
+
+WEC substantially improves the results of wind farm layout optimization, particularly for gradient-based optimization algorithms, through a continuation approach.
+
+Background, implementation using two wake models and two optimization algorithms, and results are provided as well as comparisons to existing methods.
