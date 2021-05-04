@@ -1,0 +1,43 @@
+%\title{Overleaf Memo Template}
+% Using the texMemo package by Rob Oakes
+\documentclass[a4paper,11pt]{texMemo}
+
+\usepackage[parfill]{parskip}
+\usepackage{nopageno}
+
+%% Edit the header section here. To include your
+%% own logo, upload a file via the files menu.
+\memoto{Dr. Scott Schreck}
+\memofrom{Jared J.~Thomas}
+\memosubject{Manuscript submission to \textit{Wind Energy}}
+\memodate{\today}
+
+\begin{document}
+	\maketitle
+	
+	Dear Dr. Schreck,
+	
+	We have submitted our manuscript "Wake Expansion Continuation: Multi-Modality Reduction in the Wind Farm Layout Optimization Problem" for publication in \textit{Wind Energy}. The manuscript presents a method for allowing gradient-based optimization algorithms to bypass local optima in wind farm layout optimization problems. We refer to our method as wake expansion continuation (WEC). 
+	
+	The key results presented in the manuscript are summarized as follows:
+	\begin{enumerate}
+		\item For one case study, we found that the worst optimization results run with WEC were better than the best optimization results run without WEC.
+		\item Gradient-based optimizations using WEC required one to two orders of magnitude fewer function calls than our tests with gradient-free optimizations, while finding better results on average.
+		\item WEC reduced mean wake loss by one to three percentage points more than gradient-based optimizations run without WEC and by zero to two percentage points more than gradient-free optimizations run with or without WEC.
+		\item WEC reduced the standard deviation of wake loss across all case studies compared to gradient-based optimization and for all but one case using gradient-free optimization.
+	\end{enumerate}
+	
+	The novelty of this work lies in applying a Gaussian continuation optimization approach to wind farm layout optimization and in applying Gaussian continuation directly to the existing simulation models rather than creating a surrogate model. While we applied the method to only two wake models, it can be applied to any wake model. 
+	
+	All authors have approved the submission of this manuscript. The results have not been previously published or submitted for publication in any other journal.
+
+	\bigskip
+	
+	\bigskip
+
+	Sincerely,
+	
+	Jared J.~Thomas \\
+	jaredthomas@byu.net
+	
+\end{document}
