@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from scipy.stats import ttest_ind
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.patches import Ellipse, Rectangle, Polygon
 import pandas as pd
 import seaborn as sns
 import re
@@ -4476,6 +4477,8 @@ def plot_wec_methods(filename, save_figs, show_figs):
     wec_factor_d = 4
     wec_factor_h = 3
 
+    turbine_color = "k"
+
     # end of near wake
     x0 = x0_func(d, gamma, ct, alpha_star, beta_star, I)
 
@@ -4492,6 +4495,12 @@ def plot_wec_methods(filename, save_figs, show_figs):
     sigmay_d, sigmaz_d = spread_func_original_wec(x, x0, xd, d, ky, kz, gamma, wec_factor_d)
 
     sigmay_h, sigmaz_h = spread_func_wech(x, x0, xd, d, ky, kz, gamma, wec_factor_h)
+    
+    sigma_scaler = 1.5
+    sigmay_original *= sigma_scaler
+    sigmay_a *= sigma_scaler
+    sigmay_d *= sigma_scaler
+    sigmay_h *= sigma_scaler
 
     # plot
     fig, ax = plt.subplots(1)
@@ -4499,28 +4508,38 @@ def plot_wec_methods(filename, save_figs, show_figs):
     colors = ["#F5793A", "#0F2080", "#85C0F9", "#BDB8AD", "#A95AA1", "#382119"]
     line1 = ax.plot(x / d, sigmay_original / d, colors[3])
     line2 = ax.plot(x / d, -sigmay_original / d, colors[3])
-    line3 = ax.plot(x / d, np.zeros_like(x), '--', color=colors[3])
-    ax.text(3, 0.3, 'Original wake',
+    line3 = ax.plot(x / d, np.zeros_like(x), '--', color=colors[3], zorder=0)
+    ax.text(3, 0.3*sigma_scaler, 'Original wake',
              verticalalignment='top', horizontalalignment='left',
              color=colors[3], fontsize=15)
 
     line4 = ax.plot(x / d, sigmay_a / d, colors[0])
     line5 = ax.plot(x / d, -sigmay_a / d, colors[0])
-    ax.text(3., 0.72, 'WEC-A',
+    ax.text(3., 0.72*sigma_scaler, 'WEC-A',
              verticalalignment='bottom', horizontalalignment='left',
              color=colors[0], fontsize=15)
 
     line6 = ax.plot(x / d, sigmay_d / d, colors[1])
     line7 = ax.plot(x / d, -sigmay_d / d, colors[1])
-    ax.text(1, 1.4, 'WEC-D',
+    ax.text(1, 1.4*sigma_scaler, 'WEC-D',
              verticalalignment='bottom', horizontalalignment='left',
              color=colors[1], fontsize=15)
 
     line8 = ax.plot(x / d, sigmay_h / d, colors[2])
     line9 = ax.plot(x / d, -sigmay_h / d, colors[2])
-    ax.text(1, 0.8, 'WEC-H',
+    ax.text(1, 0.8*sigma_scaler, 'WEC-H',
              verticalalignment='bottom', horizontalalignment='left',
              color=colors[2], fontsize=15)
+
+    #  plot turbine
+    blade1 = Ellipse((0.0, 0.25), 0.1, 0.5, 0.0, visible=True, fill=True, ec="none", fc=turbine_color)
+    blade2 = Ellipse((0.0, -0.25), 0.1, 0.5, 0.0, visible=True, fill=True, ec="none", fc=turbine_color)
+    hub = Ellipse((0.0,0.0), 0.2, 0.1, visible=True, fill=True, ec="none", fc=turbine_color)
+    nacelle = Rectangle((0.0,-0.05), 0.1, 0.1, visible=True, fill=True, ec="none", fc=turbine_color, joinstyle='round')
+    ax.add_artist(blade1)
+    ax.add_artist(blade2)
+    ax.add_artist(hub)
+    ax.add_artist(nacelle)
 
     plt.xlabel('Downwind distance ($\Delta x/d$)')
     plt.ylabel('Crosswind distance ($\Delta y/d$)')
@@ -4614,8 +4633,7 @@ def plot_cp_curve(filename, save_figs, show_figs):
 
 
 def plot_simple_design_space(filename, save_figs, show_figs):
-    from matplotlib.patches import Ellipse, Rectangle, Polygon
-
+    
     turbine_y = -np.array([0.0, 3.0, 7.0])
     turbine_x = np.array([-1.0, 1.0, 0.0])
     diameter = 1.0
@@ -6299,10 +6317,10 @@ if __name__ == "__main__":
     # plot_max_wec_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_step_results(filename, save_figs, show_figs, nturbs=38)
     # plot_wec_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = './images/maxwec_const_nsteps6'
-    plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
-    filename = './images/nsteps_const_maxwec'
-    plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = './images/maxwec_const_nsteps6'
+    # plot_max_wec_const_nstep_results(filename, save_figs, show_figs, nturbs=38)
+    # filename = './images/nsteps_const_maxwec'
+    # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
     # plot_wec_methods(filename, save_figs, show_figs)
@@ -6370,6 +6388,9 @@ if __name__ == "__main__":
     # filename = "./images/smoothing_jensen_wec_d.pdf"
     # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
+    # filename = "./images/smoothing_bpa_wec_d.pdf"
+    # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="BPA")
+
     # filename = "./images/ct_curve_v80.pdf"
     # plot_ct_curve(filename, save_figs, show_figs)
 
@@ -6393,5 +6414,5 @@ if __name__ == "__main__":
 
     # plot_alpso_tests(save_figs=save_figs,show_figs=show_figs)
 
-    filename = "./images/fcall-bar-plot"
-    analyze_fcalls_per_step(filename, save_figs, show_figs)
+    # filename = "./images/fcall-bar-plot"
+    # analyze_fcalls_per_step(filename, save_figs, show_figs)
