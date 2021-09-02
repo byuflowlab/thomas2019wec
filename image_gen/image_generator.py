@@ -6323,6 +6323,7 @@ if __name__ == "__main__":
     # plot_maxwec3_nstep_results(filename, save_figs, show_figs, nturbs=38)
 
     # filename = './images/wec-methods.pdf'
+    # filename = './images/Figure_1.pdf'
     # plot_wec_methods(filename, save_figs, show_figs)
 
     # filename = "./images/38turbs_results_hist"
@@ -6330,13 +6331,30 @@ if __name__ == "__main__":
 
     # filename = "round_farm_38Turbines_5DSpacing_finish_pres.pdf"
     # plot_round_farm_finish_pres(filename, save_figs, show_figs)
-
-    # filename = "60_turb_start.pdf"
-    # filename = "38_turb_start.pdf"
+    
     # filename = "16_turb_start.pdf"
+    # filename = "Figure_8.pdf"
+    # filename = "38_turb_start.pdf"
+    # filename = "Figure_10.pdf"
+    # filename = "60_turb_start.pdf"
+    # filename = "Figure_14.pdf"
+    
     # plot_farm(filename, save_figs, show_figs, layout='start', turb_nums=False, turbs=16)
 
+    # dirs = 20 
+    # Figure_9.pdf # freq
+
+    # dirs = 12 
+    # Figure_11.pdf # freq
+
+    # dirs = 36
+    # Figure_12.pdf # freq 
+    # Figure_13.pdf # wind speed 
+
     # dirs = 72
+    # Figure_15.pdf # freq 
+    # Figure_16.pdf # wind speed 
+
     # filename = "windrose_%i_dir.pdf" %dirs
     # make_windrose_plots(filename, save_figs, show_figs, presentation=False, dirs=dirs)
 
@@ -6386,24 +6404,32 @@ if __name__ == "__main__":
     # plot_model_contours_vertical(filename, save_figs, show_figs, before=False)
 
     # filename = "./images/smoothing_jensen_wec_d.pdf"
+    # filename = "./images/Figure_7b.pdf"
     # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="JENSEN")
 
     # filename = "./images/smoothing_bpa_wec_d.pdf"
+    # filename = "./images/Figure_6b.pdf"
     # plot_smoothing_visualization_w_wec_wo_wec(filename, save_figs, show_figs, wec_method="D", wake_model="BPA")
 
-    # filename = "./images/ct_curve_v80.pdf"
-    # plot_ct_curve(filename, save_figs, show_figs)
-
     # filename = "./images/cp_curve_v80.pdf"
+    # filename = "./images/Figure_4.pdf"
     # plot_cp_curve(filename, save_figs, show_figs)
 
+    # filename = "./images/ct_curve_v80.pdf"
+    # filename = "./images/Figure_5.pdf"
+    # plot_ct_curve(filename, save_figs, show_figs)
+
     # filename = "./images/3turb-design-space.pdf"
+    # filename = "./images/Figure_6a.pdf"
+    # filename = "./images/Figure_7a.pdf"
     # plot_simple_design_space(filename, save_figs, show_figs)
 
     # filename = "./images/jensen_diagram.pdf"
+    # filename = "./images/Figure_2.pdf"
     # plot_jensen_diagram(filename, save_figs, show_figs)
     
     # filename = "./images/jensen_profiles.pdf"
+    # filename = "./images/Figure_3.pdf"
     # plot_jensen_profiles(filename, save_figs, show_figs)
 
     # nturbs = 38

@@ -8,6 +8,8 @@
 \usepackage{stackengine}
 \usepackage{caption}
 \usepackage{subcaption}
+\captionsetup{font=normalsize}
+\captionsetup[sub]{font=normalsize}
 \usepackage{float}
 \usepackage{placeins}
 
@@ -36,7 +38,7 @@
 \graphicspath{{./final_images/}}
 
 % editing packages
-\usepackage{todonotes}
+%\usepackage{todonotes}
 
 \usepackage[utf8]{inputenc}
 \pagestyle{plain}
@@ -111,7 +113,7 @@ To apply the wake expansion technique to the wind farm layout optimization probl
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.6\textwidth,trim={0, 0, 0, 2.0}]{wake_model_visualizations/wec-methods}
+	\includegraphics[width=0.6\textwidth,trim={0, 0, 0, 2.0}]{wake_model_visualizations/Figure_1}
 	\caption{The impact on wake shape of expanding the wake by increasing the spreading angle (WEC-A), the diameter (WEC-D), or a downstream diameter that also changes the near wake spreading angle (WEC-H). The relative amount of expansion in the figure is for convenience in comparing the WEC methods. The actual amount of expansion is variable for all methods. Because there is not a finite wake boundary, these lines are plotted at $1.5\sigma$ of the Gaussian wake distribution on either side of the wake center.}
 	\label{fig:wec-methods}
 \end{figure}
@@ -194,13 +196,13 @@ We used the same wake spreading angle as Jensen, $\beta = 20 \degree$  \cite{jen
 	\centering
 	\begin{minipage}[t]{0.6\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={3cm 0cm 0cm 0cm}, clip]{wake_model_visualizations/jensen_diagram}
+		\includegraphics[width=\textwidth, trim={3cm 0cm 0cm 0cm}, clip]{wake_model_visualizations/Figure_2}
 		\caption{Horizontal geometry of the Jensen wake models \cite{jensen1983}. The wind is blowing to the right. The dashed line down the middle represents the center line of the wake. The large black dot represents any given point of interest.}
 		\label{fig:JensenDiagrams}
 	\end{minipage}\hspace{1pc}
 	\begin{minipage}[t]{0.35\textwidth}
 		\centering
-		\includegraphics[width=0.6\textwidth, trim={1.05cm 0cm 1.05cm 0cm}]{wake_model_visualizations/jensen_profiles}
+		\includegraphics[width=0.6\textwidth, trim={1.05cm 0cm 1.05cm 0cm}]{wake_model_visualizations/Figure_3}
 		\caption{Wake deficit profiles at 6 rotor diameters down wind for the Jensen top hat and Jensen cosine wake models.}
 		\label{fig:JensenProfiles}
 	\end{minipage}
@@ -213,13 +215,13 @@ We based our turbines on the Vestas V-80 2MW wind turbine for all studies in thi
 	\centering
 	\begin{minipage}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{inputs/cp_curve_v80}
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{inputs/Figure_4}
 		\caption{$C_P$ curve for the Vestas V80 2MW wind turbine \cite{niayifar2016} for a given rotation speed schedule.}
 		\label{fig:cp}
 	\end{minipage}\hspace{1pc}%
 	\begin{minipage}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{inputs/ct_curve_v80.pdf}
+		\includegraphics[width=\textwidth]{inputs/Figure_5.pdf}
 		\caption{$C_T$ curve for the Vestas V80 2MW wind turbine \cite{niayifar2016} for a given rotation speed schedule.}
 		\label{fig:ct}
 	\end{minipage} 
@@ -319,13 +321,13 @@ Increasing $\xi$ widens the wakes without changing the wake center velocity defi
 	\centering
 	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={-2.0cm -0.0cm -2.0cm 3.5cm}, clip]{final_images/layouts/3turb-design-space}
+		\includegraphics[width=\textwidth, trim={-2.0cm -0.0cm -2.0cm 3.5cm}, clip]{final_images/layouts/Figure_6a}
 	\caption{}
 	\label{fig:smoothing_locations_bpa}
 	\end{subfigure}\hspace{1pc}
 	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{wake_model_visualizations/smoothing_bpa_wec_d}
+		\includegraphics[width=\textwidth]{wake_model_visualizations/Figure_6b}
 		\caption{}
 		\label{fig:smoothing_bpa_wec_d}
 	\end{subfigure}
@@ -397,13 +399,13 @@ Because we have inserted the WEC factor, $\xi$, into \cref{eq:JensenVelocityDefi
 	\centering
 	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={-2.0cm -0.0cm -2.0cm 3.5cm}, clip]{final_images/layouts/3turb-design-space}
+		\includegraphics[width=\textwidth, trim={-2.0cm -0.0cm -2.0cm 3.5cm}, clip]{final_images/layouts/Figure_7a}
 		\caption{}
 	\label{fig:smoothing_locations_jensen}
 	\end{subfigure}\hspace{1pc}
 	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{wake_model_visualizations/smoothing_jensen_wec_d}
+		\includegraphics[width=\textwidth]{wake_model_visualizations/Figure_7b}
 		\caption{}
 		\label{fig:smoothing_jensen_wec_d}
 	\end{subfigure}
@@ -424,13 +426,13 @@ We selected case 1 to provide a meaningful problem that would be tractable for n
 \centering
 \begin{minipage}[t]{18pc}
 \centering
-\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/16_turb_start.pdf}
+\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/Figure_8}
 \caption{Baseline wind farm layout for case 1. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 \label{fig:layout1}
 \end{minipage}\hspace{1pc}%
 \begin{minipage}[t]{18pc}
 \centering
-\includegraphics[width=\textwidth, trim={2.0cm 0cm 2.0cm 0cm}, clip]{final_images/windroses/freqwindrose_20_dir.pdf}
+\includegraphics[width=\textwidth, trim={2.0cm 0cm 2.0cm 0cm}, clip]{final_images/windroses/Figure_9.pdf}
 \caption{Direction probability wind rose for case 1. This wind rose is composed of a double Gaussian distribution binned into 20 directions.}
 \label{fig:directional}
 \end{minipage} 
@@ -460,13 +462,13 @@ where $(x_i,y_i)$ is the position of each turbine $i$, $s_{i,j}$ represents the 
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/38_turb_start.pdf}
+		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/layouts/Figure_10.pdf}
 		\caption{Baseline wind farm layout for cases 2 and 3. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 		\label{fig:layout2and3}
 	\end{minipage} \hspace{1pc}
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_12_dir.pdf}
+		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/Figure_11.pdf}
 		\caption{Directional probability wind rose for case 2. This is the Nantucket wind rose binned into 12 directions\cite{wrcc2017}.}
 		\label{fig:freqwindrose_12dir}
 	\end{minipage}
@@ -492,13 +494,13 @@ Case 3 is the same as case 2 but with more wind directions and different wind sp
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_36_dir.pdf}
+		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/Figure_12.pdf}
 		\caption{Directional probability wind rose for case 2. This is the Nantucket wind rose binned into 36 directions\cite{wrcc2017}.}
 		\label{fig:freqwindrose_36dir}
 	\end{minipage} \hspace{1pc}%
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/speedwindrose_36_dir.pdf}
+		\includegraphics[width=\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/Figure_13.pdf}
 		\caption{Average speed wind rose for case 2. This is the Nantucket wind rose binned into 36 directions\cite{wrcc2017}}
 		\label{fig:speedwindrose_36dir}
 	\end{minipage}
@@ -511,7 +513,7 @@ We selected case 4, based on the Princess Amalia Wind Park, to provide a larger 
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=1.\textwidth, trim={1.0cm, 0cm, 1.0cm, 0cm}, clip]{final_images/layouts/60_turb_start.pdf}
+		\includegraphics[width=1.\textwidth, trim={1.0cm, 0cm, 1.0cm, 0cm}, clip]{final_images/layouts/Figure_14.pdf}
 		\caption{Baseline wind farm layout for case 4 with 60 wind turbines. The circles marking turbine locations are to scale, with diameters equal to the rotor diameter.}
 		\label{fig:layout4}
 	\end{minipage}\hspace{1pc}%
@@ -521,13 +523,13 @@ We selected case 4, based on the Princess Amalia Wind Park, to provide a larger 
 	\centering
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/freqwindrose_72_dir.pdf}
+		\includegraphics[width=\textwidth, trim={1.5cm 0cm 1.5cm 0cm}, clip]{final_images/windroses/Figure_15.pdf}
 		\caption{Direction probability wind rose for case 4. The wind rose is comprised of data from Noorzeewind\cite{noordzeewind2006}. Measurements were taken from July 1, 2005, to June 30, 2006.}
 		\label{fig:freqwindrose_72dir}
 	\end{minipage} \hspace{1pc}%
 	\begin{minipage}[t]{18pc}
 		\centering
-		\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/speedwindrose_72_dir.pdf}
+		\includegraphics[width=1.\textwidth, trim={1.5cm, 0cm, 1.5cm, 0cm}, clip]{final_images/windroses/Figure_16.pdf}
 		\caption{Average speed wind rose for case 4. The wind rose is comprised of data from Noorzeewind\cite{noordzeewind2006}. Measurements were taken from July 1, 2005, to June 30, 2006.}
 		\label{fig:speedwindrose_72dir}
 	\end{minipage}
@@ -607,14 +609,14 @@ The mean wake loss results for tuning WEC are shown in \cref{fig:aepmean-wm,fig:
 	\centering
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{tests/maxwec_const_nsteps6_mean}
+		\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{tests/Figure_17}
 		\caption{Mean wake loss results for varying the maximum WEC expansion factor while holding the number of steps constant at six. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepmean-wm}
 	\end{minipage}\hspace{1pc}
 	% Figure displaying results from aep vs crosswind position tests for Jensen
 	\begin{minipage}[t]{0.47\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{tests/nsteps_const_maxwec_mean}
+		\includegraphics[width=\textwidth]{tests/Figure_18}
 		\caption{Mean wake loss results for varying the number of WEC steps while holding the expansion factor constant at three. Each data point represents 200 separate optimizations with different starting points.}
 		\label{fig:aepmean-ws}
 	\end{minipage}
@@ -654,7 +656,7 @@ In the WFLO problem, we  want low wake loss values, tight distributions, and rel
 	\centering
 	\begin{minipage}[t]{\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/dist_boxpercentwakeloss.pdf}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_19.pdf}  
 		\caption{Results distributions of all case studies. BPA refers to the Bastankhah Model. Jensen refers to the Jensen cosine model.}
 		\label{fig:boxplots}
 	\end{minipage} 
@@ -672,7 +674,7 @@ We calculated wake loss values using the wake models without WEC and with local 
 	\centering
 	\begin{minipage}[t]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/convergence_history_BPAmodel_16turbs_20dirs}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_20}  
 		\caption{Convergence histories of optimizations for case 1 (16 turbines and 20 wind directions) using the Bastankhah model. Markers indicate optimized values.}
 		\label{fig:case-1-histories}
 	\end{minipage}
@@ -686,13 +688,13 @@ Because WEC allows transitions through, and out of, local optima, the wake loss 
 	\centering
 	\begin{minipage}[t]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/convergence_history_BPAmodel_38turbs_12dirs}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_21}  
 		\caption{Convergence histories of optimizations for case 2 (38 turbines and 12 wind directions) using the Bastankhah model. Markers indicate optimized values.}
 		\label{fig:case-2-histories}
 	\end{minipage}\hspace{1pc}
 	\begin{minipage}[t]{0.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/convergence_history_JENSENmodel_38turbs_12dirs}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_22}  
 		\caption{Optimization convergence histories for case 2 (38 turbines and 12 wind directions) using the Jensen model. Markers indicate optimized values.}
 		\label{fig:case-2j-histories}
 	\end{minipage}
@@ -704,13 +706,13 @@ Cases 3 and 4 (\cref{fig:case-3-histories,fig:case-4-histories}) showed similar 
 	\centering
 	\begin{minipage}[t]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/convergence_history_BPAmodel_38turbs_36dirs}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_23}  
 		\caption{Convergence histories of optimizations for case 3 (38 turbines and 36 wind directions) using the Bastankhah model. Markers indicate optimized values.}
 		\label{fig:case-3-histories}
 	\end{minipage} \hspace{1pc}
 	\begin{minipage}[t]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{final_images/results/convergence_history_BPAmodel_60turbs_72dirs}  
+		\includegraphics[width=\textwidth]{final_images/results/Figure_24}  
 		\caption{Convergence histories of optimizations for case 4 (60 turbines and 72 wind directions) using the Bastankhah model. Markers indicate optimized values.}
 		\label{fig:case-4-histories}
 	\end{minipage} 
