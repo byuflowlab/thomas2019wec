@@ -1,3 +1,4 @@
+*.zip
 *.0
 *.json
 openmdao_checks.*
@@ -27,6 +28,7 @@ journal.aux
 journal.synctex.gz
 journal.out
 *-journal
+*.pag
 
 # except don't ignore the summary or layout datafiles.
 !*_all.txt
